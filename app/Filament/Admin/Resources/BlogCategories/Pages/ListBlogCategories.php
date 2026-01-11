@@ -13,9 +13,24 @@ class ListBlogCategories extends ListRecords
 
     protected function getHeaderActions(): array
     {
-        return [
+        $actions = [
             Actions\CreateAction::make(),
         ];
+
+        if ($this->parent_id) {
+            $parent = BlogCategory::find($this->parent_id);
+            // If current view is sub-category (parent_id=X), "Up" means go to parent of X.
+            // If X is root, "Up" means go to Root (index).
+            $upParams = ($parent && $parent->parent_id) ? ['parent_id' => $parent->parent_id] : [];
+
+            $actions[] = Actions\Action::make('up')
+                ->label('Üst Kategoriye Dön')
+                ->icon('heroicon-m-arrow-uturn-left')
+                ->color('gray')
+                ->url(static::getResource()::getUrl('index', $upParams));
+        }
+
+        return $actions;
     }
     public ?int $parent_id = null; // Üst kategori ID state
     // 🔹 URL parametresinden parent_id'yi almak için:
