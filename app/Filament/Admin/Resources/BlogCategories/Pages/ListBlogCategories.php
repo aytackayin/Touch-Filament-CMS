@@ -35,7 +35,9 @@ class ListBlogCategories extends ListRecords
 
         return $actions;
     }
+
     public ?int $parent_id = null; // Üst kategori ID state
+
     // 🔹 URL parametresinden parent_id'yi almak için:
     public function mount(): void
     {
@@ -43,6 +45,7 @@ class ListBlogCategories extends ListRecords
 
         $this->parent_id = request()->query('parent_id');
     }
+
     public function getBreadcrumbs(): array
     {
         $breadcrumbs = [
@@ -68,5 +71,18 @@ class ListBlogCategories extends ListRecords
         $breadcrumbs[] = $this->getBreadcrumb();
 
         return $breadcrumbs;
+    }
+
+    public function getFooterWidgets(): array
+    {
+        if (!$this->parent_id) {
+            return [];
+        }
+
+        return [
+            \App\Filament\Admin\Resources\Blogs\Widgets\RelatedItemsWidget::make([
+                'parent_id' => $this->parent_id,
+            ]),
+        ];
     }
 }

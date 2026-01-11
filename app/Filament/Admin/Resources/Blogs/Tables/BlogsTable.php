@@ -9,6 +9,8 @@ use Filament\Actions\DeleteAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use App\Filament\Admin\Resources\Blogs\BlogResource;
+use App\Models\Blog;
 
 class BlogsTable
 {
@@ -37,8 +39,15 @@ class BlogsTable
                 //
             ])
             ->actions([
-                EditAction::make(),
-                DeleteAction::make(),
+                EditAction::make()
+                    ->url(fn(Blog $record): string => BlogResource::getUrl('edit', ['record' => $record]))
+                    ->icon('heroicon-o-pencil-square')
+                    ->label('')
+                    ->tooltip(__('button.edit')),
+                DeleteAction::make()
+                    ->icon('heroicon-o-trash')
+                    ->label('')
+                    ->tooltip(__('button.delete')),
             ])
             ->bulkActions([
                 BulkActionGroup::make([

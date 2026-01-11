@@ -66,6 +66,12 @@ class BlogForm
                             ->relationship('language', 'name')
                             ->required()
                             ->default(function () {
+                                if ($categoryId = request()->query('category_id')) {
+                                    $category = BlogCategory::find($categoryId);
+                                    if ($category) {
+                                        return $category->language_id;
+                                    }
+                                }
                                 return \App\Models\Language::where('is_default', true)->first()?->id;
                             }),
                         Select::make('categories')
@@ -73,6 +79,12 @@ class BlogForm
                             ->multiple()
                             ->preload()
                             ->live()
+                            ->default(function () {
+                                if ($categoryId = request()->query('category_id')) {
+                                    return [(int) $categoryId];
+                                }
+                                return [];
+                            })
                             ->afterStateUpdated(function ($state, $set) {
                                 if (!empty($state)) {
                                     $firstCatId = is_array($state) ? $state[0] : $state;
