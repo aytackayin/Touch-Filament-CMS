@@ -15,10 +15,20 @@ class BlogCategoriesTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(function (\Illuminate\Database\Eloquent\Builder $query) {
+                $parentId = request()->query('parent_id');
+                if ($parentId) {
+                    $query->where('parent_id', $parentId);
+                } else {
+                    $query->whereNull('parent_id');
+                }
+            })
             ->columns([
                 TextColumn::make('title')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->color('primary')
+                    ->url(fn(\App\Models\BlogCategory $record) => \App\Filament\Admin\Resources\BlogCategories\BlogCategoryResource::getUrl('index', ['parent_id' => $record->id])),
                 TextColumn::make('language.name')
                     ->sortable(),
                 TextColumn::make('parent.title')
