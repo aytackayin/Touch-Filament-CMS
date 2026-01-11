@@ -94,6 +94,8 @@ class BlogCategoryForm
                                 return \App\Models\Language::where('is_default', true)->first()?->id;
                             })
                             ->live()
+                            ->disabled(fn($get) => filled($get('parent_id')))
+                            ->dehydrated()
                             ->afterStateUpdated(function ($state, $set) {
                                 // Logic to update other fields if needed
                             }),

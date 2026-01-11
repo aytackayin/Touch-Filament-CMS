@@ -73,9 +73,18 @@ class BlogForm
                                     }
                                 }
                                 return \App\Models\Language::where('is_default', true)->first()?->id;
-                            }),
+                            })
+                            ->live()
+                            ->afterStateUpdated(fn($set) => $set('categories', [])),
                         Select::make('categories')
-                            ->relationship('categories', 'title')
+                            ->relationship('categories', 'title', function ($query, $get) {
+                                $languageId = $get('language_id');
+                                if ($languageId) {
+                                    $query->where('language_id', $languageId);
+                                } else {
+                                    $query->whereRaw('1 = 0');
+                                }
+                            })
                             ->multiple()
                             ->preload()
                             ->live()
@@ -85,6 +94,7 @@ class BlogForm
                                 }
                                 return [];
                             })
+                            ->disabled(fn($get) => blank($get('language_id')))
                             ->afterStateUpdated(function ($state, $set) {
                                 if (!empty($state)) {
                                     $firstCatId = is_array($state) ? $state[0] : $state;

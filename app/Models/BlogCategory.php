@@ -70,6 +70,25 @@ class BlogCategory extends Model
             }
         });
 
+        static::updated(function ($model) {
+            if ($model->isDirty('language_id')) {
+                $newLang = $model->language_id;
+
+                // Recursively update children
+                // Using each() to ensure their Updated events fire if we needed recursive logic there too, 
+                // but simpler mass update might be better for performance if depth is high. 
+                // However, user requirement is strict sync.
+                $model->children()->each(function ($child) use ($newLang) {
+                    $child->update(['language_id' => $newLang]);
+                });
+
+                // Update associated blogs
+                $model->blogs()->each(function ($blog) use ($newLang) {
+                    $blog->update(['language_id' => $newLang]);
+                });
+            }
+        });
+
         static::deleting(function ($model) {
             // Delete attachments
             if ($model->id) {
