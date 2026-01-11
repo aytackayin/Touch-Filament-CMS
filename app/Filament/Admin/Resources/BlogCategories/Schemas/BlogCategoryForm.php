@@ -70,6 +70,7 @@ class BlogCategoryForm
                             ->searchable()
                             ->preload()
                             ->live()
+                            ->default(request()->query('parent_id'))
                             ->afterStateUpdated(function ($state, $set) {
                                 if ($state) {
                                     $parent = BlogCategory::find($state);
@@ -81,7 +82,15 @@ class BlogCategoryForm
                         Select::make('language_id')
                             ->relationship('language', 'name')
                             ->required()
+                            // If parent_id exists (via request or state), prefer parent's language.
+                            // Otherwise default language.
                             ->default(function () {
+                                if ($parentId = request()->query('parent_id')) {
+                                    $parent = BlogCategory::find($parentId);
+                                    if ($parent) {
+                                        return $parent->language_id;
+                                    }
+                                }
                                 return \App\Models\Language::where('is_default', true)->first()?->id;
                             })
                             ->live()

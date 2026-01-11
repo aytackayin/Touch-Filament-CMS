@@ -13,8 +13,11 @@ class ListBlogCategories extends ListRecords
 
     protected function getHeaderActions(): array
     {
+        $createParams = $this->parent_id ? ['parent_id' => $this->parent_id] : [];
+
         $actions = [
-            Actions\CreateAction::make(),
+            Actions\CreateAction::make()
+                ->url(static::getResource()::getUrl('create', $createParams)),
         ];
 
         if ($this->parent_id) {
