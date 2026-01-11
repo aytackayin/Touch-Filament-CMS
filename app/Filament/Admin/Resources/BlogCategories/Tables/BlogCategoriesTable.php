@@ -47,8 +47,14 @@ class BlogCategoriesTable
                 //
             ])
             ->actions([
-                EditAction::make(),
-                DeleteAction::make(),
+                EditAction::make()
+                    ->icon('heroicon-o-pencil-square')
+                    ->label('')
+                    ->tooltip(__('button.edit')),
+                DeleteAction::make()
+                    ->icon('heroicon-o-trash')
+                    ->label('')
+                    ->tooltip(__('button.delete')),
             ])
             ->bulkActions([
                 BulkActionGroup::make([

@@ -11,34 +11,7 @@ class ListBlogCategories extends ListRecords
 {
     protected static string $resource = BlogCategoryResource::class;
 
-    protected function getHeaderActions(): array
-    {
-        $createParams = $this->parent_id ? ['parent_id' => $this->parent_id] : [];
-
-        $actions = [
-            Actions\CreateAction::make()
-                ->url(static::getResource()::getUrl('create', $createParams)),
-        ];
-
-        if ($this->parent_id) {
-            $parent = BlogCategory::find($this->parent_id);
-            // If current view is sub-category (parent_id=X), "Up" means go to parent of X.
-            // If X is root, "Up" means go to Root (index).
-            $upParams = ($parent && $parent->parent_id) ? ['parent_id' => $parent->parent_id] : [];
-
-            $actions[] = Actions\Action::make('up')
-                ->label('Üst Kategoriye Dön')
-                ->icon('heroicon-m-arrow-uturn-left')
-                ->color('gray')
-                ->url(static::getResource()::getUrl('index', $upParams));
-        }
-
-        return $actions;
-    }
-
-    public ?int $parent_id = null; // Üst kategori ID state
-
-    // 🔹 URL parametresinden parent_id'yi almak için:
+    public ?int $parent_id = null;
     public function mount(): void
     {
         parent::mount();
@@ -71,6 +44,37 @@ class ListBlogCategories extends ListRecords
         $breadcrumbs[] = $this->getBreadcrumb();
 
         return $breadcrumbs;
+    }
+
+    protected function getHeaderActions(): array
+    {
+        $createParams = $this->parent_id ? ['parent_id' => $this->parent_id] : [];
+
+        $actions = [
+            Actions\CreateAction::make()
+                ->label('')
+                ->tooltip(__('button.new'))
+                ->color('success')
+                ->size('xs')
+                ->icon('heroicon-m-squares-plus')
+                ->url(static::getResource()::getUrl('create', $createParams)),
+        ];
+
+        if ($this->parent_id) {
+            $parent = BlogCategory::find($this->parent_id);
+            $upParams = ($parent && $parent->parent_id) ? ['parent_id' => $parent->parent_id] : [];
+
+            $actions[] = Actions\Action::make('up')
+                ->label('')
+                ->tooltip(__('button.parent_category'))
+                ->color('gray')
+                ->size('xs')
+                ->translateLabel()
+                ->icon('heroicon-m-arrow-uturn-up')
+                ->url(static::getResource()::getUrl('index', $upParams));
+        }
+
+        return $actions;
     }
 
     public function getFooterWidgets(): array

@@ -13,7 +13,12 @@ class ListBlogs extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
+            Actions\CreateAction::make()
+                ->label('')
+                ->tooltip(__('button.new'))
+                ->color('success')
+                ->size('xs')
+                ->icon('heroicon-m-document-plus'),
         ];
     }
 }
