@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Blogs\Tables;
 
 use Filament\Actions\Action;
+use Filament\Actions\DeleteAction;
 use Filament\Actions\BulkAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -42,17 +43,13 @@ class BlogsTable
                     ->icon('heroicon-o-pencil-square')
                     ->label('')
                     ->tooltip(__('button.edit')),
-                Action::make('delete')
-                    ->requiresConfirmation()
-                    ->modalIcon('heroicon-o-trash')
-                    ->modalHeading(fn($record) => __('filament-actions::delete.single.modal.heading', ['label' => $record->title ?? 'Item'])) // Fallback just in case
-                    ->modalDescription(__('filament-actions::delete.single.modal.description'))
-                    ->modalSubmitActionLabel(__('filament-actions::delete.single.modal.actions.delete.label'))
-                    ->action(fn(Blog $record) => $record->delete())
-                    ->icon('heroicon-o-trash')
+                DeleteAction::make()
                     ->label('')
+                    ->icon('heroicon-o-trash')
                     ->color('danger')
-                    ->tooltip(__('button.delete')),
+                    ->tooltip(__('button.delete'))
+                    ->requiresConfirmation()
+                    ->action(fn($record) => $record->delete()),
             ])
             ->bulkActions([
                 BulkAction::make('delete')

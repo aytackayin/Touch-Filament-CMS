@@ -3,11 +3,12 @@
 namespace App\Filament\Resources\BlogCategories\Tables;
 
 use Filament\Actions\Action;
+use Filament\Actions\DeleteAction;
 use Filament\Actions\BulkAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-
+use App\Filament\Resources\BlogCategories\BlogCategoryResource;
 class BlogCategoriesTable
 {
     public static function configure(Table $table): Table
@@ -18,7 +19,7 @@ class BlogCategoriesTable
                     ->searchable()
                     ->sortable()
                     ->color('primary')
-                    ->url(fn(\App\Models\BlogCategory $record) => \App\Filament\Resources\BlogCategories\BlogCategoryResource::getUrl('index', ['parent_id' => $record->id])),
+                    ->url(fn($record) => BlogCategoryResource::getUrl('index', ['parent_id' => $record->id])),
                 TextColumn::make('language.name')
                     ->sortable(),
                 TextColumn::make('parent.title')
@@ -38,21 +39,17 @@ class BlogCategoriesTable
             ])
             ->recordActions([
                 Action::make('edit')
-                    ->url(fn(\App\Models\BlogCategory $record) => \App\Filament\Resources\BlogCategories\BlogCategoryResource::getUrl('edit', ['record' => $record]))
+                    ->url(fn($record) => BlogCategoryResource::getUrl('edit', ['record' => $record]))
                     ->icon('heroicon-o-pencil-square')
                     ->label('')
                     ->tooltip(__('button.edit')),
-                Action::make('delete')
-                    ->requiresConfirmation()
-                    ->modalIcon('heroicon-o-trash')
-                    ->modalHeading(fn($record) => __('filament-actions::delete.single.modal.heading', ['label' => $record->title]))
-                    ->modalDescription(__('filament-actions::delete.single.modal.description'))
-                    ->modalSubmitActionLabel(__('filament-actions::delete.single.modal.actions.delete.label'))
-                    ->action(fn(\App\Models\BlogCategory $record) => $record->delete())
-                    ->icon('heroicon-o-trash')
+                DeleteAction::make()
                     ->label('')
+                    ->icon('heroicon-o-trash')
                     ->color('danger')
-                    ->tooltip(__('button.delete')),
+                    ->tooltip(__('button.delete'))
+                    ->requiresConfirmation()
+                    ->action(fn($record) => $record->delete()),
             ])
             ->bulkActions([
                 BulkAction::make('delete')
