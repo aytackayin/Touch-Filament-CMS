@@ -45,12 +45,12 @@ class BlogForm
                             ->columnSpanFull(),
                         FileUpload::make('attachments')
                             ->multiple()
-                            ->disk('public')
+                            ->disk('attachments')
                             ->directory(function ($record) {
                                 if ($record) {
-                                    return 'attachments/blogs/' . $record->id . '/images';
+                                    return 'blogs/' . $record->id . '/images';
                                 }
-                                return 'attachments/blogs/temp';
+                                return 'blogs/temp';
                             })
                             ->image()
                             ->imageEditor()
