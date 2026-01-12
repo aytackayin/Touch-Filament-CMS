@@ -4,11 +4,13 @@ namespace App\Filament\Resources\BlogCategories\Tables;
 
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
-use Filament\Actions\BulkAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use App\Filament\Resources\BlogCategories\BlogCategoryResource;
+use App\Services\BlogCategoryDeletionService;
 class BlogCategoriesTable
 {
     public static function configure(Table $table): Table
@@ -52,12 +54,19 @@ class BlogCategoriesTable
                     ->action(fn($record) => $record->delete()),
             ])
             ->bulkActions([
-                BulkAction::make('delete')
-                    ->label('Delete selected')
-                    ->icon('heroicon-o-trash')
-                    ->color('danger')
-                    ->requiresConfirmation()
-                    ->action(fn($records) => $records->each->delete()),
+                BulkActionGroup::make([
+                    DeleteBulkAction::make()
+                        ->label('Delete selected')
+                        ->icon('heroicon-o-trash')
+                        ->color('danger')
+                        ->requiresConfirmation()
+                        ->action(function ($records) {
+                            $deletionService = app(BlogCategoryDeletionService::class);
+                            foreach ($records as $record) {
+                                $deletionService->delete($record);
+                            }
+                        }),
+                ]),
             ]);
     }
 }
