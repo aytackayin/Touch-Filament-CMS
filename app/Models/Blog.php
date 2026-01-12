@@ -195,6 +195,9 @@ class Blog extends Model
             if ($model->id) {
                 Storage::disk('attachments')->deleteDirectory("blogs/{$model->id}");
             }
+
+            // Detach categories to clean up pivot table
+            $model->categories()->detach();
         });
     }
 

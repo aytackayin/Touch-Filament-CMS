@@ -16,7 +16,20 @@ class ListBlogCategories extends ListRecords
     {
         parent::mount();
 
-        $this->parent_id = request()->query('parent_id');
+        $this->parent_id = request()->query('parent_id') ? (int) request()->query('parent_id') : null;
+    }
+
+    protected function getTableQuery(): ?\Illuminate\Database\Eloquent\Builder
+    {
+        $query = parent::getTableQuery();
+
+        if ($this->parent_id) {
+            $query->where('parent_id', $this->parent_id);
+        } else {
+            $query->whereNull('parent_id');
+        }
+
+        return $query;
     }
 
     public function getBreadcrumbs(): array

@@ -227,8 +227,18 @@ class BlogCategory extends Model
             // Requirement says: "Bir kategori silindiğinde alt kategorileri, attachments ve bağlı tüm bloglar ve blogların attachments ları silinecek."
             // This implies deleting the blogs themselves.
             $model->blogs()->each(function ($blog) {
-                $blog->delete();
+                // Check if the blog belongs to other categories as well
+                if ($blog->categories()->count() > 1) {
+                    // It has other categories, so we DON'T delete the blog.
+                    // The relationship (pivot) will be cleaned up by the DB::table('categorizables')->...->delete() call below.
+                } else {
+                    // It only belongs to this category (or has no others), so safe to delete the blog entirely.
+                    $blog->delete();
+                }
             });
+
+            // Delete pivot records for this category
+            \Illuminate\Support\Facades\DB::table('categorizables')->where('category_id', $model->id)->delete();
         });
     }
 

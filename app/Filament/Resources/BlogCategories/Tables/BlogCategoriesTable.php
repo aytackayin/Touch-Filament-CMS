@@ -2,10 +2,8 @@
 
 namespace App\Filament\Resources\BlogCategories\Tables;
 
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\EditAction;
-use Filament\Actions\DeleteAction;
+use Filament\Actions\Action;
+use Filament\Actions\BulkAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -15,14 +13,6 @@ class BlogCategoriesTable
     public static function configure(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(function (\Illuminate\Database\Eloquent\Builder $query) {
-                $parentId = request()->query('parent_id');
-                if ($parentId) {
-                    $query->where('parent_id', $parentId);
-                } else {
-                    $query->whereNull('parent_id');
-                }
-            })
             ->columns([
                 TextColumn::make('title')
                     ->searchable()
@@ -46,20 +36,31 @@ class BlogCategoriesTable
             ->filters([
                 //
             ])
-            ->actions([
-                EditAction::make()
+            ->recordActions([
+                Action::make('edit')
+                    ->url(fn(\App\Models\BlogCategory $record) => \App\Filament\Resources\BlogCategories\BlogCategoryResource::getUrl('edit', ['record' => $record]))
                     ->icon('heroicon-o-pencil-square')
                     ->label('')
                     ->tooltip(__('button.edit')),
-                DeleteAction::make()
+                Action::make('delete')
+                    ->requiresConfirmation()
+                    ->modalIcon('heroicon-o-trash')
+                    ->modalHeading(fn($record) => __('filament-actions::delete.single.modal.heading', ['label' => $record->title]))
+                    ->modalDescription(__('filament-actions::delete.single.modal.description'))
+                    ->modalSubmitActionLabel(__('filament-actions::delete.single.modal.actions.delete.label'))
+                    ->action(fn(\App\Models\BlogCategory $record) => $record->delete())
                     ->icon('heroicon-o-trash')
                     ->label('')
+                    ->color('danger')
                     ->tooltip(__('button.delete')),
             ])
             ->bulkActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make(),
-                ]),
+                BulkAction::make('delete')
+                    ->label('Delete selected')
+                    ->icon('heroicon-o-trash')
+                    ->color('danger')
+                    ->requiresConfirmation()
+                    ->action(fn($records) => $records->each->delete()),
             ]);
     }
 }
