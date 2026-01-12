@@ -13,7 +13,12 @@ class ListLanguages extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            CreateAction::make(),
+            CreateAction::make()
+                ->label('')
+                ->tooltip(__('button.new'))
+                ->color('success')
+                ->size('xs')
+                ->icon('heroicon-m-language'),
         ];
     }
 }

@@ -11,6 +11,7 @@ use App\Models\BlogCategory;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Filament\Support\Icons\Heroicon;
 
 use BackedEnum;
 
@@ -18,7 +19,7 @@ class BlogCategoryResource extends Resource
 {
     protected static ?string $model = BlogCategory::class;
 
-    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedFolder;
 
     public static function getNavigationGroup(): ?string
     {

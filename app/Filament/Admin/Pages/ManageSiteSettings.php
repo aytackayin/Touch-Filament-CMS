@@ -15,7 +15,7 @@ use BackedEnum;
 class ManageSiteSettings extends SettingsPage
 {
     protected static string $settings = GeneralSettings::class;
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedAdjustmentsHorizontal;
 
     public static function getNavigationGroup(): ?string
     {

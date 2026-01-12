@@ -42,11 +42,16 @@ class LanguagesTable
                 //
             ])
             ->recordActions([
-                EditAction::make(),
+                EditAction::make()
+                    ->icon('heroicon-o-pencil-square')
+                    ->label('')
+                    ->tooltip('Edit'),
                 DeleteAction::make()
+                    ->icon('heroicon-o-trash')
+                    ->label('')
+                    ->tooltip('Delete')
                     ->visible(fn($record) => !$record->is_default)
-                    ->disabled(fn($record) => $record->is_default)
-                    ->tooltip('Default language cannot be deleted'),
+                    ->disabled(fn($record) => $record->is_default),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
