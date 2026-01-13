@@ -41,7 +41,7 @@ class BlogResource extends Resource
             ->first();
 
         return [
-            'İçerik' => new HtmlString('<span style="font-size: 12px; line-height: 1;">' . Str::limit($firstSentence, 120) . '</span>'),
+            new HtmlString('<span style="font-size: 12px; line-height: 1;">' . Str::limit($firstSentence, 120) . '</span>'),
         ];
     }
 

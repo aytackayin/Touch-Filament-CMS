@@ -41,7 +41,7 @@ class BlogCategoryResource extends Resource
             ->first();
 
         return [
-            'Açıklama' => new HtmlString('<span style="font-size: 12px; line-height: 1;">' . Str::limit($firstSentence, 120) . '</span>'),
+            new HtmlString('<span style="font-size: 12px; line-height: 1;">' . Str::limit($firstSentence, 120) . '</span>'),
         ];
     }
     public static function getNavigationGroup(): ?string
