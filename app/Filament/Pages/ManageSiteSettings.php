@@ -21,6 +21,7 @@ class ManageSiteSettings extends SettingsPage
     {
         return __('Genel Ayarlar');
     }
+    protected static ?int $navigationSort = 102;
 
     public static function getNavigationLabel(): string
     {

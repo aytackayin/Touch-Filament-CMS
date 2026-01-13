@@ -31,6 +31,7 @@ class LanguageResource extends Resource
     {
         return __('Diller');
     }
+    protected static ?int $navigationSort = 101;
 
     public static function form(Schema $schema): Schema
     {

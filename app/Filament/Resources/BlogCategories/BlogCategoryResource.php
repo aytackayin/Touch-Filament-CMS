@@ -48,7 +48,7 @@ class BlogCategoryResource extends Resource
     {
         return 'Blog';
     }
-
+    protected static ?int $navigationSort = 1;
     public static function form(Schema $schema): Schema
     {
         return BlogCategoryForm::configure($schema);
