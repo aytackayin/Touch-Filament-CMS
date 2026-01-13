@@ -23,58 +23,59 @@ class BlogsTable
             ->paginatedWhileReordering()
             ->recordUrl(null)
             ->columns([
-                TextColumn::make('title')
-                    ->searchable(['title', 'content'])
-                    ->icon('heroicon-s-document-text')
-                    ->description(fn(Blog $record): string => $record->content ? Str::limit(strip_tags($record->content), 100) : '')
-                    ->sortable(),
-                TextColumn::make('language.name')
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('user.name')
-                    ->label('Author')
-                    ->sortable(),
-                IconColumn::make('is_published')
-                    ->size(IconSize::Medium)
-                    ->alignCenter(true)
-                    ->boolean()
-                    ->action(function ($record) {
-                        $record->is_published = !$record->is_published;
-                        $record->save();
-                    }),
-                TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-            ])
+                    TextColumn::make('title')
+                        ->searchable(['title', 'content'])
+                        ->icon('heroicon-s-document-text')
+                        ->description(fn(Blog $record): string => $record->content ? Str::limit(strip_tags($record->content), 100) : '')
+                        ->wrap()
+                        ->sortable(),
+                    TextColumn::make('language.name')
+                        ->sortable()
+                        ->toggleable(isToggledHiddenByDefault: true),
+                    TextColumn::make('user.name')
+                        ->label('Author')
+                        ->sortable(),
+                    IconColumn::make('is_published')
+                        ->size(IconSize::Medium)
+                        ->alignCenter(true)
+                        ->boolean()
+                        ->action(function ($record) {
+                            $record->is_published = !$record->is_published;
+                            $record->save();
+                        }),
+                    TextColumn::make('created_at')
+                        ->dateTime()
+                        ->sortable()
+                        ->toggleable(isToggledHiddenByDefault: true),
+                ])
             ->reorderable('sort')
             ->defaultSort('sort', 'asc')
             ->filters([
-                //
-            ])
+                    //
+                ])
             ->recordActions([
-                Action::make('edit')
-                    ->url(fn(Blog $record): string => BlogResource::getUrl('edit', ['record' => $record]))
-                    ->icon('heroicon-o-pencil-square')
-                    ->label('')
-                    ->tooltip(__('button.edit')),
-                DeleteAction::make()
-                    ->label('')
-                    ->icon('heroicon-o-trash')
-                    ->color('danger')
-                    ->tooltip(__('button.delete'))
-                    ->requiresConfirmation()
-                    ->action(fn($record) => $record->delete()),
-            ])
-            ->bulkActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make()
-                        ->label('Delete selected')
+                    Action::make('edit')
+                        ->url(fn(Blog $record): string => BlogResource::getUrl('edit', ['record' => $record]))
+                        ->icon('heroicon-o-pencil-square')
+                        ->label('')
+                        ->tooltip(__('button.edit')),
+                    DeleteAction::make()
+                        ->label('')
                         ->icon('heroicon-o-trash')
                         ->color('danger')
+                        ->tooltip(__('button.delete'))
                         ->requiresConfirmation()
-                        ->action(fn($records) => $records->each->delete()),
-                ]),
-            ]);
+                        ->action(fn($record) => $record->delete()),
+                ])
+            ->bulkActions([
+                    BulkActionGroup::make([
+                        DeleteBulkAction::make()
+                            ->label('Delete selected')
+                            ->icon('heroicon-o-trash')
+                            ->color('danger')
+                            ->requiresConfirmation()
+                            ->action(fn($records) => $records->each->delete()),
+                    ]),
+                ]);
     }
 }
