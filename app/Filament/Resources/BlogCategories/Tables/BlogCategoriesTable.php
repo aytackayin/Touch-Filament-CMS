@@ -9,12 +9,15 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Support\Enums\IconSize;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use App\Filament\Resources\BlogCategories\BlogCategoryResource;
 use App\Services\BlogCategoryDeletionService;
 use App\Models\BlogCategory;
 use Illuminate\Support\Str;
 use Illuminate\Support\HtmlString;
+use Filament\Tables\Filters\Filter;
+use Illuminate\Database\Eloquent\Builder;
 class BlogCategoriesTable
 {
     public static function configure(Table $table): Table
@@ -54,7 +57,15 @@ class BlogCategoriesTable
             ->reorderable('sort')
             ->defaultSort('sort', 'asc')
             ->filters([
-                    //
+                    SelectFilter::make('language_id')
+                        ->label(__('label.language'))
+                        ->relationship('language', 'name'),
+                    SelectFilter::make('is_published')
+                        ->label('Publication Status')
+                        ->options([
+                                '1' => 'Published',
+                                '0' => 'Unpublished',
+                            ]),
                 ])
             ->recordActions([
                     Action::make('edit')
