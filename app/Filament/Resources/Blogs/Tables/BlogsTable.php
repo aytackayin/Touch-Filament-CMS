@@ -12,19 +12,25 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use App\Filament\Resources\Blogs\BlogResource;
 use App\Models\Blog;
+use Illuminate\Support\Str;
 
 class BlogsTable
 {
     public static function configure(Table $table): Table
     {
         return $table
+            ->striped()
+            ->paginatedWhileReordering()
             ->recordUrl(null)
             ->columns([
                 TextColumn::make('title')
                     ->searchable(['title', 'content'])
+                    ->icon('heroicon-s-document-text')
+                    ->description(fn(Blog $record): string => $record->content ? Str::limit(strip_tags($record->content), 100) : '')
                     ->sortable(),
                 TextColumn::make('language.name')
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('user.name')
                     ->label('Author')
                     ->sortable(),
