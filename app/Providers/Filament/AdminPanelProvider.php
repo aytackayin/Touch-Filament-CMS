@@ -30,6 +30,7 @@ class AdminPanelProvider extends PanelProvider
             ->path('admin')
             ->default()
             ->login()
+            ->globalSearchDebounce('300ms')
             ->colors([
                 'primary' => Color::Amber,
             ])

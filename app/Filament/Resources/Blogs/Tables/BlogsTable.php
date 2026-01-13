@@ -7,6 +7,7 @@ use Filament\Actions\DeleteAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Tables\Columns\IconColumn;
+use Filament\Support\Enums\IconSize;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use App\Filament\Resources\Blogs\BlogResource;
@@ -17,9 +18,10 @@ class BlogsTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->recordUrl(null)
             ->columns([
                 TextColumn::make('title')
-                    ->searchable()
+                    ->searchable(['title', 'content'])
                     ->sortable(),
                 TextColumn::make('language.name')
                     ->sortable(),
@@ -27,6 +29,8 @@ class BlogsTable
                     ->label('Author')
                     ->sortable(),
                 IconColumn::make('is_published')
+                    ->size(IconSize::Medium)
+                    ->alignCenter(true)
                     ->boolean()
                     ->action(function ($record) {
                         $record->is_published = !$record->is_published;

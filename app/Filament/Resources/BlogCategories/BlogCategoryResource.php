@@ -12,6 +12,8 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 use Filament\Support\Icons\Heroicon;
+use Illuminate\Support\Str;
+use Illuminate\Database\Eloquent\Model;
 
 use BackedEnum;
 
@@ -21,6 +23,27 @@ class BlogCategoryResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedFolder;
 
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['title', 'description'];
+    }
+    public static function getGlobalSearchResultTitle(Model $record): string
+    {
+        return '📁 ' . $record->title;
+    }
+    public static function getGlobalSearchResultDetails(Model $record): array
+    {
+        $description = strip_tags($record->description ?? '');
+
+        // İlk cümleyi al
+        $firstSentence = Str::of($description)
+            ->explode('.')
+            ->first();
+
+        return [
+            'Açıklama' => Str::limit($firstSentence, 120),
+        ];
+    }
     public static function getNavigationGroup(): ?string
     {
         return 'Blog';

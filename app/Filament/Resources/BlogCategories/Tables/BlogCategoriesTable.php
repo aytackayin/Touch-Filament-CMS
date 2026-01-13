@@ -7,10 +7,13 @@ use Filament\Actions\DeleteAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Tables\Columns\IconColumn;
+use Filament\Support\Enums\IconSize;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use App\Filament\Resources\BlogCategories\BlogCategoryResource;
 use App\Services\BlogCategoryDeletionService;
+use App\Models\BlogCategory;
+use Illuminate\Support\Str;
 class BlogCategoriesTable
 {
     public static function configure(Table $table): Table
@@ -18,18 +21,24 @@ class BlogCategoriesTable
         return $table
             ->striped()
             ->paginatedWhileReordering()
+            ->recordUrl(null)
             ->columns([
                 TextColumn::make('title')
-                    ->searchable()
+                    ->searchable(['title', 'description'])
+                    ->icon('heroicon-m-squares-2x2')
                     ->sortable()
                     ->color('primary')
+                    ->description(fn(BlogCategory $record): string => $record->description ? Str::limit(strip_tags($record->description), 100) : '')
                     ->url(fn($record) => BlogCategoryResource::getUrl('index', ['parent_id' => $record->id])),
                 TextColumn::make('language.name')
-                    ->sortable(),
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('parent.title')
                     ->label('Parent Category')
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 IconColumn::make('is_published')
+                    ->size(IconSize::Medium)
+                    ->alignCenter(true)
                     ->boolean()
                     ->action(function ($record) {
                         $record->is_published = !$record->is_published;
