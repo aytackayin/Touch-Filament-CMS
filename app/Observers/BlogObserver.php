@@ -41,6 +41,9 @@ class BlogObserver
         } else {
             $this->cleanupContentImages($blog);
         }
+
+        // Clean up old livewire temp files after any save
+        $this->cleanupOldLivewireTmpFiles();
     }
 
     protected function moveContentImages(Blog $blog): void
@@ -113,6 +116,47 @@ class BlogObserver
                     \Illuminate\Support\Facades\Storage::disk('attachments')->delete($relativePath);
                 }
             }
+        }
+    }
+
+    protected function cleanupOldLivewireTmpFiles(): void
+    {
+        try {
+            $disk = \Illuminate\Support\Facades\Storage::disk('local');
+
+            // Check if livewire-tmp directory exists
+            if (!$disk->exists('livewire-tmp')) {
+                return;
+            }
+
+            // Get all files in livewire-tmp (including subdirectories)
+            $files = $disk->allFiles('livewire-tmp');
+
+            // Delete files older than 1 minute
+            $cutoffTime = now()->subMinute()->timestamp;
+
+            foreach ($files as $file) {
+                try {
+                    $lastModified = $disk->lastModified($file);
+
+                    if ($lastModified < $cutoffTime) {
+                        $disk->delete($file);
+                    }
+                } catch (\Exception $e) {
+                    // Continue on error for individual files
+                    continue;
+                }
+            }
+
+            // Clean up empty subdirectories
+            $directories = $disk->directories('livewire-tmp');
+            foreach ($directories as $directory) {
+                if (empty($disk->allFiles($directory))) {
+                    $disk->deleteDirectory($directory);
+                }
+            }
+        } catch (\Exception $e) {
+            // Fail silently - don't break the save operation
         }
     }
 
