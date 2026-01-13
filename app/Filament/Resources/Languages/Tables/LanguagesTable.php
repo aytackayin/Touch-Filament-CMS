@@ -27,9 +27,47 @@ class LanguagesTable
                 TextColumn::make('direction')
                     ->badge(),
                 IconColumn::make('is_default')
-                    ->boolean(),
+                    ->boolean()
+                    ->action(function (Language $record) {
+                        if ($record->is_default) {
+                            // Varsayılan dil ise kapatmaya çalışılıyor
+                            // Başka varsayılan dil var mı kontrol et
+                            $hasAnotherDefault = Language::query()
+                                ->where('id', '!=', $record->id)
+                                ->where('is_default', true)
+                                ->exists();
+
+                            // Başka varsayılan yoksa bu dili varsayılan olmaktan çıkaramayız
+                            if (!$hasAnotherDefault) {
+                                return;
+                            }
+                        }
+
+                        // Toggle yap
+                        $newValue = !$record->is_default;
+
+                        if ($newValue) {
+                            // Bu dili varsayılan yapıyoruz, diğerlerini kapat
+                            Language::query()
+                                ->where('id', '!=', $record->id)
+                                ->update(['is_default' => false]);
+                        }
+
+                        $record->is_default = $newValue;
+                        $record->save();
+                    }),
                 IconColumn::make('is_active')
-                    ->boolean(),
+                    ->boolean()
+                    ->action(function (Language $record) {
+                        // Varsayılan dil pasif yapılamaz
+                        if ($record->is_default && $record->is_active) {
+                            return;
+                        }
+
+                        // Toggle yap
+                        $record->is_active = !$record->is_active;
+                        $record->save();
+                    }),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()

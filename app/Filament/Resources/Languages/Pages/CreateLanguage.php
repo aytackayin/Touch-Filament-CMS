@@ -18,6 +18,12 @@ class CreateLanguage extends CreateRecord
         $this->previousUrl = url()->previous();
     }
 
+    protected function mutateFormDataBeforeCreate(array $data): array
+    {
+        $data['is_default'] = false;
+        return $data;
+    }
+
     protected function getRedirectUrl(): string
     {
         return $this->previousUrl ?? $this->getResource()::getUrl('index');

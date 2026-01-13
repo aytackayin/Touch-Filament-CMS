@@ -35,39 +35,8 @@ class LanguageForm
                     ])
                     ->required()
                     ->default('ltr'),
-                Toggle::make('is_default')
-                    ->label('Default Language')
-                    ->reactive()
-                    ->afterStateUpdated(function ($state, $set, $record) {
-                        // Default yapıldıysa, diğerlerini kapat
-                        if ($state) {
-                            Language::query()
-                                ->where('id', '!=', optional($record)->id)
-                                ->update(['is_default' => false]);
-                        }
-
-                        // Default kapatılmaya çalışılıyorsa
-                        if (!$state) {
-                            $set('is_active', true);
-                            $hasAnotherDefault = Language::query()
-                                ->where('id', '!=', optional($record)->id)
-                                ->where('is_default', true)
-                                ->exists();
-
-                            if (!$hasAnotherDefault) {
-                                // Geri aç
-                                $set('is_default', true);
-                            }
-                        }
-                    }),
                 Toggle::make('is_active')
-                    ->default(true)
-                    ->afterStateUpdated(function ($state, $set, $record) {
-                        if (!$state && $record?->is_default) {
-                            // Default language pasif yapılamaz
-                            $set('is_active', true);
-                        }
-                    }),
+                    ->default(true),
             ]);
     }
 }
