@@ -105,10 +105,6 @@ class BlogCategoryForm
                                     ->afterStateUpdated(function ($state, $set) {
                                         // Logic to update other fields if needed
                                     }),
-                                TextInput::make('sort')
-                                    ->required()
-                                    ->numeric()
-                                    ->default(0),
                                 Toggle::make('is_published')
                                     ->required()
                                     ->default(true),

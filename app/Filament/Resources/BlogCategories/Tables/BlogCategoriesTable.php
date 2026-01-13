@@ -16,6 +16,8 @@ class BlogCategoriesTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->striped()
+            ->paginatedWhileReordering()
             ->columns([
                 TextColumn::make('title')
                     ->searchable()
@@ -27,15 +29,19 @@ class BlogCategoriesTable
                 TextColumn::make('parent.title')
                     ->label('Parent Category')
                     ->sortable(),
-                TextColumn::make('sort')
-                    ->sortable(),
                 IconColumn::make('is_published')
-                    ->boolean(),
+                    ->boolean()
+                    ->action(function ($record) {
+                        $record->is_published = !$record->is_published;
+                        $record->save();
+                    }),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
+            ->reorderable('sort')
+            ->defaultSort('sort', 'asc')
             ->filters([
                 //
             ])

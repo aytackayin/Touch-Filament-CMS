@@ -65,9 +65,6 @@ class BlogForm
                     ->schema([
                         Section::make('Settings')
                             ->schema([
-                                TextInput::make('sort')
-                                    ->numeric()
-                                    ->default(0),
                                 Select::make('language_id')
                                     ->relationship('language', 'name')
                                     ->required()
