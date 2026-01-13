@@ -14,7 +14,7 @@ use Filament\Tables\Table;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Model;
-
+use Illuminate\Support\HtmlString;
 use BackedEnum;
 
 class BlogResource extends Resource
@@ -41,7 +41,7 @@ class BlogResource extends Resource
             ->first();
 
         return [
-            'İçerik' => Str::limit($firstSentence, 120),
+            'İçerik' => new HtmlString('<span style="font-size: 12px; line-height: 1;">' . Str::limit($firstSentence, 120) . '</span>'),
         ];
     }
 

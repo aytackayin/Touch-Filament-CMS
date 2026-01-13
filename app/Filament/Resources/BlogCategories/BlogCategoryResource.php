@@ -14,7 +14,7 @@ use Filament\Tables\Table;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Model;
-
+use Illuminate\Support\HtmlString;
 use BackedEnum;
 
 class BlogCategoryResource extends Resource
@@ -41,7 +41,7 @@ class BlogCategoryResource extends Resource
             ->first();
 
         return [
-            'Açıklama' => Str::limit($firstSentence, 120),
+            'Açıklama' => new HtmlString('<span style="font-size: 12px; line-height: 1;">' . Str::limit($firstSentence, 120) . '</span>'),
         ];
     }
     public static function getNavigationGroup(): ?string

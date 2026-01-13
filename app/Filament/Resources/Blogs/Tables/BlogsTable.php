@@ -13,6 +13,7 @@ use Filament\Tables\Table;
 use App\Filament\Resources\Blogs\BlogResource;
 use App\Models\Blog;
 use Illuminate\Support\Str;
+use Illuminate\Support\HtmlString;
 
 class BlogsTable
 {
@@ -26,7 +27,7 @@ class BlogsTable
                     TextColumn::make('title')
                         ->searchable(['title', 'content'])
                         ->icon('heroicon-s-document-text')
-                        ->description(fn(Blog $record): string => $record->content ? Str::limit(strip_tags($record->content), 100) : '')
+                        ->description(fn(Blog $record): HtmlString => $record->content ? new HtmlString('<span style="font-size: 12px; line-height: 1;" class="text-gray-500 dark:text-gray-400">' . Str::limit(strip_tags($record->content), 100) . '</span>') : new HtmlString(''))
                         ->wrap()
                         ->sortable(),
                     TextColumn::make('language.name')

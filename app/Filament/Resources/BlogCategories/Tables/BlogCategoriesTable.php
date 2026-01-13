@@ -14,6 +14,7 @@ use App\Filament\Resources\BlogCategories\BlogCategoryResource;
 use App\Services\BlogCategoryDeletionService;
 use App\Models\BlogCategory;
 use Illuminate\Support\Str;
+use Illuminate\Support\HtmlString;
 class BlogCategoriesTable
 {
     public static function configure(Table $table): Table
@@ -28,7 +29,7 @@ class BlogCategoriesTable
                         ->icon('heroicon-m-squares-2x2')
                         ->sortable()
                         ->color('primary')
-                        ->description(fn(BlogCategory $record): string => $record->description ? Str::limit(strip_tags($record->description), 100) : '')
+                        ->description(fn(BlogCategory $record): HtmlString => $record->description ? new HtmlString('<span style="font-size: 12px; line-height: 1;" class="text-gray-500 dark:text-gray-400">' . Str::limit(strip_tags($record->description), 100) . '</span>') : new HtmlString(''))
                         ->wrap()
                         ->url(fn($record) => BlogCategoryResource::getUrl('index', ['parent_id' => $record->id])),
                     TextColumn::make('language.name')
