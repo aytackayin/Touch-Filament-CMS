@@ -14,9 +14,7 @@ use App\Filament\Resources\Blogs\BlogResource;
 use App\Models\Blog;
 use Illuminate\Support\Str;
 use Illuminate\Support\HtmlString;
-use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
-use Illuminate\Database\Eloquent\Builder;
 
 class BlogsTable
 {

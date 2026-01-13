@@ -16,8 +16,6 @@ use App\Services\BlogCategoryDeletionService;
 use App\Models\BlogCategory;
 use Illuminate\Support\Str;
 use Illuminate\Support\HtmlString;
-use Filament\Tables\Filters\Filter;
-use Illuminate\Database\Eloquent\Builder;
 class BlogCategoriesTable
 {
     public static function configure(Table $table): Table
