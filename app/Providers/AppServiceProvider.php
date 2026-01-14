@@ -24,9 +24,28 @@ class AppServiceProvider extends ServiceProvider
         \App\Models\BlogCategory::observe(\App\Observers\BlogCategoryObserver::class);
 
         LanguageSwitch::configureUsing(function (LanguageSwitch $switch) {
+            $languages = \App\Models\Language::where('is_active', 1)->get();
+
             $switch
-                ->locales(['tr', 'en']);
+                ->circular()
+                ->locales(
+                    $languages
+                        ->pluck('code')
+                        ->map(fn($code) => strtolower(explode('_', $code)[0]))
+                        ->unique()
+                        ->values()
+                        ->toArray()
+                )
+                ->labels(
+                    $languages
+                        ->mapWithKeys(fn($lang) => [
+                            strtolower(explode('_', $lang->code)[0])
+                            => "{$lang->name}"
+                        ])
+                        ->toArray()
+                );
         });
+
 
         try {
             /** @var \App\Settings\GeneralSettings $settings */
