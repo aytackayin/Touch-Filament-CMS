@@ -33,7 +33,6 @@
                             const component = window.Livewire.find(wireId);
                             if (component) {
                                 component.set('data.video_thumbnails_store', jsonData);
-                                console.log('Updated Livewire state with', thumbnailsData.length, 'thumbnails');
                             }
                         }
                     }
@@ -97,9 +96,9 @@
                     // Update the hidden field
                     updateHiddenField();
 
-                    console.log('Thumbnail generated for:', fileObject.name);
+                    // console.log('Thumbnail generated for:', fileObject.name);
                 } else {
-                    console.log('Thumbnail already exists for:', fileObject.name);
+                    // console.log('Thumbnail already exists for:', fileObject.name);
                 }
 
                 URL.revokeObjectURL(video.src);
@@ -123,7 +122,7 @@
                     const id = item.serverId || item.id;
                     if (!id || isProcessed(id)) continue;
 
-                    console.log('Processing video:', item.file.name);
+                    // console.log('Processing video:', item.file.name);
                     markProcessed(id);
                     generateThumbnail(item.file, id);
                 }
@@ -131,7 +130,7 @@
         }
 
         // Initialize
-        console.log('Video Thumbnail Handler Initialized');
+        // console.log('Video Thumbnail Handler Initialized');
 
         // Scan periodically for FilePond uploads
         setInterval(scanFilePond, 2000);
@@ -140,7 +139,7 @@
         document.addEventListener('submit', function (e) {
             if (thumbnailsData.length > 0) {
                 updateHiddenField();
-                console.log('Form submitting with', thumbnailsData.length, 'video thumbnails');
+                // console.log('Form submitting with', thumbnailsData.length, 'video thumbnails');
             }
         }, true);
     })();

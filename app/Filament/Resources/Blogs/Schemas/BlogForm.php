@@ -60,6 +60,13 @@ class BlogForm
                                     ->acceptedFileTypes(['image/*', 'video/*'])
                                     ->imageEditor()
                                     ->preserveFilenames()
+                                    ->getUploadedFileNameForStorageUsing(
+                                        fn(\Livewire\Features\SupportFileUploads\TemporaryUploadedFile $file): string =>
+                                        (string) str($file->getClientOriginalName())
+                                            ->beforeLast('.')
+                                            ->slug()
+                                            ->append('.' . $file->getClientOriginalExtension())
+                                    )
                                     ->columnSpanFull(),
                                 \Filament\Forms\Components\Hidden::make('video_thumbnails_store')
                                     ->dehydrated(),

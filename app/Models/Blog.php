@@ -247,16 +247,8 @@ class Blog extends Model
                 unset($model->attributes['_video_thumbnails']); // Clean up
             }
 
-            \Log::debug('Video Thumbnails Processing:', [
-                'via_mutator' => !empty($model->video_thumbnails_store_temp),
-                'via_request' => !empty(request()->input('data.video_thumbnails_store')),
-                'final_data_present' => !empty($thumbnailsData)
-            ]);
-
             if (!empty($thumbnailsData)) {
                 $thumbnails = is_string($thumbnailsData) ? json_decode($thumbnailsData, true) : $thumbnailsData;
-
-                \Log::debug('Video Thumbnails - Decoded:', ['thumbnails' => $thumbnails]);
 
                 if (is_array($thumbnails) && !empty($thumbnails)) {
                     $thumbsDir = "blogs/{$model->id}/videos/thumbs";
@@ -271,26 +263,50 @@ class Blog extends Model
                         $base64Data = $thumbnail['thumbnail'] ?? null;
 
                         if ($filename && $base64Data) {
-                            // Extract filename without extension and add .jpg
-                            // Now we rely on preserveFilenames() so names match match
-                            $nameWithoutExt = pathinfo($filename, PATHINFO_FILENAME);
-                            $thumbFilename = $nameWithoutExt . '.jpg';
-                            $thumbPath = "{$thumbsDir}/{$thumbFilename}";
+                            // 1. Slugify the incoming filename to match storage strategy in BlogForm
+                            $originalNameWithoutExt = pathinfo($filename, PATHINFO_FILENAME);
+                            $extension = pathinfo($filename, PATHINFO_EXTENSION);
 
-                            // Decode base64 image
-                            $imageData = $base64Data;
-                            if (str_contains($imageData, 'data:image')) {
-                                $imageData = preg_replace('/^data:image\/\w+;base64,/', '', $imageData);
+                            $sluggedName = \Illuminate\Support\Str::slug($originalNameWithoutExt);
+                            $expectedVideoName = $sluggedName . '.' . $extension;
+                            $thumbFilename = $sluggedName . '.jpg';
+
+                            // 2. Check if corresponding video exists in current attachments
+                            // We need to check against basename of attachments
+                            $videoExists = false;
+                            if (is_array($model->attachments)) {
+                                foreach ($model->attachments as $att) {
+                                    if (basename($att) === $expectedVideoName) {
+                                        $videoExists = true;
+                                        break;
+                                    }
+                                }
                             }
-                            $imageData = str_replace(' ', '+', $imageData);
-                            $decodedImage = base64_decode($imageData);
 
-                            if ($decodedImage !== false) {
-                                // Save thumbnail using Storage disk
-                                $disk->put($thumbPath, $decodedImage);
-                                \Log::info("Video thumbnail saved: {$thumbPath}");
+                            if ($videoExists) {
+                                $thumbPath = "{$thumbsDir}/{$thumbFilename}";
+
+                                // Decode base64 image
+                                $imageData = $base64Data;
+                                if (str_contains($imageData, 'data:image')) {
+                                    $imageData = preg_replace('/^data:image\/\w+;base64,/', '', $imageData);
+                                }
+                                $imageData = str_replace(' ', '+', $imageData);
+                                $decodedImage = base64_decode($imageData);
+
+                                if ($decodedImage !== false) {
+                                    // Save thumbnail using Storage disk
+                                    $disk->put($thumbPath, $decodedImage);
+                                    \Log::info("Video thumbnail saved: {$thumbPath}");
+                                } else {
+                                    \Log::error("Failed to decode base64 for thumbnail");
+                                }
                             } else {
-                                \Log::error("Failed to decode base64 for thumbnail");
+                                \Log::info("Skipping thumbnail for deleted/missing video: {$expectedVideoName}");
+                                // Optional: Ensure thumbnail is deleted if it exists?
+                                // The cleanup logic at the start of saved() or in deleting() should handle this handled via oldAttachmentsForCleanup
+                                // But if this is a subsequent save where video was removed, cleanup logic ran first.
+                                // Here we just ensure we don't CREATE/UPDATE a dead thumbnail.
                             }
                         }
                     }
