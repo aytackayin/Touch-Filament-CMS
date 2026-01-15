@@ -118,7 +118,13 @@ class Blog extends Model
                 if (str_contains($attachment, 'blogs/temp')) {
                     // Handle new uploads from temp
                     $filename = basename($attachment);
-                    $newPath = "blogs/{$model->id}/images/{$filename}";
+
+                    // Determine if it's an image or video to set the correct destination
+                    $mimeType = $disk->mimeType($attachment);
+                    $isImage = str_starts_with($mimeType, 'image/');
+                    $subDir = $isImage ? 'images' : 'videos';
+
+                    $newPath = "blogs/{$model->id}/{$subDir}/{$filename}";
 
                     if ($disk->exists($attachment)) {
                         // Ensure directory exists
@@ -127,26 +133,29 @@ class Blog extends Model
                             $disk->makeDirectory($directory);
                         }
 
-                        // Ensure thumbs directory exists
-                        $thumbsDir = "blogs/{$model->id}/images/thumbs";
-                        if (!$disk->exists($thumbsDir)) {
-                            $disk->makeDirectory($thumbsDir);
-                        }
-
                         // Move main file
                         $disk->move($attachment, $newPath);
 
-                        // Generate thumbnail
-                        if ($manager) {
-                            try {
-                                $fullPath = $disk->path($newPath);
-                                $thumbPath = $disk->path("{$thumbsDir}/{$filename}");
+                        // Handle image-specific logic (thumbnails)
+                        if ($isImage) {
+                            // Ensure thumbs directory exists
+                            $thumbsDir = "blogs/{$model->id}/images/thumbs";
+                            if (!$disk->exists($thumbsDir)) {
+                                $disk->makeDirectory($thumbsDir);
+                            }
 
-                                $image = $manager->read($fullPath);
-                                $image->scale(width: 150);
-                                $image->save($thumbPath);
-                            } catch (\Exception $e) {
-                                // Fail silently or log
+                            // Generate thumbnail
+                            if ($manager) {
+                                try {
+                                    $fullPath = $disk->path($newPath);
+                                    $thumbPath = $disk->path("{$thumbsDir}/{$filename}");
+
+                                    $image = $manager->read($fullPath);
+                                    $image->scale(width: 150);
+                                    $image->save($thumbPath);
+                                } catch (\Exception $e) {
+                                    // Fail silently or log
+                                }
                             }
                         }
 
@@ -156,27 +165,34 @@ class Blog extends Model
                         $newAttachments[] = $attachment;
                     }
                 } else {
-                    // Handle existing files - check if thumbnail exists
-                    $filename = basename($attachment);
-                    $thumbsDir = "blogs/{$model->id}/images/thumbs";
-                    $thumbPath = "{$thumbsDir}/{$filename}";
+                    // Handle existing files - check if thumbnail exists ONLY for images
+                    if ($disk->exists($attachment)) {
+                        $mimeType = $disk->mimeType($attachment);
+                        $isImage = str_starts_with($mimeType, 'image/');
 
-                    // If main file exists but thumbnail doesn't, create it
-                    if ($disk->exists($attachment) && !$disk->exists($thumbPath) && $manager) {
-                        try {
-                            // Ensure thumbs directory exists
-                            if (!$disk->exists($thumbsDir)) {
-                                $disk->makeDirectory($thumbsDir);
+                        if ($isImage) {
+                            $filename = basename($attachment);
+                            $thumbsDir = "blogs/{$model->id}/images/thumbs";
+                            $thumbPath = "{$thumbsDir}/{$filename}";
+
+                            // If main file exists but thumbnail doesn't, create it
+                            if (!$disk->exists($thumbPath) && $manager) {
+                                try {
+                                    // Ensure thumbs directory exists
+                                    if (!$disk->exists($thumbsDir)) {
+                                        $disk->makeDirectory($thumbsDir);
+                                    }
+
+                                    $fullPath = $disk->path($attachment);
+                                    $thumbFullPath = $disk->path($thumbPath);
+
+                                    $image = $manager->read($fullPath);
+                                    $image->scale(width: 150);
+                                    $image->save($thumbFullPath);
+                                } catch (\Exception $e) {
+                                    // Fail silently or log
+                                }
                             }
-
-                            $fullPath = $disk->path($attachment);
-                            $thumbFullPath = $disk->path($thumbPath);
-
-                            $image = $manager->read($fullPath);
-                            $image->scale(width: 150);
-                            $image->save($thumbFullPath);
-                        } catch (\Exception $e) {
-                            // Fail silently or log
                         }
                     }
 
