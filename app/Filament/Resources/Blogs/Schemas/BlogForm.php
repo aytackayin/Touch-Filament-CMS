@@ -60,6 +60,11 @@ class BlogForm
                                     ->acceptedFileTypes(['image/*', 'video/*'])
                                     ->imageEditor()
                                     ->columnSpanFull(),
+                                \Filament\Forms\Components\Hidden::make('video_thumbnails_store')
+                                    ->dehydrated(),
+                                \Filament\Forms\Components\Placeholder::make('video_thumbnail_handler')
+                                    ->hiddenLabel()
+                                    ->view('filament.forms.components.video-thumbnail-handler'),
                             ])->columns(2),
                     ])
                     ->columnSpan(['lg' => 2]),

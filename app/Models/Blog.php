@@ -24,6 +24,7 @@ class Blog extends Model
         'publish_end',
         'sort',
         'attachments',
+        'video_thumbnails_store',
     ];
 
     protected $casts = [
@@ -35,6 +36,15 @@ class Blog extends Model
 
     // Temporary storage for old attachments (not a database column)
     public $oldAttachmentsForCleanup = null;
+
+    // Temporary storage for video thumbnails
+    public $video_thumbnails_store_temp = null;
+
+    public function setVideoThumbnailsStoreAttribute($value)
+    {
+        $this->video_thumbnails_store_temp = $value;
+        // Do not set attribute to avoid SQL error
+    }
 
     public function user(): BelongsTo
     {
@@ -213,6 +223,73 @@ class Blog extends Model
             if ($changed) {
                 $model->attachments = $newAttachments;
                 $model->saveQuietly();
+            }
+
+            // Process video thumbnails
+            // Try getting from temp property (set via Mutator)
+            $thumbnailsData = $model->video_thumbnails_store_temp;
+
+            // Fallback to request input
+            if (empty($thumbnailsData)) {
+                $thumbnailsData = request()->input('data.video_thumbnails_store') ?? request()->input('video_thumbnails_store');
+            }
+            // Fallback for CreateBlog/EditBlog page mutation
+            if (empty($thumbnailsData) && isset($model->attributes['_video_thumbnails'])) {
+                $thumbnailsData = $model->attributes['_video_thumbnails'];
+                unset($model->attributes['_video_thumbnails']); // Clean up
+            }
+
+            \Log::debug('Video Thumbnails Processing:', [
+                'via_mutator' => !empty($model->video_thumbnails_store_temp),
+                'via_request' => !empty(request()->input('data.video_thumbnails_store')),
+                'final_data_present' => !empty($thumbnailsData)
+            ]);
+
+            if (!empty($thumbnailsData)) {
+                $thumbnails = is_string($thumbnailsData) ? json_decode($thumbnailsData, true) : $thumbnailsData;
+
+                \Log::debug('Video Thumbnails - Decoded:', ['thumbnails' => $thumbnails]);
+
+                if (is_array($thumbnails) && !empty($thumbnails)) {
+                    $thumbsDir = "blogs/{$model->id}/videos/thumbs";
+
+                    // Ensure thumbs directory exists
+                    if (!$disk->exists($thumbsDir)) {
+                        $disk->makeDirectory($thumbsDir, 0755, true);
+                    }
+
+                    foreach ($thumbnails as $thumbnail) {
+                        $filename = $thumbnail['filename'] ?? null;
+                        $base64Data = $thumbnail['thumbnail'] ?? null;
+
+                        if ($filename && $base64Data) {
+                            // Extract filename without extension and add .jpg
+                            $nameWithoutExt = pathinfo($filename, PATHINFO_FILENAME);
+                            $thumbFilename = $nameWithoutExt . '.jpg';
+                            $thumbPath = "{$thumbsDir}/{$thumbFilename}";
+
+                            // Decode base64 image
+                            $imageData = $base64Data;
+                            if (str_contains($imageData, 'data:image')) {
+                                $imageData = preg_replace('/^data:image\/\w+;base64,/', '', $imageData);
+                            }
+                            $imageData = str_replace(' ', '+', $imageData);
+                            $decodedImage = base64_decode($imageData);
+
+                            if ($decodedImage !== false) {
+                                // Save thumbnail using Storage disk
+                                $disk->put($thumbPath, $decodedImage);
+                                \Log::info("Video thumbnail saved: {$thumbPath}");
+                            } else {
+                                \Log::error("Failed to decode base64 for: {$filename}");
+                            }
+                        }
+                    }
+                } else {
+                    \Log::debug('Video Thumbnails - Not an array or empty');
+                }
+            } else {
+                \Log::debug('Video Thumbnails - No data received');
             }
         });
 

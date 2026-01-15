@@ -19,11 +19,23 @@ class EditBlog extends EditRecord
 
     public ?string $previousUrl = null;
 
+    public ?string $video_thumbnails_store = null;
+
     public function mount(int|string $record): void
     {
         parent::mount($record);
 
         $this->previousUrl = url()->previous();
+    }
+
+    protected function mutateFormDataBeforeSave(array $data): array
+    {
+        // Process video thumbnails if present
+        if (!empty($this->video_thumbnails_store)) {
+            $data['_video_thumbnails'] = $this->video_thumbnails_store;
+        }
+
+        return $data;
     }
 
     protected function getRedirectUrl(): string

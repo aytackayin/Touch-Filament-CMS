@@ -16,6 +16,8 @@ class CreateBlog extends CreateRecord
     #[Url]
     public ?string $category_id = null;
 
+    public ?string $video_thumbnails_store = null;
+
     protected function fillForm(): void
     {
         parent::fillForm();
@@ -30,6 +32,16 @@ class CreateBlog extends CreateRecord
         parent::mount();
 
         $this->previousUrl = url()->previous();
+    }
+
+    protected function mutateFormDataBeforeCreate(array $data): array
+    {
+        // Process video thumbnails if present
+        if (!empty($this->video_thumbnails_store)) {
+            $data['_video_thumbnails'] = $this->video_thumbnails_store;
+        }
+
+        return $data;
     }
 
     protected function getRedirectUrl(): string
