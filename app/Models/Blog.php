@@ -97,6 +97,16 @@ class Blog extends Model
                     }
                 }
 
+                // Clean up empty directories for this blog
+                $blogDir = "blogs/{$model->id}";
+                if ($disk->exists($blogDir)) {
+                    // Check if there are any files left in the blog directory (recursively)
+                    $allFiles = $disk->allFiles($blogDir);
+                    if (empty($allFiles)) {
+                        $disk->deleteDirectory($blogDir);
+                    }
+                }
+
                 $model->oldAttachmentsForCleanup = null;
             }
 
