@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "e05d7cd31c80a90f6fae31f5c548420d",
+    "content-hash": "ed1f7653ada2cebbc0340fc2f3a590b7",
     "packages": [
         {
             "name": "andreia/filament-nord-theme",
@@ -151,6 +151,53 @@
                 "source": "https://github.com/AnourValar/eloquent-serialize/tree/1.3.5"
             },
             "time": "2025-12-04T13:38:21+00:00"
+        },
+        {
+            "name": "aytackayin/tinymce",
+            "version": "1.0.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/aytackayin/tinymce.git",
+                "reference": "53962864672cda691615ba40996ebb34dbb6194b"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/aytackayin/tinymce/zipball/53962864672cda691615ba40996ebb34dbb6194b",
+                "reference": "53962864672cda691615ba40996ebb34dbb6194b",
+                "shasum": ""
+            },
+            "require": {
+                "filament/filament": "^3.0|^4.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Aytackayin\\Tinymce\\TinymceServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Aytackayin\\Tinymce\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Itouch",
+                    "email": "info@aytackayin.com"
+                }
+            ],
+            "description": "Filament 4/3 Tinymce Plugin with Code Editor",
+            "support": {
+                "issues": "https://github.com/aytackayin/tinymce/issues",
+                "source": "https://github.com/aytackayin/tinymce/tree/v1.0.1"
+            },
+            "time": "2026-01-15T18:49:16+00:00"
         },
         {
             "name": "bacon/bacon-qr-code",

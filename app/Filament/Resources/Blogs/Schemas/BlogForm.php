@@ -16,6 +16,7 @@ use Filament\Schemas\Schema;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Placeholder;
+use Aytackayin\Tinymce\Forms\Components\TinyEditor;
 
 class BlogForm
 {
@@ -45,16 +46,19 @@ class BlogForm
                                         $set('slug', Blog::generateUniqueSlug($state, $record?->id));
                                     })
                                     ->unique(Blog::class, 'slug', ignoreRecord: true),
-                                RichEditor::make('content')
-                                    ->required()
-                                    ->fileAttachmentsDisk('attachments')
-                                    ->fileAttachmentsDirectory(function ($record) {
-                                        if ($record) {
-                                            return 'blogs/' . $record->id . '/content-images';
-                                        }
-                                        return 'blogs/temp';
-                                    })
-                                    ->columnSpanFull(),
+                                /*                                 RichEditor::make('content')
+                                                                    ->required()
+                                                                    ->fileAttachmentsDisk('attachments')
+                                                                    ->fileAttachmentsDirectory(function ($record) {
+                                                                        if ($record) {
+                                                                            return 'blogs/' . $record->id . '/content-images';
+                                                                        }
+                                                                        return 'blogs/temp';
+                                                                    })
+                                                                    ->columnSpanFull(), */
+                                TinyEditor::make('content')
+                                    ->columnSpanFull()
+                                    ->required(),
                                 FileUpload::make('attachments')
                                     ->multiple()
                                     ->disk('attachments')
