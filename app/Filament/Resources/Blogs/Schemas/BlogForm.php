@@ -59,6 +59,7 @@ class BlogForm
                                     ->directory('blogs/temp')
                                     ->acceptedFileTypes(['image/*', 'video/*'])
                                     ->imageEditor()
+                                    ->preserveFilenames()
                                     ->columnSpanFull(),
                                 \Filament\Forms\Components\Hidden::make('video_thumbnails_store')
                                     ->dehydrated(),

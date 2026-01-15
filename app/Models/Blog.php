@@ -188,9 +188,6 @@ class Blog extends Model
                         }
 
                         $newAttachments[] = $newPath;
-                        if (!$isImage) {
-                            $newVideoFiles[] = basename($newPath);
-                        }
                         $changed = true;
                     } else {
                         $newAttachments[] = $attachment;
@@ -253,8 +250,7 @@ class Blog extends Model
             \Log::debug('Video Thumbnails Processing:', [
                 'via_mutator' => !empty($model->video_thumbnails_store_temp),
                 'via_request' => !empty(request()->input('data.video_thumbnails_store')),
-                'final_data_present' => !empty($thumbnailsData),
-                'new_videos_count' => count($newVideoFiles)
+                'final_data_present' => !empty($thumbnailsData)
             ]);
 
             if (!empty($thumbnailsData)) {
@@ -270,31 +266,15 @@ class Blog extends Model
                         $disk->makeDirectory($thumbsDir, 0755, true);
                     }
 
-                    $thumbIndex = 0;
                     foreach ($thumbnails as $thumbnail) {
+                        $filename = $thumbnail['filename'] ?? null;
                         $base64Data = $thumbnail['thumbnail'] ?? null;
 
-                        // Determine filename: Use new video filename if available, otherwise fallback
-                        $thumbFilename = null;
-
-                        if (!empty($newVideoFiles) && isset($newVideoFiles[$thumbIndex])) {
-                            // Match with newly uploaded video
-                            $targetVideoName = $newVideoFiles[$thumbIndex];
-                            $nameWithoutExt = pathinfo($targetVideoName, PATHINFO_FILENAME);
+                        if ($filename && $base64Data) {
+                            // Extract filename without extension and add .jpg
+                            // Now we rely on preserveFilenames() so names match match
+                            $nameWithoutExt = pathinfo($filename, PATHINFO_FILENAME);
                             $thumbFilename = $nameWithoutExt . '.jpg';
-                            \Log::info("Matching thumbnail to new video: {$targetVideoName} -> {$thumbFilename}");
-                        } else {
-                            // Fallback: use uploaded filename (might be wrong if hashed)
-                            $filename = $thumbnail['filename'] ?? null;
-                            if ($filename) {
-                                $nameWithoutExt = pathinfo($filename, PATHINFO_FILENAME);
-                                $thumbFilename = $nameWithoutExt . '.jpg';
-                            }
-                        }
-
-                        $thumbIndex++;
-
-                        if ($thumbFilename && $base64Data) {
                             $thumbPath = "{$thumbsDir}/{$thumbFilename}";
 
                             // Decode base64 image

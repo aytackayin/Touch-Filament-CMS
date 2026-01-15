@@ -68,8 +68,8 @@
                     return;
                 }
 
-                // Calculate resized dimensions (max width 640px)
-                const MAX_WIDTH = 640;
+                // Calculate resized dimensions (max width 150px)
+                const MAX_WIDTH = 150;
                 let width = video.videoWidth;
                 let height = video.videoHeight;
 
