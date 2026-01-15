@@ -13,7 +13,9 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Schemas\Schema;
-use Illuminate\Support\Str;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
+use Filament\Forms\Components\Hidden;
+use Filament\Forms\Components\Placeholder;
 
 class BlogForm
 {
@@ -59,18 +61,19 @@ class BlogForm
                                     ->directory('blogs/temp')
                                     ->acceptedFileTypes(['image/*', 'video/*'])
                                     ->imageEditor()
+                                    ->enableReordering()
                                     ->preserveFilenames()
                                     ->getUploadedFileNameForStorageUsing(
-                                        fn(\Livewire\Features\SupportFileUploads\TemporaryUploadedFile $file): string =>
+                                        fn(TemporaryUploadedFile $file): string =>
                                         (string) str($file->getClientOriginalName())
                                             ->beforeLast('.')
                                             ->slug()
                                             ->append('.' . $file->getClientOriginalExtension())
                                     )
                                     ->columnSpanFull(),
-                                \Filament\Forms\Components\Hidden::make('video_thumbnails_store')
+                                Hidden::make('video_thumbnails_store')
                                     ->dehydrated(),
-                                \Filament\Forms\Components\Placeholder::make('video_thumbnail_handler')
+                                Placeholder::make('video_thumbnail_handler')
                                     ->hiddenLabel()
                                     ->view('filament.forms.components.video-thumbnail-handler'),
                             ])->columns(2),
