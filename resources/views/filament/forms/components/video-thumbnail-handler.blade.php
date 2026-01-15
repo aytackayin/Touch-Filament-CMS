@@ -68,23 +68,39 @@
                     return;
                 }
 
+                // Calculate resized dimensions (max width 640px)
+                const MAX_WIDTH = 640;
+                let width = video.videoWidth;
+                let height = video.videoHeight;
+
+                if (width > MAX_WIDTH) {
+                    const ratio = MAX_WIDTH / width;
+                    width = MAX_WIDTH;
+                    height = height * ratio;
+                }
+
                 const canvas = document.createElement('canvas');
-                canvas.width = video.videoWidth;
-                canvas.height = video.videoHeight;
-                canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
-                const base64 = canvas.toDataURL('image/jpeg', 0.7);
+                canvas.width = width;
+                canvas.height = height;
+                canvas.getContext('2d').drawImage(video, 0, 0, width, height);
+                const base64 = canvas.toDataURL('image/jpeg', 0.6); // Lower quality to 0.6
 
-                // Add new thumbnail to our local array
-                thumbnailsData.push({
-                    id: id,
-                    filename: fileObject.name,
-                    thumbnail: base64
-                });
+                // Check if this file is already in our local array to prevent duplicates
+                if (!thumbnailsData.some(t => t.filename === fileObject.name)) {
+                    // Add new thumbnail to our local array
+                    thumbnailsData.push({
+                        id: id,
+                        filename: fileObject.name,
+                        thumbnail: base64
+                    });
 
-                // Update the hidden field
-                updateHiddenField();
+                    // Update the hidden field
+                    updateHiddenField();
 
-                console.log('Thumbnail generated for:', fileObject.name);
+                    console.log('Thumbnail generated for:', fileObject.name);
+                } else {
+                    console.log('Thumbnail already exists for:', fileObject.name);
+                }
 
                 URL.revokeObjectURL(video.src);
             } catch (e) {
