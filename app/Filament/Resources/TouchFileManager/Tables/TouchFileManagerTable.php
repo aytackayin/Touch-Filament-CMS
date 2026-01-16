@@ -8,6 +8,7 @@ use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
+use Filament\Forms\Components\Hidden;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ViewColumn;
@@ -63,17 +64,6 @@ class TouchFileManagerTable
             )
             ->columns($isGrid ? [
                 Stack::make([
-                    ImageColumn::make('thumbnail_preview')
-                        ->label('')
-                        ->disk('attachments')
-                        ->state(fn(TouchFile $record) => $record->thumbnail_path)
-                        ->height(140)
-                        ->width('100%')
-                        ->defaultImageUrl(fn(TouchFile $record) => $record->is_folder
-                            ? url('/images/icons/folder.png')
-                            : url('/images/icons/file.png'))
-                        ->extraImgAttributes(['class' => 'object-cover w-full h-32 rounded-t-xl']),
-
                     ViewColumn::make('details')
                         ->view('filament.tables.columns.touch-file-grid-info'),
                 ])->space(0),
