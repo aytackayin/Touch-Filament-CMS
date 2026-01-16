@@ -103,7 +103,7 @@ class TouchFileManagerTable
 
                 TextColumn::make('created_at')
                     ->label('Date')
-                    ->dateTime()
+                    ->date()
                     ->sortable()
                     ->toggleable(),
             ])
