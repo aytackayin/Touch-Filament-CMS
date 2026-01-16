@@ -11,6 +11,9 @@ class CreateTouchFile extends CreateRecord
 {
     protected static string $resource = TouchFileManagerResource::class;
 
+    #[\Livewire\Attributes\Url]
+    public ?string $parent_id = null;
+
     public ?string $previousUrl = null;
 
     public function mount(): void
@@ -40,7 +43,7 @@ class CreateTouchFile extends CreateRecord
     protected function handleFileUploads(array $data): array
     {
         $files = $data['files'];
-        $parentId = $data['parent_id'] ?? null;
+        $parentId = $data['parent_id'] ?? $this->parent_id;
         $videoThumbnails = $data['video_thumbnails'] ?? null;
         $videoThumbnailsData = [];
 

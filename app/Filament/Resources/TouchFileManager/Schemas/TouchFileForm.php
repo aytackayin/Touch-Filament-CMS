@@ -40,7 +40,15 @@ class TouchFileForm
                                     })
                                     ->searchable()
                                     ->default(fn() => request('parent_id'))
-                                    ->visible(fn($operation) => $operation === 'edit' || !request()->filled('parent_id'))
+                                    ->visible(function ($livewire, $operation) {
+                                        if ($operation === 'edit')
+                                            return true;
+                                        // If parent_id is set in Livewire component (CreateTouchFile) or Request, hide it
+                                        if (isset($livewire->parent_id) && $livewire->parent_id) {
+                                            return false;
+                                        }
+                                        return !request()->filled('parent_id');
+                                    })
                                     ->dehydrated()
                                     ->placeholder('Root (attachments)')
                                     ->helperText('Select a parent folder or leave empty for root directory'),
