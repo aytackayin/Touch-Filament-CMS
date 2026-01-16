@@ -93,6 +93,14 @@ class TouchFileForm
                                         '4:3',
                                         '1:1',
                                     ])
+                                    ->preserveFilenames()
+                                    ->getUploadedFileNameForStorageUsing(
+                                        fn(TemporaryUploadedFile $file): string =>
+                                        (string) str($file->getClientOriginalName())
+                                            ->beforeLast('.')
+                                            ->slug()
+                                            ->append('.' . $file->getClientOriginalExtension())
+                                    )
                                     ->hidden(fn($operation) => $operation === 'create')
                                     ->visible(fn($record) => $record && !$record->is_folder)
                                     ->columnSpanFull(),

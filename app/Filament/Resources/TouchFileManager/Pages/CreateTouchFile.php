@@ -13,8 +13,6 @@ class CreateTouchFile extends CreateRecord
 
     public ?string $previousUrl = null;
 
-    public ?string $video_thumbnails_store = null;
-
     public function mount(): void
     {
         parent::mount();
@@ -25,8 +23,8 @@ class CreateTouchFile extends CreateRecord
     {
         // Handle file uploads
         if (!empty($data['files'])) {
-            // Pass video thumbnails data if available
-            $data['video_thumbnails'] = $this->video_thumbnails_store;
+            // Pass video thumbnails data if available from the form data
+            $data['video_thumbnails'] = $data['video_thumbnails_store'] ?? null;
 
             $uploadedFiles = $this->handleFileUploads($data);
 

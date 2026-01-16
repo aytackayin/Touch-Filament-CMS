@@ -119,6 +119,64 @@ class EditTouchFile extends EditRecord
                     \Log::error('Thumbnail generation failed on edit: ' . $e->getMessage());
                 }
             }
+            // D. Handle Video Thumbnail (from hidden field)
+            elseif ($disk->mimeType($targetPath) && str_starts_with($disk->mimeType($targetPath), 'video/')) {
+                $videoThumbnails = $data['video_thumbnails_store'] ?? null;
+                if ($videoThumbnails) {
+                    $videoThumbnailsData = json_decode($videoThumbnails, true);
+                    if (is_array($videoThumbnailsData)) {
+                        // The temp filename that created the thumb might effectively be $newFilename (sourcePath)
+                        // Filenames might be slightly different due to Filament sanitization.
+                        // We'll try to match by loose slug or original name logic.
+
+                        $currentFileName = basename($sourcePath); // Name uploaded to temp
+
+                        foreach ($videoThumbnailsData as $thumbData) {
+                            $thumbFilename = $thumbData['filename'] ?? '';
+                            // Match logic primarily based on CreateTouchFile
+                            $nameNoExt = pathinfo($thumbFilename, PATHINFO_FILENAME);
+                            $ext = pathinfo($thumbFilename, PATHINFO_EXTENSION);
+                            $slugged = \Illuminate\Support\Str::slug($nameNoExt) . '.' . $ext;
+
+                            // Check match against the temp filename uploaded
+                            if ($slugged === $currentFileName) {
+                                $base64Data = $thumbData['thumbnail'] ?? null;
+                                if ($base64Data) {
+                                    try {
+                                        $thumbsDir = str_replace('\\', '/', dirname($targetPath));
+                                        if ($thumbsDir === '.')
+                                            $thumbsDir = 'thumbs';
+                                        else
+                                            $thumbsDir .= '/thumbs';
+
+                                        if (!$disk->exists($thumbsDir)) {
+                                            $disk->makeDirectory($thumbsDir);
+                                        }
+
+                                        $thumbName = pathinfo(basename($targetPath), PATHINFO_FILENAME) . '.jpg';
+                                        $thumbPath = $thumbsDir . '/' . $thumbName;
+
+                                        // Clean base64
+                                        $imageData = $base64Data;
+                                        if (str_contains($imageData, 'data:image')) {
+                                            $imageData = preg_replace('/^data:image\/\w+;base64,/', '', $imageData);
+                                        }
+                                        $imageData = str_replace(' ', '+', $imageData);
+                                        $decodedImage = base64_decode($imageData);
+
+                                        if ($decodedImage !== false) {
+                                            $disk->put($thumbPath, $decodedImage);
+                                        }
+                                    } catch (\Exception $e) {
+                                        \Log::error('Video thumbnail save failed on edit: ' . $e->getMessage());
+                                    }
+                                }
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
 
             // D. Update Data for DB Update
             $data['path'] = $targetPath;
@@ -129,6 +187,39 @@ class EditTouchFile extends EditRecord
 
         $record->update($data);
         return $record;
+    }
+
+    protected function mutateFormDataBeforeSave(array $data): array
+    {
+        if (isset($data['name'])) {
+            if ($this->record->is_folder) {
+                // For folders, just slugify the whole name
+                $data['name'] = \Illuminate\Support\Str::slug($data['name']);
+            } else {
+                // For files, preserve extension
+                $originalName = $data['name'];
+                $extension = pathinfo($originalName, PATHINFO_EXTENSION);
+                $nameNoExt = pathinfo($originalName, PATHINFO_FILENAME);
+
+                $sluggedName = \Illuminate\Support\Str::slug($nameNoExt);
+
+                if ($extension) {
+                    $data['name'] = $sluggedName . '.' . $extension;
+                } else {
+                    // Try to get extension from original record if user removed it?
+                    // Or trust the user input (maybe they want no extension)
+                    // Let's check original record extension just in case
+                    $oldExt = pathinfo($this->record->name, PATHINFO_EXTENSION);
+                    if ($oldExt) {
+                        $data['name'] = $sluggedName . '.' . $oldExt;
+                    } else {
+                        $data['name'] = $sluggedName;
+                    }
+                }
+            }
+        }
+
+        return $data;
     }
 
     protected function mutateFormDataBeforeFill(array $data): array

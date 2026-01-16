@@ -24,7 +24,9 @@ class ListTouchFiles extends ListRecords
                 ->form(TouchFileForm::folderSchema()->getComponents())
                 ->action(function (array $data) {
                     $parentId = $data['parent_id'] ?? null;
-                    $name = $data['name'];
+                    // Slugify folder name
+                    $name = \Illuminate\Support\Str::slug($data['name']);
+                    $data['name'] = $name;
 
                     // Calculate Path
                     $path = $name;
