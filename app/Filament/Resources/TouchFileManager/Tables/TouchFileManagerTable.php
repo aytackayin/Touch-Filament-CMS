@@ -32,7 +32,9 @@ class TouchFileManagerTable
                         $query->whereNull('parent_id');
                     }
                 }
-                return $query;
+
+                // Öncelik: Klasörler (1), sonra Dosyalar (0). Ardından isim sıralaması.
+                return $query->orderBy('is_folder', 'desc')->orderBy('name', 'asc');
             })
             ->striped()
             ->recordUrl(
@@ -42,7 +44,7 @@ class TouchFileManagerTable
             )
             ->columns([
                 ImageColumn::make('thumbnail_preview')
-                    ->label('Preview')
+                    ->label('')
                     ->disk('attachments')
                     ->state(fn(TouchFile $record) => $record->thumbnail_path)
                     ->height(40)
@@ -53,8 +55,8 @@ class TouchFileManagerTable
                     ->toggleable(),
 
                 TextColumn::make('name')
+                    ->label('')
                     ->searchable()
-                    ->sortable()
                     ->wrap()
                     ->weight('medium')
                     ->description(fn(TouchFile $record) => $record->is_folder ? 'Folder' : $record->mime_type)
@@ -62,6 +64,7 @@ class TouchFileManagerTable
                     ->color(fn(TouchFile $record) => $record->is_folder ? 'warning' : null),
 
                 TextColumn::make('type')
+                    ->label('')
                     ->badge()
                     ->color(fn(string $state): string => match ($state) {
                         'image' => 'success',
@@ -73,20 +76,18 @@ class TouchFileManagerTable
                         default => 'gray',
                     })
                     ->formatStateUsing(fn(string $state): string => ucfirst($state))
-                    ->sortable()
                     ->toggleable(),
 
                 TextColumn::make('human_size')
-                    ->label('Size')
-                    ->sortable(query: function ($query, string $direction) {
-                        return $query->orderBy('size', $direction);
-                    })
+                    ->label('')
+                    /*                     ->sortable(query: function ($query, string $direction) {
+                                            return $query->orderBy('size', $direction);
+                                        }) */
                     ->alignEnd(),
 
                 TextColumn::make('parent.name')
                     ->label('Parent Folder')
                     ->default('Root')
-                    ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('created_at')
@@ -99,7 +100,6 @@ class TouchFileManagerTable
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
-            ->defaultSort('name', 'asc')
             ->filters([
                 SelectFilter::make('type')
                     ->label('File Type')
