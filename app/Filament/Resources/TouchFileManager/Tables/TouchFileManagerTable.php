@@ -72,12 +72,12 @@ class TouchFileManagerTable
                     ->label('')
                     ->disk('attachments')
                     ->state(fn(TouchFile $record) => $record->thumbnail_path)
-                    ->height(40)
-                    ->width(40)
+                    ->width(60)
+                    ->height(60)
                     ->defaultImageUrl(fn(TouchFile $record) => $record->is_folder
                         ? url('/images/icons/folder.png')
                         : url('/images/icons/file.png'))
-                    ->extraImgAttributes(['class' => 'object-cover rounded']),
+                    ->extraImgAttributes(['class' => 'object-cover object-center rounded-lg', 'style' => 'width: 60px; height: 60px; border-radius: 10px;']),
 
                 TextColumn::make('name')
                     ->label('Name')
