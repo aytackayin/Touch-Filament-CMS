@@ -69,7 +69,10 @@ class TouchFileForm
                                         'application/vnd.ms-powerpoint',
                                         'application/vnd.openxmlformats-officedocument.presentationml.presentation',
                                         'application/zip',
+                                        'application/x-zip-compressed',
+                                        'multipart/x-zip',
                                         'application/x-rar-compressed',
+                                        'application/vnd.rar',
                                         'application/x-7z-compressed',
                                         'text/plain',
                                     ])

@@ -55,6 +55,7 @@ class TouchFileManagerTable
                 TextColumn::make('name')
                     ->searchable()
                     ->sortable()
+                    ->wrap()
                     ->weight('medium')
                     ->description(fn(TouchFile $record) => $record->is_folder ? 'Folder' : $record->mime_type)
                     //->icon(fn(TouchFile $record) => $record->is_folder ? 'heroicon-o-folder' : null)
