@@ -156,7 +156,10 @@ class TouchFileManagerTable
                     ->modalCancelActionLabel('Close'),
 
                 Action::make('edit')
-                    ->url(fn(TouchFile $record): string => TouchFileManagerResource::getUrl('edit', ['record' => $record]))
+                    ->url(fn(TouchFile $record): string => TouchFileManagerResource::getUrl('edit', [
+                        'record' => $record,
+                        'parent_id' => $record->parent_id
+                    ]))
                     ->icon('heroicon-o-pencil-square')
                     ->label('')
                     ->tooltip('Edit'),

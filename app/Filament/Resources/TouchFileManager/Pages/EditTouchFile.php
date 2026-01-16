@@ -11,6 +11,9 @@ class EditTouchFile extends EditRecord
 {
     protected static string $resource = TouchFileManagerResource::class;
 
+    #[\Livewire\Attributes\Url]
+    public ?string $parent_id = null;
+
     protected function getHeaderActions(): array
     {
         return [
@@ -19,7 +22,13 @@ class EditTouchFile extends EditRecord
                 ->modalHeading(fn() => $this->record->is_folder ? 'Delete Folder' : 'Delete File')
                 ->modalDescription(fn() => $this->record->is_folder
                     ? 'Are you sure you want to delete this folder? All files and subfolders inside will also be deleted.'
-                    : 'Are you sure you want to delete this file?'),
+                    : 'Are you sure you want to delete this file?')
+                ->successRedirectUrl(function () {
+                    $parentId = $this->parent_id ?? ($this->record ? $this->record->parent_id : null);
+                    return $parentId
+                        ? $this->getResource()::getUrl('index', ['parent_id' => $parentId])
+                        : $this->getResource()::getUrl('index');
+                }),
         ];
     }
 
@@ -33,15 +42,27 @@ class EditTouchFile extends EditRecord
 
     protected function getRedirectUrl(): string
     {
-        return $this->previousUrl ?? $this->getResource()::getUrl('index');
+        $parentId = $this->parent_id ?? ($this->record ? $this->record->parent_id : null);
+
+        if ($parentId) {
+            return $this->getResource()::getUrl('index', ['parent_id' => $parentId]);
+        }
+
+        return $this->getResource()::getUrl('index');
     }
 
     protected function handleRecordUpdate(Model $record, array $data): Model
     {
         // 1. If path is removed (file deleted from upload), delete the record
         if (!$record->is_folder && empty($data['path'])) {
+            $parentId = $this->parent_id ?? $record->parent_id;
             $record->delete();
-            $this->redirect($this->getResource()::getUrl('index'));
+
+            $redirectUrl = $parentId
+                ? $this->getResource()::getUrl('index', ['parent_id' => $parentId])
+                : $this->getResource()::getUrl('index');
+
+            $this->redirect($redirectUrl);
             return $record;
         }
 
