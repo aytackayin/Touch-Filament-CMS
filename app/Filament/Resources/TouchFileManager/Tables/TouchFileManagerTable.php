@@ -8,14 +8,13 @@ use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
-use Filament\Support\Enums\IconSize;
-use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Filament\Tables\Columns\Layout\Stack;
+use Filament\Tables\Columns\Layout\Split;
 use Illuminate\Support\Facades\Storage;
-
 use Illuminate\Database\Eloquent\Builder;
 
 class TouchFileManagerTable
@@ -23,6 +22,11 @@ class TouchFileManagerTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->contentGrid([
+                'md' => 2,
+                'xl' => 4,
+                '2xl' => 5,
+            ])
             ->modifyQueryUsing(function (Builder $query) use ($table) {
                 $livewire = $table->getLivewire();
                 if ($livewire && property_exists($livewire, 'parent_id')) {
@@ -37,68 +41,64 @@ class TouchFileManagerTable
                 return $query->orderBy('is_folder', 'desc')->orderBy('name', 'asc');
             })
             ->striped()
+            ->contentGrid([
+                'md' => 2,
+                'xl' => 4,
+                '2xl' => 5,
+            ])
             ->recordUrl(
                 fn(TouchFile $record): ?string => $record->is_folder
                 ? TouchFileManagerResource::getUrl('index', ['parent_id' => $record->id])
                 : null
             )
             ->columns([
-                ImageColumn::make('thumbnail_preview')
-                    ->label('')
-                    ->disk('attachments')
-                    ->state(fn(TouchFile $record) => $record->thumbnail_path)
-                    ->height(40)
-                    ->width(60)
-                    ->defaultImageUrl(fn(TouchFile $record) => $record->is_folder
-                        ? url('/images/icons/folder.png')
-                        : url('/images/icons/file.png'))
-                    ->toggleable(),
+                \Filament\Tables\Columns\Layout\Stack::make([
+                    ImageColumn::make('thumbnail_preview')
+                        ->label('')
+                        ->disk('attachments')
+                        ->state(fn(TouchFile $record) => $record->thumbnail_path)
+                        ->height(120) // Üstte büyük bir önizleme
+                        ->width('100%')
+                        ->defaultImageUrl(fn(TouchFile $record) => $record->is_folder
+                            ? url('/images/icons/folder.png')
+                            : url('/images/icons/file.png'))
+                        ->extraImgAttributes(['class' => 'object-cover w-full h-32 rounded-t-xl']),
 
-                TextColumn::make('name')
-                    ->label('')
-                    ->searchable()
-                    ->wrap()
-                    ->weight('medium')
-                    ->description(fn(TouchFile $record) => $record->is_folder ? 'Folder' : $record->mime_type)
-                    //->icon(fn(TouchFile $record) => $record->is_folder ? 'heroicon-o-folder' : null)
-                    ->color(fn(TouchFile $record) => $record->is_folder ? 'warning' : null),
+                    \Filament\Tables\Columns\Layout\Split::make([
+                        TextColumn::make('name')
+                            ->label('')
+                            ->searchable()
+                            ->wrap()
+                            ->weight('bold')
+                            ->size('sm')
+                            ->description(fn(TouchFile $record) => $record->is_folder ? '' : $record->human_size)
+                            ->color(fn(TouchFile $record) => $record->is_folder ? 'warning' : null)
+                            ->grow(),
 
-                TextColumn::make('type')
-                    ->label('')
-                    ->badge()
-                    ->color(fn(string $state): string => match ($state) {
-                        'image' => 'success',
-                        'video' => 'info',
-                        'document' => 'primary',
-                        'archive' => 'warning',
-                        'spreadsheet' => 'success',
-                        'presentation' => 'danger',
-                        default => 'gray',
-                    })
-                    ->formatStateUsing(fn(string $state): string => ucfirst($state))
-                    ->toggleable(),
+                        TextColumn::make('type')
+                            ->label('')
+                            ->badge()
+                            ->color(fn(string $state): string => match ($state) {
+                                'image' => 'success',
+                                'video' => 'info',
+                                'document' => 'primary',
+                                'archive' => 'warning',
+                                'spreadsheet' => 'success',
+                                'presentation' => 'danger',
+                                default => 'gray',
+                            })
+                            ->formatStateUsing(fn(string $state): string => ucfirst($state))
+                            ->toggleable(),
+                    ])->extraAttributes(['class' => 'p-3 items-center']),
+                ]),
 
+                // Gizli kolonlar (Arama ve Filtreleme için gerekli)
                 TextColumn::make('human_size')
                     ->label('')
-                    /*                     ->sortable(query: function ($query, string $direction) {
-                                            return $query->orderBy('size', $direction);
-                                        }) */
-                    ->alignEnd(),
-
+                    ->hidden(),
                 TextColumn::make('parent.name')
-                    ->label('Parent Folder')
-                    ->default('Root')
-                    ->toggleable(isToggledHiddenByDefault: true),
-
-                TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-
-                TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->label('')
+                    ->hidden(),
             ])
             ->filters([
                 SelectFilter::make('type')
