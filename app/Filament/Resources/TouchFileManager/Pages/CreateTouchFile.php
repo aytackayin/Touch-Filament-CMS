@@ -6,6 +6,10 @@ use App\Filament\Resources\TouchFileManager\TouchFileManagerResource;
 use App\Models\TouchFile;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
+use Intervention\Image\ImageManager;
+use Intervention\Image\Drivers\Gd\Driver;
 
 class CreateTouchFile extends CreateRecord
 {
@@ -88,8 +92,8 @@ class CreateTouchFile extends CreateRecord
 
         // Initialize Intervention Image Manager
         $manager = null;
-        if (class_exists(\Intervention\Image\ImageManager::class)) {
-            $manager = new \Intervention\Image\ImageManager(new \Intervention\Image\Drivers\Gd\Driver());
+        if (class_exists(ImageManager::class)) {
+            $manager = new ImageManager(new Driver());
         }
 
         foreach ($files as $file) {
@@ -144,7 +148,7 @@ class CreateTouchFile extends CreateRecord
                     $image->save($thumbFullPath);
 
                 } catch (\Exception $e) {
-                    \Log::error('Image thumbnail generation failed: ' . $e->getMessage());
+                    Log::error('Image thumbnail generation failed: ' . $e->getMessage());
                 }
             } elseif ($type === 'video') {
                 // Find matching video thumbnail
@@ -161,7 +165,7 @@ class CreateTouchFile extends CreateRecord
                     // We slugify the thumbFilename extensionless part to match Filament's naming
                     $nameNoExt = pathinfo($thumbFilename, PATHINFO_FILENAME);
                     $ext = pathinfo($thumbFilename, PATHINFO_EXTENSION);
-                    $slugged = \Illuminate\Support\Str::slug($nameNoExt) . '.' . $ext;
+                    $slugged = Str::slug($nameNoExt) . '.' . $ext;
 
                     if ($slugged === $fileName) {
                         // Found match
@@ -196,7 +200,7 @@ class CreateTouchFile extends CreateRecord
                                     $disk->put($thumbPath, $decodedImage);
                                 }
                             } catch (\Exception $e) {
-                                \Log::error('Video thumbnail save failed: ' . $e->getMessage());
+                                Log::error('Video thumbnail save failed: ' . $e->getMessage());
                             }
                         }
                         break;

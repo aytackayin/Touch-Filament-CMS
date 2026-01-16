@@ -6,6 +6,12 @@ use App\Filament\Resources\TouchFileManager\TouchFileManagerResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\TouchFile;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
+use Intervention\Image\ImageManager;
+use Intervention\Image\Drivers\Gd\Driver;
 
 class EditTouchFile extends EditRecord
 {
@@ -24,7 +30,7 @@ class EditTouchFile extends EditRecord
         $parentId = $this->parent_id ?? ($this->record ? $this->record->parent_id : null);
 
         if ($parentId) {
-            $folder = \App\Models\TouchFile::find($parentId);
+            $folder = TouchFile::find($parentId);
             $trail = [];
             while ($folder) {
                 array_unshift($trail, [
@@ -99,7 +105,7 @@ class EditTouchFile extends EditRecord
         // 2. If file content changed (Image Editor or New Upload)
         // The data['path'] will differ from record->path
         if (!$record->is_folder && isset($data['path']) && $data['path'] !== $record->path) {
-            $disk = \Illuminate\Support\Facades\Storage::disk('attachments');
+            $disk = Storage::disk('attachments');
             $newFilename = $data['path']; // This is the temp/root filename from Filament
 
             // Calculate Target Directory
@@ -107,7 +113,7 @@ class EditTouchFile extends EditRecord
             $parentId = $data['parent_id'] ?? $record->parent_id; // Use new parent if changed, or old one
 
             if ($parentId) {
-                $parent = \App\Models\TouchFile::find($parentId);
+                $parent = TouchFile::find($parentId);
                 if ($parent) {
                     $targetDir = $parent->full_path;
                 }
@@ -144,9 +150,9 @@ class EditTouchFile extends EditRecord
             }
 
             // C. Generate NEW Thumbnail (if image)
-            if (class_exists(\Intervention\Image\ImageManager::class) && str_starts_with($disk->mimeType($targetPath), 'image/')) {
+            if (class_exists(ImageManager::class) && str_starts_with($disk->mimeType($targetPath), 'image/')) {
                 try {
-                    $manager = new \Intervention\Image\ImageManager(new \Intervention\Image\Drivers\Gd\Driver());
+                    $manager = new ImageManager(new Driver());
 
                     $thumbsDir = str_replace('\\', '/', dirname($targetPath));
                     if ($thumbsDir === '.')
@@ -167,7 +173,7 @@ class EditTouchFile extends EditRecord
                     $image->save($thumbFullPath);
 
                 } catch (\Exception $e) {
-                    \Log::error('Thumbnail generation failed on edit: ' . $e->getMessage());
+                    Log::error('Thumbnail generation failed on edit: ' . $e->getMessage());
                 }
             }
             // D. Handle Video Thumbnail (from hidden field)
@@ -187,7 +193,7 @@ class EditTouchFile extends EditRecord
                             // Match logic primarily based on CreateTouchFile
                             $nameNoExt = pathinfo($thumbFilename, PATHINFO_FILENAME);
                             $ext = pathinfo($thumbFilename, PATHINFO_EXTENSION);
-                            $slugged = \Illuminate\Support\Str::slug($nameNoExt) . '.' . $ext;
+                            $slugged = Str::slug($nameNoExt) . '.' . $ext;
 
                             // Check match against the temp filename uploaded
                             if ($slugged === $currentFileName) {
@@ -219,7 +225,7 @@ class EditTouchFile extends EditRecord
                                             $disk->put($thumbPath, $decodedImage);
                                         }
                                     } catch (\Exception $e) {
-                                        \Log::error('Video thumbnail save failed on edit: ' . $e->getMessage());
+                                        Log::error('Video thumbnail save failed on edit: ' . $e->getMessage());
                                     }
                                 }
                                 break;
@@ -245,14 +251,14 @@ class EditTouchFile extends EditRecord
         if (isset($data['name'])) {
             if ($this->record->is_folder) {
                 // For folders, just slugify the whole name
-                $data['name'] = \Illuminate\Support\Str::slug($data['name']);
+                $data['name'] = Str::slug($data['name']);
             } else {
                 // For files, preserve extension
                 $originalName = $data['name'];
                 $extension = pathinfo($originalName, PATHINFO_EXTENSION);
                 $nameNoExt = pathinfo($originalName, PATHINFO_FILENAME);
 
-                $sluggedName = \Illuminate\Support\Str::slug($nameNoExt);
+                $sluggedName = Str::slug($nameNoExt);
 
                 if ($extension) {
                     $data['name'] = $sluggedName . '.' . $extension;

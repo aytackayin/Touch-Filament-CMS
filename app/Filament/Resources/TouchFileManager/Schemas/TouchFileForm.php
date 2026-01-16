@@ -11,6 +11,8 @@ use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
+use Filament\Forms\Components\Placeholder;
+use Illuminate\Support\Str;
 
 class TouchFileForm
 {
@@ -88,7 +90,7 @@ class TouchFileForm
                                     ->preserveFilenames()
                                     ->getUploadedFileNameForStorageUsing(
                                         fn(TemporaryUploadedFile $file): string =>
-                                        (string) str($file->getClientOriginalName())
+                                        (string) Str::of($file->getClientOriginalName())
                                             ->beforeLast('.')
                                             ->slug()
                                             ->append('.' . $file->getClientOriginalExtension())
@@ -111,7 +113,7 @@ class TouchFileForm
                                     ->preserveFilenames()
                                     ->getUploadedFileNameForStorageUsing(
                                         fn(TemporaryUploadedFile $file): string =>
-                                        (string) str($file->getClientOriginalName())
+                                        (string) Str::of($file->getClientOriginalName())
                                             ->beforeLast('.')
                                             ->slug()
                                             ->append('.' . $file->getClientOriginalExtension())
@@ -123,7 +125,7 @@ class TouchFileForm
                                 Hidden::make('video_thumbnails_store')
                                     ->dehydrated(),
 
-                                \Filament\Forms\Components\Placeholder::make('video_thumbnail_handler')
+                                Placeholder::make('video_thumbnail_handler')
                                     ->hiddenLabel()
                                     ->view('filament.forms.components.video-thumbnail-handler'),
 

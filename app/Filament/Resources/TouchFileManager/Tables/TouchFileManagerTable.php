@@ -10,10 +10,10 @@ use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\ViewColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Filament\Tables\Columns\Layout\Stack;
-use Filament\Tables\Columns\Layout\Split;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -62,7 +62,7 @@ class TouchFileManagerTable
                 : null
             )
             ->columns($isGrid ? [
-                \Filament\Tables\Columns\Layout\Stack::make([
+                Stack::make([
                     ImageColumn::make('thumbnail_preview')
                         ->label('')
                         ->disk('attachments')
@@ -74,7 +74,7 @@ class TouchFileManagerTable
                             : url('/images/icons/file.png'))
                         ->extraImgAttributes(['class' => 'object-cover w-full h-32 rounded-t-xl']),
 
-                    \Filament\Tables\Columns\ViewColumn::make('details')
+                    ViewColumn::make('details')
                         ->view('filament.tables.columns.touch-file-grid-info'),
                 ])->space(0),
             ] : [

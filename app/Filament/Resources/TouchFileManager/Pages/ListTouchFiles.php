@@ -8,6 +8,13 @@ use App\Models\TouchFile;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Actions\Action;
+use Filament\Schemas\Components\Group;
+use Filament\Schemas\Components\Section;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Hidden;
+use Filament\Forms\Components\Select;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
 
 class ListTouchFiles extends ListRecords
 {
@@ -86,21 +93,21 @@ class ListTouchFiles extends ListRecords
                 ->form(function () {
                     $parentId = $this->parent_id;
                     return [
-                        \Filament\Schemas\Components\Group::make()
+                        Group::make()
                             ->schema([
-                                \Filament\Schemas\Components\Section::make('Create New Folder')
+                                Section::make('Create New Folder')
                                     ->schema([
-                                        \Filament\Forms\Components\TextInput::make('name')
+                                        TextInput::make('name')
                                             ->label('Folder Name')
                                             ->required()
                                             ->maxLength(255)
                                             ->placeholder('e.g., Documents'),
 
-                                        \Filament\Forms\Components\Hidden::make('parent_id')
+                                        Hidden::make('parent_id')
                                             ->default($parentId)
                                             ->visible((bool) $parentId),
 
-                                        \Filament\Forms\Components\Select::make('parent_id')
+                                        Select::make('parent_id')
                                             ->label('Parent Folder')
                                             ->options(function () {
                                                 return TouchFile::where('is_folder', true)
@@ -114,7 +121,7 @@ class ListTouchFiles extends ListRecords
                                             ->placeholder('Root (attachments)')
                                             ->visible(!$parentId),
 
-                                        \Filament\Forms\Components\Hidden::make('is_folder')
+                                        Hidden::make('is_folder')
                                             ->default(true),
                                     ])
                                     ->columns(2),
@@ -124,7 +131,7 @@ class ListTouchFiles extends ListRecords
                 })
                 ->action(function (array $data) {
                     $parentId = $data['parent_id'] ?? $this->parent_id;
-                    $name = \Illuminate\Support\Str::slug($data['name']);
+                    $name = Str::slug($data['name']);
                     $data['name'] = $name;
                     $data['parent_id'] = $parentId;
 
@@ -139,7 +146,7 @@ class ListTouchFiles extends ListRecords
                     $data['is_folder'] = true;
                     $data['path'] = $path;
 
-                    $disk = \Illuminate\Support\Facades\Storage::disk('attachments');
+                    $disk = Storage::disk('attachments');
                     if (!$disk->exists($path)) {
                         $disk->makeDirectory($path);
                     }
