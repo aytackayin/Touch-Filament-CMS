@@ -16,6 +16,33 @@ class ListTouchFiles extends ListRecords
     #[\Livewire\Attributes\Url]
     public ?string $parent_id = null;
 
+    public function getBreadcrumbs(): array
+    {
+        $breadcrumbs = [
+            static::getResource()::getUrl() => static::getResource()::getBreadcrumb(),
+        ];
+
+        if ($this->parent_id) {
+            $folder = TouchFile::find($this->parent_id);
+            $trail = [];
+            while ($folder) {
+                array_unshift($trail, [
+                    'url' => static::getResource()::getUrl('index', ['parent_id' => $folder->id]),
+                    'label' => $folder->name,
+                ]);
+                $folder = $folder->parent;
+            }
+
+            foreach ($trail as $crumb) {
+                $breadcrumbs[$crumb['url']] = $crumb['label'];
+            }
+        }
+
+        $breadcrumbs[] = $this->getBreadcrumb();
+
+        return $breadcrumbs;
+    }
+
     protected function getHeaderActions(): array
     {
         $currentFolder = $this->parent_id ? TouchFile::find($this->parent_id) : null;
