@@ -21,12 +21,24 @@ class TouchFileManagerTable
 {
     public static function configure(Table $table): Table
     {
+        $livewire = $table->getLivewire();
+        $isGrid = ($livewire && property_exists($livewire, 'view_type'))
+            ? $livewire->view_type === 'grid'
+            : true;
+
         return $table
-            ->contentGrid([
-                'md' => 2,
-                'xl' => 4,
-                '2xl' => 5,
-            ])
+            ->when(
+                $isGrid,
+                fn(Table $table) => $table
+                    ->contentGrid([
+                        'md' => 2,
+                        'xl' => 4,
+                        '2xl' => 5,
+                    ])
+                    ->extraAttributes([
+                        'class' => 'touch-file-manager-grid',
+                    ])
+            )
             ->modifyQueryUsing(function (Builder $query) use ($table) {
                 $livewire = $table->getLivewire();
                 if ($livewire && property_exists($livewire, 'parent_id')) {
@@ -41,17 +53,15 @@ class TouchFileManagerTable
                 return $query->orderBy('is_folder', 'desc')->orderBy('name', 'asc');
             })
             ->striped()
-            ->contentGrid([
-                'md' => 2,
-                'xl' => 4,
-                '2xl' => 5,
-            ])
             ->recordUrl(
                 fn(TouchFile $record): ?string => $record->is_folder
-                ? TouchFileManagerResource::getUrl('index', ['parent_id' => $record->id])
+                ? TouchFileManagerResource::getUrl('index', [
+                    'parent_id' => $record->id,
+                    'view_type' => $table->getLivewire()->view_type ?? 'grid',
+                ])
                 : null
             )
-            ->columns([
+            ->columns($isGrid ? [
                 \Filament\Tables\Columns\Layout\Stack::make([
                     ImageColumn::make('thumbnail_preview')
                         ->label('')
@@ -99,6 +109,45 @@ class TouchFileManagerTable
                 TextColumn::make('parent.name')
                     ->label('')
                     ->hidden(),
+            ] : [
+                ImageColumn::make('thumbnail_preview')
+                    ->label('')
+                    ->disk('attachments')
+                    ->state(fn(TouchFile $record) => $record->thumbnail_path)
+                    ->height(40)
+                    ->width(40)
+                    ->defaultImageUrl(fn(TouchFile $record) => $record->is_folder
+                        ? url('/images/icons/folder.png')
+                        : url('/images/icons/file.png'))
+                    ->extraImgAttributes(['class' => 'object-cover rounded']),
+
+                TextColumn::make('name')
+                    ->label('Name')
+                    ->searchable()
+                    ->weight('bold')
+                    ->wrap()
+                    ->color(fn(TouchFile $record) => $record->is_folder ? 'warning' : null)
+                    ->description(fn(TouchFile $record) => $record->is_folder ? '' : $record->human_size),
+
+                TextColumn::make('type')
+                    ->label('Type')
+                    ->badge()
+                    ->color(fn(string $state): string => match ($state) {
+                        'image' => 'success',
+                        'video' => 'info',
+                        'document' => 'primary',
+                        'archive' => 'warning',
+                        'spreadsheet' => 'success',
+                        'presentation' => 'danger',
+                        default => 'gray',
+                    })
+                    ->formatStateUsing(fn(string $state): string => ucfirst($state)),
+
+                TextColumn::make('created_at')
+                    ->label('Date')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(),
             ])
             ->filters([
                 SelectFilter::make('type')

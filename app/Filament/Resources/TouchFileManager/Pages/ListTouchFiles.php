@@ -13,13 +13,23 @@ class ListTouchFiles extends ListRecords
 {
     protected static string $resource = TouchFileManagerResource::class;
 
+    public function getTableExtraAttributes(): array
+    {
+        return [
+            'class' => 'touch-file-manager-container ' . ($this->view_type === 'grid' ? 'is-grid-view' : 'is-list-view'),
+        ];
+    }
+
     #[\Livewire\Attributes\Url]
     public ?string $parent_id = null;
+
+    #[\Livewire\Attributes\Url]
+    public string $view_type = 'grid';
 
     public function getBreadcrumbs(): array
     {
         $breadcrumbs = [
-            static::getResource()::getUrl() => static::getResource()::getBreadcrumb(),
+            static::getResource()::getUrl('index', ['view_type' => $this->view_type]) => static::getResource()::getBreadcrumb(),
         ];
 
         if ($this->parent_id) {
@@ -27,7 +37,10 @@ class ListTouchFiles extends ListRecords
             $trail = [];
             while ($folder) {
                 array_unshift($trail, [
-                    'url' => static::getResource()::getUrl('index', ['parent_id' => $folder->id]),
+                    'url' => static::getResource()::getUrl('index', [
+                        'parent_id' => $folder->id,
+                        'view_type' => $this->view_type
+                    ]),
                     'label' => $folder->name,
                 ]);
                 $folder = $folder->parent;
@@ -49,7 +62,7 @@ class ListTouchFiles extends ListRecords
         $upUrl = null;
 
         if ($currentFolder) {
-            $upParams = [];
+            $upParams = ['view_type' => $this->view_type];
             if ($currentFolder->parent_id) {
                 $upParams['parent_id'] = $currentFolder->parent_id;
             }
@@ -143,7 +156,22 @@ class ListTouchFiles extends ListRecords
                 ->icon('heroicon-o-arrow-up-tray')
                 ->url(fn(): string => TouchFileManagerResource::getUrl('create', [
                     'parent_id' => $this->parent_id,
+                    'view_type' => $this->view_type,
                 ])),
+
+            Action::make('toggleView')
+                ->label($this->view_type === 'grid' ? 'List View' : 'Grid View')
+                ->icon($this->view_type === 'grid' ? 'heroicon-o-list-bullet' : 'heroicon-o-squares-2x2')
+                ->color('gray')
+                ->size('xs')
+                ->action(function () {
+                    $newView = $this->view_type === 'grid' ? 'list' : 'grid';
+
+                    return redirect(static::getResource()::getUrl('index', [
+                        'parent_id' => $this->parent_id,
+                        'view_type' => $newView,
+                    ]));
+                }),
         ];
     }
 }
