@@ -16,13 +16,30 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Storage;
 
+use Illuminate\Database\Eloquent\Builder;
+
 class TouchFileManagerTable
 {
     public static function configure(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(function (Builder $query) use ($table) {
+                $livewire = $table->getLivewire();
+                if ($livewire && property_exists($livewire, 'parent_id')) {
+                    if ($livewire->parent_id) {
+                        $query->where('parent_id', $livewire->parent_id);
+                    } else {
+                        $query->whereNull('parent_id');
+                    }
+                }
+                return $query;
+            })
             ->striped()
-            ->recordUrl(null)
+            ->recordUrl(
+                fn(TouchFile $record): ?string => $record->is_folder
+                ? TouchFileManagerResource::getUrl('index', ['parent_id' => $record->id])
+                : null
+            )
             ->columns([
                 ImageColumn::make('thumbnail_preview')
                     ->label('Preview')

@@ -13,39 +13,92 @@ class ListTouchFiles extends ListRecords
 {
     protected static string $resource = TouchFileManagerResource::class;
 
+    #[\Livewire\Attributes\Url]
+    public ?string $parent_id = null;
+
     protected function getHeaderActions(): array
     {
+        $currentFolder = $this->parent_id ? TouchFile::find($this->parent_id) : null;
+        $upUrl = null;
+
+        if ($currentFolder) {
+            $upParams = [];
+            if ($currentFolder->parent_id) {
+                $upParams['parent_id'] = $currentFolder->parent_id;
+            }
+            $upUrl = TouchFileManagerResource::getUrl('index', $upParams);
+        }
+
         return [
+            Actions\Action::make('up')
+                ->label('Up')
+                ->icon('heroicon-o-arrow-uturn-left')
+                ->color('gray')
+                ->visible((bool) $this->parent_id)
+                ->url($upUrl)
+                ->size('xs'),
+
             Action::make('createFolder')
                 ->label('New Folder')
                 ->icon('heroicon-o-folder-plus')
                 ->color('warning')
                 ->size('xs')
-                ->form(TouchFileForm::folderSchema()->getComponents())
+                ->form(function () {
+                    $parentId = $this->parent_id;
+                    return [
+                        \Filament\Schemas\Components\Group::make()
+                            ->schema([
+                                \Filament\Schemas\Components\Section::make('Create New Folder')
+                                    ->schema([
+                                        \Filament\Forms\Components\TextInput::make('name')
+                                            ->label('Folder Name')
+                                            ->required()
+                                            ->maxLength(255)
+                                            ->placeholder('e.g., Documents'),
+
+                                        \Filament\Forms\Components\Hidden::make('parent_id')
+                                            ->default($parentId)
+                                            ->visible((bool) $parentId),
+
+                                        \Filament\Forms\Components\Select::make('parent_id')
+                                            ->label('Parent Folder')
+                                            ->options(function () {
+                                                return TouchFile::where('is_folder', true)
+                                                    ->orderBy('name')
+                                                    ->get()
+                                                    ->mapWithKeys(function ($folder) {
+                                                        return [$folder->id => $folder->full_path];
+                                                    });
+                                            })
+                                            ->searchable()
+                                            ->placeholder('Root (attachments)')
+                                            ->visible(!$parentId),
+
+                                        \Filament\Forms\Components\Hidden::make('is_folder')
+                                            ->default(true),
+                                    ])
+                                    ->columns(2),
+                            ])
+                            ->columnSpan(['lg' => 3]),
+                    ];
+                })
                 ->action(function (array $data) {
-                    $parentId = $data['parent_id'] ?? null;
-                    // Slugify folder name
+                    $parentId = $data['parent_id'] ?? $this->parent_id;
                     $name = \Illuminate\Support\Str::slug($data['name']);
                     $data['name'] = $name;
+                    $data['parent_id'] = $parentId;
 
-                    // Calculate Path
                     $path = $name;
                     if ($parentId) {
                         $parent = TouchFile::find($parentId);
                         if ($parent) {
-                            // Use recursive relationship or stored path
-                            // full_path attribute relies on parent relationship
                             $path = $parent->full_path . '/' . $name;
                         }
                     }
 
                     $data['is_folder'] = true;
-                    $data['type'] = null;
-                    $data['mime_type'] = null;
-                    $data['size'] = null;
                     $data['path'] = $path;
 
-                    // Create physical folder
                     $disk = \Illuminate\Support\Facades\Storage::disk('attachments');
                     if (!$disk->exists($path)) {
                         $disk->makeDirectory($path);
@@ -60,7 +113,10 @@ class ListTouchFiles extends ListRecords
                 ->tooltip('Upload new files')
                 ->color('success')
                 ->size('xs')
-                ->icon('heroicon-o-arrow-up-tray'),
+                ->icon('heroicon-o-arrow-up-tray')
+                ->url(fn(): string => TouchFileManagerResource::getUrl('create', [
+                    'parent_id' => $this->parent_id,
+                ])),
         ];
     }
 }

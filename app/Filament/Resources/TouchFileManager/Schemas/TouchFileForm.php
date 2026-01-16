@@ -39,6 +39,9 @@ class TouchFileForm
                                             });
                                     })
                                     ->searchable()
+                                    ->default(fn() => request('parent_id'))
+                                    ->visible(fn($operation) => $operation === 'edit' || !request()->filled('parent_id'))
+                                    ->dehydrated()
                                     ->placeholder('Root (attachments)')
                                     ->helperText('Select a parent folder or leave empty for root directory'),
 
