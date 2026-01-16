@@ -1,1 +1,19 @@
 @import "tailwindcss";
+
+/* TEST: Eğer bu mavi çizgiyi görüyorsanız CSS dosyanız aktif demektir */
+/* .is-grid-view .fi-ta-record { border: 2px solid blue !important; } */
+
+.is-grid-view .fi-ta-selection-cell {
+    position: absolute !important;
+    top: 12px !important;
+    right: 12px !important;
+    left: auto !important;
+    z-index: 100 !important;
+    background: white !important;
+    border-radius: 6px !important;
+    display: flex !important;
+}
+
+.is-grid-view article {
+    position: relative !important;
+}

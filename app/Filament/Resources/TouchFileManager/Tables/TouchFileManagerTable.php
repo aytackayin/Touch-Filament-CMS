@@ -67,48 +67,16 @@ class TouchFileManagerTable
                         ->label('')
                         ->disk('attachments')
                         ->state(fn(TouchFile $record) => $record->thumbnail_path)
-                        ->height(120) // Üstte büyük bir önizleme
+                        ->height(140)
                         ->width('100%')
                         ->defaultImageUrl(fn(TouchFile $record) => $record->is_folder
                             ? url('/images/icons/folder.png')
                             : url('/images/icons/file.png'))
                         ->extraImgAttributes(['class' => 'object-cover w-full h-32 rounded-t-xl']),
 
-                    \Filament\Tables\Columns\Layout\Split::make([
-                        TextColumn::make('name')
-                            ->label('')
-                            ->searchable()
-                            ->wrap()
-                            ->weight('bold')
-                            ->size('sm')
-                            ->description(fn(TouchFile $record) => $record->is_folder ? '' : $record->human_size)
-                            ->color(fn(TouchFile $record) => $record->is_folder ? 'warning' : null)
-                            ->grow(),
-
-                        TextColumn::make('type')
-                            ->label('')
-                            ->badge()
-                            ->color(fn(string $state): string => match ($state) {
-                                'image' => 'success',
-                                'video' => 'info',
-                                'document' => 'primary',
-                                'archive' => 'warning',
-                                'spreadsheet' => 'success',
-                                'presentation' => 'danger',
-                                default => 'gray',
-                            })
-                            ->formatStateUsing(fn(string $state): string => ucfirst($state))
-                            ->toggleable(),
-                    ])->extraAttributes(['class' => 'p-3 items-center']),
-                ]),
-
-                // Gizli kolonlar (Arama ve Filtreleme için gerekli)
-                TextColumn::make('human_size')
-                    ->label('')
-                    ->hidden(),
-                TextColumn::make('parent.name')
-                    ->label('')
-                    ->hidden(),
+                    \Filament\Tables\Columns\ViewColumn::make('details')
+                        ->view('filament.tables.columns.touch-file-grid-info'),
+                ])->space(0),
             ] : [
                 ImageColumn::make('thumbnail_preview')
                     ->label('')
