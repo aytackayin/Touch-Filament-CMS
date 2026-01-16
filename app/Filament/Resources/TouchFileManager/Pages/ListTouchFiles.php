@@ -33,10 +33,13 @@ class ListTouchFiles extends ListRecords
     #[\Livewire\Attributes\Url]
     public string $view_type = 'grid';
 
+    #[\Livewire\Attributes\Url]
+    public ?string $iframe = null;
+
     public function getBreadcrumbs(): array
     {
         $breadcrumbs = [
-            static::getResource()::getUrl('index', ['view_type' => $this->view_type]) => static::getResource()::getBreadcrumb(),
+            static::getResource()::getUrl('index', ['view_type' => $this->view_type, 'iframe' => $this->iframe]) => static::getResource()::getBreadcrumb(),
         ];
 
         if ($this->parent_id) {
@@ -46,7 +49,8 @@ class ListTouchFiles extends ListRecords
                 array_unshift($trail, [
                     'url' => static::getResource()::getUrl('index', [
                         'parent_id' => $folder->id,
-                        'view_type' => $this->view_type
+                        'view_type' => $this->view_type,
+                        'iframe' => $this->iframe,
                     ]),
                     'label' => $folder->name,
                 ]);
@@ -69,7 +73,7 @@ class ListTouchFiles extends ListRecords
         $upUrl = null;
 
         if ($currentFolder) {
-            $upParams = ['view_type' => $this->view_type];
+            $upParams = ['view_type' => $this->view_type, 'iframe' => $this->iframe];
             if ($currentFolder->parent_id) {
                 $upParams['parent_id'] = $currentFolder->parent_id;
             }
@@ -164,6 +168,7 @@ class ListTouchFiles extends ListRecords
                 ->url(fn(): string => TouchFileManagerResource::getUrl('create', [
                     'parent_id' => $this->parent_id,
                     'view_type' => $this->view_type,
+                    'iframe' => $this->iframe,
                 ])),
 
             Action::make('toggleView')
@@ -177,6 +182,7 @@ class ListTouchFiles extends ListRecords
                     return redirect(static::getResource()::getUrl('index', [
                         'parent_id' => $this->parent_id,
                         'view_type' => $newView,
+                        'iframe' => $this->iframe,
                     ]));
                 }),
         ];
