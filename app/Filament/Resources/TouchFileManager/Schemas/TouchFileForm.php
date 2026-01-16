@@ -56,6 +56,7 @@ class TouchFileForm
                                 FileUpload::make('files')
                                     ->label('Upload Files')
                                     ->multiple()
+                                    ->panelLayout('grid')
                                     ->disk('attachments')
                                     ->directory('temp')
                                     ->acceptedFileTypes([

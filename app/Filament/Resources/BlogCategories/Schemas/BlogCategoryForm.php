@@ -50,6 +50,7 @@ class BlogCategoryForm
                                     ->columnSpanFull(),
                                 FileUpload::make('attachments')
                                     ->multiple()
+                                    ->panelLayout('grid')
                                     ->disk('attachments')
                                     ->directory(function ($record) {
                                         if ($record) {
