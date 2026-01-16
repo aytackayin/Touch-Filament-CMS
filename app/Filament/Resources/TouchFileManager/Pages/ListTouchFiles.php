@@ -79,7 +79,7 @@ class ListTouchFiles extends ListRecords
         return [
             Actions\Action::make('up')
                 ->label('Up')
-                ->icon('heroicon-o-arrow-uturn-left')
+                ->icon('heroicon-m-arrow-uturn-up')
                 ->color('gray')
                 ->visible((bool) $this->parent_id)
                 ->url($upUrl)

@@ -63,29 +63,30 @@ class ListBlogCategories extends ListRecords
     {
         $createParams = $this->parent_id ? ['parent_id' => $this->parent_id] : [];
 
-        $actions = [
+        if ($this->parent_id) {
+            $parent = BlogCategory::find($this->parent_id);
+            $upParams = ($parent && $parent->parent_id) ? ['parent_id' => $parent->parent_id] : [];
+
+            $actions = [
+                Actions\Action::make('up')
+                    ->label('')
+                    ->tooltip(__('button.parent_category'))
+                    ->color('gray')
+                    ->size('xs')
+                    ->translateLabel()
+                    ->icon('heroicon-m-arrow-uturn-up')
+                    ->url(static::getResource()::getUrl('index', $upParams))
+            ];
+        }
+
+        $actions[] =
             Actions\CreateAction::make()
                 ->label('')
                 ->tooltip(__('button.new'))
                 ->color('success')
                 ->size('xs')
                 ->icon('heroicon-m-squares-plus')
-                ->url(static::getResource()::getUrl('create', $createParams)),
-        ];
-
-        if ($this->parent_id) {
-            $parent = BlogCategory::find($this->parent_id);
-            $upParams = ($parent && $parent->parent_id) ? ['parent_id' => $parent->parent_id] : [];
-
-            $actions[] = Actions\Action::make('up')
-                ->label('')
-                ->tooltip(__('button.parent_category'))
-                ->color('gray')
-                ->size('xs')
-                ->translateLabel()
-                ->icon('heroicon-m-arrow-uturn-up')
-                ->url(static::getResource()::getUrl('index', $upParams));
-        }
+                ->url(static::getResource()::getUrl('create', $createParams));
 
         return $actions;
     }

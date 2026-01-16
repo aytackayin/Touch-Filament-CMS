@@ -65,7 +65,7 @@ class TouchFileManagerTable
             ->columns($isGrid ? [
                 Stack::make([
                     ViewColumn::make('details')
-                        ->view('filament.tables.columns.touch-file-grid-info'),
+                        ->view('filament.tables.columns.touch-file-grid-info')->searchable(['name', 'type']),
                 ])->space(0),
             ] : [
                 ImageColumn::make('thumbnail_preview')

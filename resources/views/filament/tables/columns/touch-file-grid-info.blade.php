@@ -13,7 +13,7 @@
     <img src="{{ $imageUrl }}" alt="{{ $record->name }}" class="touch-file-bg"
         onerror="this.src='{{ $isFolder }}'; this.classList.add('is-icon')">
 
-    <div class="touch-file-overlay">
+    <div class="touch-file-{{ $isFolder ? 'folder' : 'overlay bg-white dark:bg-black' }}">
         <div class="touch-file-name" title="{{ $record->name }}">
             {{ $record->name }}
         </div>
@@ -78,9 +78,27 @@
         z-index: 5;
 
         padding: 12px;
-        background-color: rgba(0, 0, 0, 0.5);
+    }
 
-        color: #fff;
+    .touch-file-folder {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        z-index: 5;
+        padding: 12px;
+    }
+
+    /* Aydınlık mod (Varsayılan) */
+    .touch-file-overlay {
+        background-color: #ffffff80;
+        /* Beyaz */
+    }
+
+    /* Karanlık mod */
+    .dark .touch-file-overlay {
+        background-color: #00000081;
+        /* Siyah */
     }
 
     /* === TEXT === */
@@ -90,6 +108,7 @@
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
+        text-align: center;
     }
 
     .touch-file-info {
@@ -111,13 +130,8 @@
         width: 20px !important;
         height: 20px !important;
         border-radius: 6px !important;
-        background-color: rgba(0, 0, 0, 0.6) !important;
-        border: 2px solid rgba(255, 255, 255, 0.5) !important;
-        backdrop-filter: blur(10px) !important;
         margin: 0 !important;
         cursor: pointer !important;
-        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5) !important;
     }
 
     body .touch-file-manager-grid .fi-ta-record .fi-ta-actions .fi-text-color-900 {
