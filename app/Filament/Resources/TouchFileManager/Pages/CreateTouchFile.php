@@ -14,6 +14,35 @@ class CreateTouchFile extends CreateRecord
     #[\Livewire\Attributes\Url]
     public ?string $parent_id = null;
 
+    public function getBreadcrumbs(): array
+    {
+        $breadcrumbs = [
+            static::getResource()::getUrl() => static::getResource()::getBreadcrumb(),
+        ];
+
+        $parentId = $this->parent_id;
+
+        if ($parentId) {
+            $folder = TouchFile::find($parentId);
+            $trail = [];
+            while ($folder) {
+                array_unshift($trail, [
+                    'url' => static::getResource()::getUrl('index', ['parent_id' => $folder->id]),
+                    'label' => $folder->name,
+                ]);
+                $folder = $folder->parent;
+            }
+
+            foreach ($trail as $crumb) {
+                $breadcrumbs[$crumb['url']] = $crumb['label'];
+            }
+        }
+
+        $breadcrumbs[] = $this->getBreadcrumb();
+
+        return $breadcrumbs;
+    }
+
     public ?string $previousUrl = null;
 
     public function mount(): void

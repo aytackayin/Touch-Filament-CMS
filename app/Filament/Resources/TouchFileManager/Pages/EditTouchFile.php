@@ -14,6 +14,36 @@ class EditTouchFile extends EditRecord
     #[\Livewire\Attributes\Url]
     public ?string $parent_id = null;
 
+    public function getBreadcrumbs(): array
+    {
+        $breadcrumbs = [
+            static::getResource()::getUrl() => static::getResource()::getBreadcrumb(),
+        ];
+
+        // For editing, we usually want to show the path ending at the parent folder
+        $parentId = $this->parent_id ?? ($this->record ? $this->record->parent_id : null);
+
+        if ($parentId) {
+            $folder = \App\Models\TouchFile::find($parentId);
+            $trail = [];
+            while ($folder) {
+                array_unshift($trail, [
+                    'url' => static::getResource()::getUrl('index', ['parent_id' => $folder->id]),
+                    'label' => $folder->name,
+                ]);
+                $folder = $folder->parent;
+            }
+
+            foreach ($trail as $crumb) {
+                $breadcrumbs[$crumb['url']] = $crumb['label'];
+            }
+        }
+
+        $breadcrumbs[] = $this->getBreadcrumb();
+
+        return $breadcrumbs;
+    }
+
     protected function getHeaderActions(): array
     {
         return [
