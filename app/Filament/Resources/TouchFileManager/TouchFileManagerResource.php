@@ -16,6 +16,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 use Illuminate\Support\HtmlString;
+use Illuminate\Support\Facades\Storage;
 
 class TouchFileManagerResource extends Resource
 {
@@ -36,13 +37,42 @@ class TouchFileManagerResource extends Resource
 
     public static function getGlobalSearchResultTitle(Model $record): string
     {
-        $icon = $record->is_folder ? '📁' : '📄';
-        return $icon . ' ' . $record->name;
+        return $record->name;
     }
 
     public static function getGlobalSearchResultDetails(Model $record): array
     {
         $details = [];
+
+        // 1. Thumbnail or Icon (Moved to Details because Title escapes HTML)
+        $imageUrl = '';
+        if ($record->is_folder) {
+            $imageUrl = url('/assets/icons/colorful-icons/folder.svg');
+        } else {
+            if ($record->thumbnail_path) {
+                $imageUrl = Storage::disk('attachments')->url($record->thumbnail_path);
+            } else {
+                $isMedia = in_array($record->type, ['image', 'video'])
+                    || Str::startsWith($record->mime_type ?? '', 'audio/');
+
+                if ($isMedia) {
+                    $imageUrl = url('/assets/icons/colorful-icons/file.svg');
+                } else {
+                    $ext = strtolower($record->extension);
+                    $imageUrl = $ext
+                        ? url("/assets/icons/colorful-icons/{$ext}.svg")
+                        : url('/assets/icons/colorful-icons/file.svg');
+                }
+            }
+        }
+
+        $details[] = new HtmlString('
+            <div style="width: 48px; height: 48px; border-radius: 8px; overflow: hidden; background: rgba(156, 163, 175, 0.1); display: flex; align-items: center; justify-content: center; border: 1px solid rgba(156, 163, 175, 0.1); margin-top: 4px; margin-bottom: 4px;">
+                <img src="' . $imageUrl . '" 
+                     style="width: 100%; height: 100%; object-fit: ' . ($record->thumbnail_path ? 'cover' : 'contain; padding: 6px') . ';"
+                     onerror="this.src=\'' . url('/assets/icons/colorful-icons/grid-file.svg') . '\'">
+            </div>
+        ');
 
         if (!$record->is_folder) {
             if ($record->alt) {
