@@ -140,7 +140,7 @@ class TouchFileManagerTable
             ->columns($isGrid ? [
                 Stack::make([
                     ViewColumn::make('details')
-                        ->view('filament.tables.columns.touch-file-grid-info')->searchable(['name', 'type', 'alt']),
+                        ->view('filament.tables.columns.touchfilemanager-grid')->searchable(['name', 'type', 'alt']),
                 ])->space(0),
             ] : [
                 ImageColumn::make('thumbnail_preview')
@@ -275,7 +275,7 @@ class TouchFileManagerTable
                     ->label('')
                     ->tooltip('View')
                     ->hidden(fn($record) => !$record || !in_array($record->type, ['image', 'video']) || $record->id === 0)
-                    ->modalContent(fn($record) => $record ? view('filament.modals.file-preview', [
+                    ->modalContent(fn($record) => $record ? view('filament.modals.touchfilemanager-preview', [
                         'record' => $record,
                         'url' => Storage::disk('attachments')->url($record->path),
                     ]) : null)
