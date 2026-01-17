@@ -150,12 +150,35 @@ class TouchFileManagerTable
                     ->defaultImageUrl(function ($record) {
                         if (!$record)
                             return null;
+
+                        // Fake "Up" Record
                         if ($record->id === 0) {
                             return url('/assets/icons/colorful-icons/open-folder.svg');
                         }
-                        return $record->is_folder
-                            ? url('/assets/icons/colorful-icons/folder.svg')
-                            : url('/assets/icons/colorful-icons/file.svg');
+
+                        // Folder
+                        if ($record->is_folder) {
+                            return url('/assets/icons/colorful-icons/folder.svg');
+                        }
+
+                        // Check exclusions: Image, Video, Audio
+                        // "Music" usually implies audio mime types.
+                        $isMedia = in_array($record->type, ['image', 'video'])
+                            || str_starts_with($record->mime_type ?? '', 'audio/');
+
+                        if ($isMedia) {
+                            return url('/assets/icons/colorful-icons/file.svg');
+                        }
+
+                        // For other files, use extension-based icon
+                        // Ex: zip -> zip.svg
+                        $ext = strtolower($record->extension);
+                        if ($ext) {
+                            return url("/assets/icons/colorful-icons/{$ext}.svg");
+                        }
+
+                        // Fallback
+                        return url('/assets/icons/colorful-icons/file.svg');
                     })
                     ->extraImgAttributes(['class' => 'object-cover object-center rounded-lg', 'style' => 'width: 60px; height: 60px; border-radius: 10px;']),
 

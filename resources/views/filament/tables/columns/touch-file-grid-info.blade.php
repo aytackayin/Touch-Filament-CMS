@@ -6,19 +6,42 @@
     if ($isUp) {
         $imageUrl = url('/assets/icons/colorful-icons/grid-open-folder.svg');
         $name = 'Up';
+        $fallbackUrl = '';
     } else {
-        $imageUrl = $record->thumbnail_path
-            ? \Illuminate\Support\Facades\Storage::disk('attachments')->url($record->thumbnail_path)
-            : ($isFolder
-                ? url('/assets/icons/colorful-icons/grid-folder.svg')
-                : url('/assets/icons/colorful-icons/grid-file.svg'));
+        // Determine Image URL
+        if ($record->thumbnail_path) {
+            $imageUrl = \Illuminate\Support\Facades\Storage::disk('attachments')->url($record->thumbnail_path);
+        } else {
+            if ($isFolder) {
+                $imageUrl = url('/assets/icons/colorful-icons/grid-folder.svg');
+            } else {
+                // Check exclusions: Image, Video, Audio
+                $isMedia = in_array($record->type, ['image', 'video'])
+                    || \Illuminate\Support\Str::startsWith($record->mime_type ?? '', 'audio/');
+
+                if ($isMedia) {
+                    $imageUrl = url('/assets/icons/colorful-icons/grid-file.svg');
+                } else {
+                    $ext = strtolower($record->extension);
+                    $imageUrl = $ext
+                        ? url("/assets/icons/colorful-icons/grid-{$ext}.svg")
+                        : url('/assets/icons/colorful-icons/grid-file.svg');
+                }
+            }
+        }
+
         $name = $record->name;
+
+        // Determine Fallback URL for Error
+        $fallbackUrl = $isFolder
+            ? url('/assets/icons/colorful-icons/grid-folder.svg')
+            : url('/assets/icons/colorful-icons/grid-file.svg');
     }
 @endphp
 
 <div class="touch-file-card">
     <img src="{{ $imageUrl }}" alt="{{ $name }}" class="touch-file-bg {{ $isUp ? 'is-icon' : '' }}"
-        onerror="this.src='{{ $isFolder && !$isUp ? url('/assets/icons/colorful-icons/grid-folder.svg') : '' }}'; this.classList.add('is-icon')">
+        onerror="this.src='{{ $fallbackUrl }}'; this.classList.add('is-icon')">
 
     <div class="touch-file-{{ $isFolder ? 'folder' : 'overlay bg-white dark:bg-black' }}">
         <div class="touch-file-name" title="{{ $name }}">

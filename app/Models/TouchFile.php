@@ -165,6 +165,11 @@ class TouchFile extends Model
         return null;
     }
 
+    public function getExtensionAttribute(): string
+    {
+        return pathinfo($this->path, PATHINFO_EXTENSION);
+    }
+
     /**
      * Delete file from storage when model is deleted
      */
