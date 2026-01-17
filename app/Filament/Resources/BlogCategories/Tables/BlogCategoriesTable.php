@@ -25,74 +25,79 @@ class BlogCategoriesTable
             ->paginatedWhileReordering()
             ->recordUrl(null)
             ->columns([
-                    TextColumn::make('title')
-                        ->searchable(['title', 'description'])
-                        ->icon('heroicon-m-squares-2x2')
-                        ->sortable()
-                        ->color('primary')
-                        ->description(fn(BlogCategory $record): HtmlString => $record->description ? new HtmlString('<span style="font-size: 12px; line-height: 1;" class="text-gray-500 dark:text-gray-400">' . Str::limit(strip_tags($record->description), 100) . '</span>') : new HtmlString(''))
-                        ->wrap()
-                        ->url(fn($record) => BlogCategoryResource::getUrl('index', ['parent_id' => $record->id])),
-                    TextColumn::make('language.name')
-                        ->toggleable(isToggledHiddenByDefault: true),
-                    TextColumn::make('parent.title')
-                        ->label('Parent Category')
-                        ->sortable()
-                        ->toggleable(isToggledHiddenByDefault: true),
-                    IconColumn::make('is_published')
-                        ->size(IconSize::Medium)
-                        ->alignCenter(true)
-                        ->boolean()
-                        ->action(function ($record) {
-                            $record->is_published = !$record->is_published;
-                            $record->save();
-                        }),
-                    TextColumn::make('created_at')
-                        ->dateTime()
-                        ->sortable()
-                        ->toggleable(isToggledHiddenByDefault: true),
-                ])
+                TextColumn::make('title')
+                    ->searchable(['title', 'description'])
+                    ->icon('heroicon-m-squares-2x2')
+                    ->sortable()
+                    ->color('primary')
+                    ->description(fn(BlogCategory $record): HtmlString => $record->description ? new HtmlString('<span style="font-size: 12px; line-height: 1;" class="text-gray-500 dark:text-gray-400">' . Str::limit(strip_tags($record->description), 100) . '</span>') : new HtmlString(''))
+                    ->wrap()
+                    ->url(fn($record) => BlogCategoryResource::getUrl('index', ['parent_id' => $record->id])),
+                TextColumn::make('language.name')
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('tags')
+                    ->badge()
+                    ->separator(',')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('parent.title')
+                    ->label('Parent Category')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                IconColumn::make('is_published')
+                    ->size(IconSize::Medium)
+                    ->alignCenter(true)
+                    ->boolean()
+                    ->action(function ($record) {
+                        $record->is_published = !$record->is_published;
+                        $record->save();
+                    }),
+                TextColumn::make('created_at')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+            ])
             ->reorderable('sort')
             ->defaultSort('sort', 'asc')
             ->filters([
-                    SelectFilter::make('language_id')
-                        ->label(__('label.language'))
-                        ->relationship('language', 'name'),
-                    SelectFilter::make('is_published')
-                        ->label('Publication Status')
-                        ->options([
-                                '1' => 'Published',
-                                '0' => 'Unpublished',
-                            ]),
-                ])
+                SelectFilter::make('language_id')
+                    ->label(__('label.language'))
+                    ->relationship('language', 'name'),
+                SelectFilter::make('is_published')
+                    ->label('Publication Status')
+                    ->options([
+                        '1' => 'Published',
+                        '0' => 'Unpublished',
+                    ]),
+            ])
             ->recordActions([
-                    Action::make('edit')
-                        ->url(fn($record) => BlogCategoryResource::getUrl('edit', ['record' => $record]))
-                        ->icon('heroicon-o-pencil-square')
-                        ->label('')
-                        ->tooltip(__('button.edit')),
-                    DeleteAction::make()
-                        ->label('')
+                Action::make('edit')
+                    ->url(fn($record) => BlogCategoryResource::getUrl('edit', ['record' => $record]))
+                    ->icon('heroicon-o-pencil-square')
+                    ->label('')
+                    ->tooltip(__('button.edit')),
+                DeleteAction::make()
+                    ->label('')
+                    ->icon('heroicon-o-trash')
+                    ->color('danger')
+                    ->tooltip(__('button.delete'))
+                    ->requiresConfirmation()
+                    ->action(fn($record) => $record->delete()),
+            ])
+            ->bulkActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make()
+                        ->label('Delete selected')
                         ->icon('heroicon-o-trash')
                         ->color('danger')
-                        ->tooltip(__('button.delete'))
                         ->requiresConfirmation()
-                        ->action(fn($record) => $record->delete()),
-                ])
-            ->bulkActions([
-                    BulkActionGroup::make([
-                        DeleteBulkAction::make()
-                            ->label('Delete selected')
-                            ->icon('heroicon-o-trash')
-                            ->color('danger')
-                            ->requiresConfirmation()
-                            ->action(function ($records) {
-                                $deletionService = app(BlogCategoryDeletionService::class);
-                                foreach ($records as $record) {
-                                    $deletionService->delete($record);
-                                }
-                            }),
-                    ]),
-                ]);
+                        ->action(function ($records) {
+                            $deletionService = app(BlogCategoryDeletionService::class);
+                            foreach ($records as $record) {
+                                $deletionService->delete($record);
+                            }
+                        }),
+                ]),
+            ]);
     }
 }

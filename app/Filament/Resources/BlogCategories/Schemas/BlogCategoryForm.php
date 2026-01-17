@@ -48,6 +48,8 @@ class BlogCategoryForm
                                 Textarea::make('description')
                                     ->maxLength(65535)
                                     ->columnSpanFull(),
+                                \Filament\Forms\Components\TagsInput::make('tags')
+                                    ->columnSpanFull(),
                                 FileUpload::make('attachments')
                                     ->multiple()
                                     ->panelLayout('grid')

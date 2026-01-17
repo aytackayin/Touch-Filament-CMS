@@ -62,6 +62,7 @@ class TouchFileManagerTable
                         'parent_id',
                         'is_folder',
                         'metadata',
+                        'tags',
                         'created_at',
                         'updated_at'
                     ];
@@ -84,6 +85,7 @@ class TouchFileManagerTable
                             ? as parent_id, 
                             1 as is_folder, 
                             null as metadata, 
+                            null as tags,
                             null as created_at, 
                             null as updated_at
                         ", [$parentId]);
@@ -221,6 +223,12 @@ class TouchFileManagerTable
                     })
                     ->formatStateUsing(fn(string $state, $record) => $record?->id === 0 ? '' : ucfirst($state))
                     ->extraAttributes(fn($record) => $record?->id === 0 ? ['style' => 'display: none !important;'] : []),
+
+                TextColumn::make('tags')
+                    ->badge()
+                    ->separator(',')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('created_at')
                     ->label('Date')

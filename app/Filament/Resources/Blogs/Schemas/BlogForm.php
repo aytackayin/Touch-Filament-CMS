@@ -59,6 +59,8 @@ class BlogForm
                                 TinyEditor::make('content')
                                     ->columnSpanFull()
                                     ->required(),
+                                \Filament\Forms\Components\TagsInput::make('tags')
+                                    ->columnSpanFull(),
                                 FileUpload::make('attachments')
                                     ->multiple()
                                     ->disk('attachments')

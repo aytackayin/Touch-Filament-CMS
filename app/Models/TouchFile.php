@@ -20,12 +20,14 @@ class TouchFile extends Model
         'parent_id',
         'is_folder',
         'metadata',
+        'tags',
     ];
 
     protected $casts = [
         'is_folder' => 'boolean',
         'size' => 'integer',
         'metadata' => 'array',
+        'tags' => 'array',
     ];
 
     /**

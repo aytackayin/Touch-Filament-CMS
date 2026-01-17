@@ -25,6 +25,7 @@ class BlogCategory extends Model
         'publish_start',
         'publish_end',
         'sort',
+        'tags',
     ];
 
     protected $casts = [
@@ -32,6 +33,7 @@ class BlogCategory extends Model
         'is_published' => 'boolean',
         'publish_start' => 'datetime',
         'publish_end' => 'datetime',
+        'tags' => 'array',
     ];
 
     // Temporary storage for old attachments (not a database column)

@@ -40,6 +40,11 @@ class BlogsTable
                 TextColumn::make('user.name')
                     ->label('Author')
                     ->sortable(),
+                TextColumn::make('tags')
+                    ->badge()
+                    ->separator(',')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 IconColumn::make('is_published')
                     ->size(IconSize::Medium)
                     ->alignCenter(true)

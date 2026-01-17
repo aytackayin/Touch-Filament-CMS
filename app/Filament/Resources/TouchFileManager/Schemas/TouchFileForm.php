@@ -35,6 +35,9 @@ class TouchFileForm
                                     ->placeholder('File description...')
                                     ->maxLength(255),
 
+                                \Filament\Forms\Components\TagsInput::make('tags')
+                                    ->columnSpanFull(),
+
                                 Select::make('parent_id')
                                     ->label('Parent Folder')
                                     ->options(function () {
