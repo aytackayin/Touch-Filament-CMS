@@ -17,6 +17,7 @@ use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Placeholder;
 use Aytackayin\Tinymce\Forms\Components\TinyEditor;
+use CodeWithDennis\FilamentSelectTree\SelectTree;
 
 class BlogForm
 {
@@ -103,17 +104,18 @@ class BlogForm
                                     })
                                     ->live()
                                     ->afterStateUpdated(fn($set) => $set('categories', [])),
-                                Select::make('categories')
-                                    ->relationship('categories', 'title', function ($query, $get) {
+                                SelectTree::make('categories')
+                                    ->relationship('categories', 'title', 'parent_id', function ($query, $get) {
                                         $languageId = $get('language_id');
                                         if ($languageId) {
                                             $query->where('language_id', $languageId);
                                         } else {
                                             $query->whereRaw('1 = 0');
                                         }
+                                        return $query;
                                     })
-                                    ->multiple()
-                                    ->preload()
+                                    ->enableBranchNode()
+                                    ->searchable()
                                     ->live()
                                     ->default(function () {
                                         if ($categoryId = request()->query('category_id')) {

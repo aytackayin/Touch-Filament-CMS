@@ -14,6 +14,7 @@ use Filament\Schemas\Schema;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Schemas\Components\Group;
 use App\Models\Language;
+use CodeWithDennis\FilamentSelectTree\SelectTree;
 
 class BlogCategoryForm
 {
@@ -70,14 +71,15 @@ class BlogCategoryForm
                     ->schema([
                         Section::make('Settings')
                             ->schema([
-                                Select::make('parent_id')
-                                    ->relationship('parent', 'title', function (Builder $query, ?BlogCategory $record) {
+                                SelectTree::make('parent_id')
+                                    ->relationship('parent', 'title', 'parent_id', function (Builder $query, ?BlogCategory $record) {
                                         if ($record) {
                                             $query->where('id', '!=', $record->id);
                                         }
+                                        return $query;
                                     })
+                                    ->enableBranchNode()
                                     ->searchable()
-                                    ->preload()
                                     ->live()
                                     ->default(request()->query('parent_id'))
                                     ->afterStateUpdated(function ($state, $set) {

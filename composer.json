@@ -10,6 +10,7 @@
         "andreia/filament-nord-theme": "2.0.2",
         "aytackayin/tinymce": "^1.0",
         "bezhansalleh/filament-language-switch": "^4.0",
+        "codewithdennis/filament-select-tree": "^4.0",
         "filament/filament": "4.5.2",
         "filament/spatie-laravel-settings-plugin": "^4.5",
         "intervention/image": "^3.11",
