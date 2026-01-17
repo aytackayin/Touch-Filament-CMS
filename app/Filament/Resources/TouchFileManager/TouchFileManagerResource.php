@@ -14,6 +14,8 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
+use Illuminate\Support\HtmlString;
 
 class TouchFileManagerResource extends Resource
 {
@@ -29,7 +31,7 @@ class TouchFileManagerResource extends Resource
 
     public static function getGloballySearchableAttributes(): array
     {
-        return ['name', 'mime_type'];
+        return ['name', 'tags'];
     }
 
     public static function getGlobalSearchResultTitle(Model $record): string
@@ -43,12 +45,21 @@ class TouchFileManagerResource extends Resource
         $details = [];
 
         if (!$record->is_folder) {
-            $details['Type'] = ucfirst($record->type ?? 'Unknown');
-            $details['Size'] = $record->human_size;
+            if ($record->alt) {
+                $description = strip_tags($record->alt);
+                $firstSentence = Str::of($description)->explode('.')->first();
+                $details[] = new HtmlString('<span style="font-size: 12px; line-height: 1;">' . Str::limit($firstSentence, 120) . '</span>');
+            }
+
+            if ($record->tags && is_array($record->tags)) {
+                $details[] = new HtmlString('<span style="font-size: 12px; line-height: 1;">' . implode(', ', $record->tags) . '</span>');
+            }
+
+            $details[] = new HtmlString('<span style="font-size: 12px; line-height: 1;">' . ucfirst($record->type ?? 'Unknown') . ' (' . $record->human_size . ')</span>');
         }
 
         if ($record->parent) {
-            $details['Location'] = $record->parent->full_path;
+            $details[] = new HtmlString('<span style="font-size: 12px; line-height: 1;">' . $record->parent->full_path . '</span>');
         }
 
         return $details;
