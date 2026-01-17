@@ -15,6 +15,7 @@ use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\HtmlString;
+use Illuminate\Support\Facades\Storage;
 use BackedEnum;
 
 class BlogResource extends Resource
@@ -27,22 +28,58 @@ class BlogResource extends Resource
     {
         return ['title', 'content'];
     }
+
     public static function getGlobalSearchResultTitle(Model $record): string
     {
-        return '✍️ ' . $record->title;
+        return ' ';
     }
+
     public static function getGlobalSearchResultDetails(Model $record): array
     {
+        $details = [];
+
+        // 1. Thumbnail or Icon
+        $imageUrl = url('/assets/icons/colorful-icons/blog.svg');
+        $attachments = $record->attachments;
+
+        if (is_array($attachments) && count($attachments) > 0) {
+            foreach ($attachments as $attachment) {
+                // Check if it's an image
+                if (preg_match('/\.(jpg|jpeg|png|gif|webp|bmp|svg)$/i', $attachment)) {
+                    $filename = basename($attachment);
+                    $thumbPath = "blogs/{$record->id}/images/thumbs/{$filename}";
+                    if (Storage::disk('attachments')->exists($thumbPath)) {
+                        $imageUrl = Storage::disk('attachments')->url($thumbPath);
+                        break;
+                    }
+                }
+            }
+        }
+
+        $uniqueId = 'gs-blog-' . $record->id;
+        $details[] = new HtmlString('
+            <style>
+                #' . $uniqueId . ' { color: #030712 !important; opacity: 1 !important; }
+                .dark #' . $uniqueId . ' { color: #ffffff !important; }
+            </style>
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 6px; margin-top: -10px;">
+                <div style="width: 48px; height: 48px; border-radius: 8px; overflow: hidden; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                    <img src="' . $imageUrl . '" 
+                         style="width: 100%; height: 100%; object-fit: cover;"
+                         onerror="this.src=\'' . url('/assets/icons/colorful-icons/blog.svg') . '\'">
+                </div>
+                <div style="display: flex; flex-direction: column;">
+                    <span id="' . $uniqueId . '" style="font-weight: 600; font-size: 14px;">' . $record->title . '</span>
+                </div>
+            </div>
+        ');
+
         $description = strip_tags($record->content ?? '');
+        $firstSentence = Str::of($description)->explode('.')->first();
 
-        // İlk cümleyi al
-        $firstSentence = Str::of($description)
-            ->explode('.')
-            ->first();
+        $details[] = new HtmlString('<span style="font-size: 12px; line-height: 1;">' . Str::limit($firstSentence, 120) . '</span>');
 
-        return [
-            new HtmlString('<span style="font-size: 12px; line-height: 1;">' . Str::limit($firstSentence, 120) . '</span>'),
-        ];
+        return $details;
     }
 
     public static function getNavigationGroup(): ?string

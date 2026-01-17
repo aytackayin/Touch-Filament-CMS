@@ -73,7 +73,7 @@ class TouchFileManagerResource extends Resource
                 .dark #' . $uniqueId . ' { color: #ffffff !important; }
             </style>
             <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 6px; margin-top: -10px;">
-                <div style="width: 48px; height: 48px; border-radius: 8px; overflow: hidden; background: rgba(156, 163, 175, 0.1); display: flex; align-items: center; justify-content: center; border: 1px solid rgba(156, 163, 175, 0.1); flex-shrink: 0;">
+                <div style="width: 48px; height: 48px; border-radius: 8px; overflow: hidden; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
                     <img src="' . $imageUrl . '" 
                          style="width: 100%; height: 100%; object-fit: ' . ($record->thumbnail_path ? 'cover' : 'contain; padding: 6px') . ';"
                          onerror="this.src=\'' . url('/assets/icons/colorful-icons/file.svg') . '\'">
