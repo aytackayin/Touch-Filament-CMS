@@ -66,7 +66,12 @@ class TouchFileManagerResource extends Resource
             }
         }
 
+        $uniqueId = 'gs-name-' . $record->id;
         $details[] = new HtmlString('
+            <style>
+                #' . $uniqueId . ' { color: #030712 !important; opacity: 1 !important; }
+                .dark #' . $uniqueId . ' { color: #ffffff !important; }
+            </style>
             <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 6px; margin-top: -10px;">
                 <div style="width: 48px; height: 48px; border-radius: 8px; overflow: hidden; background: rgba(156, 163, 175, 0.1); display: flex; align-items: center; justify-content: center; border: 1px solid rgba(156, 163, 175, 0.1); flex-shrink: 0;">
                     <img src="' . $imageUrl . '" 
@@ -74,7 +79,7 @@ class TouchFileManagerResource extends Resource
                          onerror="this.src=\'' . url('/assets/icons/colorful-icons/file.svg') . '\'">
                 </div>
                 <div style="display: flex; flex-direction: column;">
-                    <span style="font-weight: 600; font-size: 14px; color: currentColor;">' . $record->name . '</span>
+                    <span id="' . $uniqueId . '" style="font-weight: 600; font-size: 14px;">' . $record->name . '</span>
                 </div>
             </div>
         ');
