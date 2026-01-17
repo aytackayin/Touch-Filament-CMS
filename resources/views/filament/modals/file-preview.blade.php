@@ -23,5 +23,10 @@
         @if($record->parent)
             <p style="font-size: 0.875rem; margin-top: 5px;"><strong>Location:</strong> {{ $record->parent->full_path }}</p>
         @endif
+        @if(!empty($record->alt))
+            <p style="font-size: 0.875rem; margin-top: 5px; color: #4b5563;">
+                {{ $record->alt }}
+            </p>
+        @endif
     </div>
 </div>

@@ -12,6 +12,7 @@ class TouchFile extends Model
 
     protected $fillable = [
         'name',
+        'alt',
         'path',
         'type',
         'mime_type',

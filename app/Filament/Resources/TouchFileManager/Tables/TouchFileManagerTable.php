@@ -54,6 +54,7 @@ class TouchFileManagerTable
                     $columns = [
                         'id',
                         'name',
+                        'alt',
                         'path',
                         'type',
                         'mime_type',
@@ -74,7 +75,8 @@ class TouchFileManagerTable
                     $fakeRow = TouchFile::query()
                         ->selectRaw("
                             0 as id, 
-                            'Up' as name, 
+                            'Up' as name,
+                            null as alt,
                             '' as path, 
                             'folder' as type, 
                             null as mime_type, 
@@ -138,7 +140,7 @@ class TouchFileManagerTable
             ->columns($isGrid ? [
                 Stack::make([
                     ViewColumn::make('details')
-                        ->view('filament.tables.columns.touch-file-grid-info')->searchable(['name', 'type']),
+                        ->view('filament.tables.columns.touch-file-grid-info')->searchable(['name', 'type', 'alt']),
                 ])->space(0),
             ] : [
                 ImageColumn::make('thumbnail_preview')
@@ -184,12 +186,26 @@ class TouchFileManagerTable
 
                 TextColumn::make('name')
                     ->label('Name')
-                    ->searchable()
+                    ->searchable(['name', 'alt'])
                     ->weight('bold')
                     ->wrap()
                     ->color(fn($record) => $record?->is_folder ? 'warning' : null)
                     ->formatStateUsing(fn(string $state, $record) => $record?->id === 0 ? 'Up' : $state)
-                    ->description(fn($record) => $record?->is_folder ? '' : $record?->human_size),
+                    ->description(function ($record) {
+                        if (!$record || $record->id === 0)
+                            return null;
+
+                        $desc = [];
+                        if (!empty($record->alt)) {
+                            $desc[] = $record->alt;
+                        }
+
+                        if (!$record->is_folder) {
+                            $desc[] = $record->human_size;
+                        }
+
+                        return implode(' • ', $desc);
+                    }),
 
                 TextColumn::make('type')
                     ->label('Type')

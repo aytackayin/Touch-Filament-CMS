@@ -30,6 +30,11 @@ class TouchFileForm
                                     ->maxLength(255)
                                     ->visible(fn($operation) => $operation === 'edit'),
 
+                                TextInput::make('alt')
+                                    ->label('Description (Alt)')
+                                    ->placeholder('File description...')
+                                    ->maxLength(255),
+
                                 Select::make('parent_id')
                                     ->label('Parent Folder')
                                     ->options(function () {

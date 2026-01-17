@@ -30,7 +30,8 @@
             }
         }
 
-        $name = $record->name;
+        // Show Alt if available, otherwise Name
+        $name = (!empty($record->alt)) ? $record->alt : $record->name;
 
         // Determine Fallback URL for Error
         $fallbackUrl = $isFolder
