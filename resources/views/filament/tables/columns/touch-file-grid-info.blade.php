@@ -1,21 +1,28 @@
 @php
     $record = $getRecord();
     $isFolder = $record->is_folder;
+    $isUp = $record->id === 0;
 
-    $imageUrl = $record->thumbnail_path
-        ? \Illuminate\Support\Facades\Storage::disk('attachments')->url($record->thumbnail_path)
-        : ($isFolder
-            ? url('/assets/icons/colorful-icons/grid-folder.svg')
-            : url('/assets/icons/colorful-icons/grid-file.svg'));
+    if ($isUp) {
+        $imageUrl = url('/assets/icons/colorful-icons/grid-open-folder.svg');
+        $name = 'Up';
+    } else {
+        $imageUrl = $record->thumbnail_path
+            ? \Illuminate\Support\Facades\Storage::disk('attachments')->url($record->thumbnail_path)
+            : ($isFolder
+                ? url('/assets/icons/colorful-icons/grid-folder.svg')
+                : url('/assets/icons/colorful-icons/grid-file.svg'));
+        $name = $record->name;
+    }
 @endphp
 
 <div class="touch-file-card">
-    <img src="{{ $imageUrl }}" alt="{{ $record->name }}" class="touch-file-bg"
-        onerror="this.src='{{ $isFolder }}'; this.classList.add('is-icon')">
+    <img src="{{ $imageUrl }}" alt="{{ $name }}" class="touch-file-bg {{ $isUp ? 'is-icon' : '' }}"
+        onerror="this.src='{{ $isFolder && !$isUp ? url('/assets/icons/colorful-icons/grid-folder.svg') : '' }}'; this.classList.add('is-icon')">
 
     <div class="touch-file-{{ $isFolder ? 'folder' : 'overlay bg-white dark:bg-black' }}">
-        <div class="touch-file-name" title="{{ $record->name }}">
-            {{ $record->name }}
+        <div class="touch-file-name" title="{{ $name }}">
+            {{ $name }}
         </div>
 
         @if(!$isFolder)

@@ -42,25 +42,95 @@ class TouchFileManagerTable
             )
             ->modifyQueryUsing(function (Builder $query) use ($table) {
                 $livewire = $table->getLivewire();
+
+                // Determine Parent ID safely
+                $parentId = null;
                 if ($livewire && property_exists($livewire, 'parent_id')) {
-                    if ($livewire->parent_id) {
-                        $query->where('parent_id', $livewire->parent_id);
-                    } else {
-                        $query->whereNull('parent_id');
-                    }
+                    $parentId = $livewire->parent_id;
                 }
 
-                // Öncelik: Klasörler (1), sonra Dosyalar (0). Ardından isim sıralaması.
-                return $query->orderBy('is_folder', 'desc')->orderBy('name', 'asc');
+                // If we are inside a folder, inject the "Up" item
+                if ($parentId) {
+                    $columns = [
+                        'id',
+                        'name',
+                        'path',
+                        'type',
+                        'mime_type',
+                        'size',
+                        'parent_id',
+                        'is_folder',
+                        'metadata',
+                        'created_at',
+                        'updated_at'
+                    ];
+
+                    // Part 1: Real Files (Inner Query)
+                    // We specifically select columns to match the Union structure
+                    $query->select($columns)->where('parent_id', $parentId);
+
+                    // Part 2: Fake "Up" Record
+                    // We use the model's query to generate SQL, but careful with bindings
+                    $fakeRow = TouchFile::query()
+                        ->selectRaw("
+                            0 as id, 
+                            'Up' as name, 
+                            '' as path, 
+                            'folder' as type, 
+                            null as mime_type, 
+                            0 as size, 
+                            ? as parent_id, 
+                            1 as is_folder, 
+                            null as metadata, 
+                            now() as created_at, 
+                            now() as updated_at
+                        ", [$parentId]);
+
+                    // Union
+                    $unionQuery = $query->union($fakeRow);
+
+                    // Wrap in a parent query with alias 'touch_files'
+                    // This creates: SELECT * FROM ( ... union ... ) as touch_files
+                    // This satisfies "items.id" references in default sorts because the table alias matches.
+                    return TouchFile::query()
+                        ->fromSub($unionQuery, 'touch_files')
+                        ->select('*')
+                        ->orderByRaw('CASE WHEN id = 0 THEN 1 ELSE 0 END DESC')
+                        ->orderBy('is_folder', 'desc')
+                        ->orderBy('name', 'asc');
+                }
+
+                // Default: Root handling (no parent_id)
+                return $query
+                    ->whereNull('parent_id')
+                    ->orderBy('is_folder', 'desc')
+                    ->orderBy('name', 'asc');
             })
             ->striped()
             ->recordUrl(
-                fn(TouchFile $record): ?string => $record->is_folder
-                ? TouchFileManagerResource::getUrl('index', [
-                    'parent_id' => $record->id,
-                    'view_type' => $table->getLivewire()->view_type ?? 'grid',
-                ])
-                : null
+                function (TouchFile $record) use ($table): ?string {
+                    if ($record->id === 0) {
+                        // "Up" navigation logic
+                        $currentParentId = $table->getLivewire()->parent_id;
+                        if ($currentParentId) {
+                            $currentFolder = TouchFile::find($currentParentId);
+                            $targetId = $currentFolder ? $currentFolder->parent_id : null;
+
+                            return TouchFileManagerResource::getUrl('index', [
+                                'parent_id' => $targetId,
+                                'view_type' => $table->getLivewire()->view_type ?? 'grid',
+                            ]);
+                        }
+                        return null;
+                    }
+
+                    return $record->is_folder
+                        ? TouchFileManagerResource::getUrl('index', [
+                            'parent_id' => $record->id,
+                            'view_type' => $table->getLivewire()->view_type ?? 'grid',
+                        ])
+                        : null;
+                }
             )
             ->columns($isGrid ? [
                 Stack::make([
@@ -74,9 +144,14 @@ class TouchFileManagerTable
                     ->state(fn(TouchFile $record) => $record->thumbnail_path)
                     ->width(60)
                     ->height(60)
-                    ->defaultImageUrl(fn(TouchFile $record) => $record->is_folder
-                        ? url('/assets/icons/colorful-icons/folder.svg')
-                        : url('/assets/icons/colorful-icons/file.svg'))
+                    ->defaultImageUrl(function (TouchFile $record) {
+                        if ($record->id === 0) {
+                            return url('/assets/icons/colorful-icons/grid-open-folder.svg');
+                        }
+                        return $record->is_folder
+                            ? url('/assets/icons/colorful-icons/folder.svg')
+                            : url('/assets/icons/colorful-icons/file.svg');
+                    })
                     ->extraImgAttributes(['class' => 'object-cover object-center rounded-lg', 'style' => 'width: 60px; height: 60px; border-radius: 10px;']),
 
                 TextColumn::make('name')
@@ -85,6 +160,7 @@ class TouchFileManagerTable
                     ->weight('bold')
                     ->wrap()
                     ->color(fn(TouchFile $record) => $record->is_folder ? 'warning' : null)
+                    ->formatStateUsing(fn(string $state, TouchFile $record) => $record->id === 0 ? 'Up' : $state)
                     ->description(fn(TouchFile $record) => $record->is_folder ? '' : $record->human_size),
 
                 TextColumn::make('type')
@@ -99,7 +175,8 @@ class TouchFileManagerTable
                         'presentation' => 'danger',
                         default => 'gray',
                     })
-                    ->formatStateUsing(fn(string $state): string => ucfirst($state)),
+                    ->formatStateUsing(fn(string $state): string => ucfirst($state))
+                    ->hidden(fn(TouchFile $record) => $record->id === 0),
 
                 TextColumn::make('created_at')
                     ->label('Date')
@@ -145,7 +222,7 @@ class TouchFileManagerTable
                     ->icon('heroicon-o-arrow-down-tray')
                     ->label('')
                     ->tooltip('Download')
-                    ->hidden(fn(TouchFile $record) => $record->is_folder)
+                    ->hidden(fn(TouchFile $record) => $record->is_folder || $record->id === 0)
                     ->url(fn(TouchFile $record) => Storage::disk('attachments')->url($record->path))
                     ->openUrlInNewTab(),
 
@@ -153,7 +230,7 @@ class TouchFileManagerTable
                     ->icon('heroicon-o-eye')
                     ->label('')
                     ->tooltip('View')
-                    ->hidden(fn(TouchFile $record) => !in_array($record->type, ['image', 'video']))
+                    ->hidden(fn(TouchFile $record) => !in_array($record->type, ['image', 'video']) || $record->id === 0)
                     ->modalContent(fn(TouchFile $record) => view('filament.modals.file-preview', [
                         'record' => $record,
                         'url' => Storage::disk('attachments')->url($record->path),
@@ -169,7 +246,8 @@ class TouchFileManagerTable
                     ]))
                     ->icon('heroicon-o-pencil-square')
                     ->label('')
-                    ->tooltip('Edit'),
+                    ->tooltip('Edit')
+                    ->hidden(fn(TouchFile $record) => $record->id === 0),
 
                 DeleteAction::make()
                     ->label('')
@@ -181,7 +259,8 @@ class TouchFileManagerTable
                     ->modalDescription(fn(TouchFile $record) => $record->is_folder
                         ? 'Are you sure you want to delete this folder? All files and subfolders inside will also be deleted.'
                         : 'Are you sure you want to delete this file?')
-                    ->action(fn($record) => $record->delete()),
+                    ->action(fn($record) => $record->delete())
+                    ->hidden(fn(TouchFile $record) => $record->id === 0),
             ])
             ->bulkActions([
                 BulkActionGroup::make([
