@@ -15,6 +15,9 @@ use App\Models\Blog;
 use Illuminate\Support\Str;
 use Illuminate\Support\HtmlString;
 use Filament\Tables\Filters\SelectFilter;
+use App\Filament\Exports\BlogExporter;
+use Filament\Actions\ExportBulkAction;
+use Filament\Support\Icons\Heroicon;
 
 class BlogsTable
 {
@@ -25,71 +28,75 @@ class BlogsTable
             ->paginatedWhileReordering()
             ->recordUrl(null)
             ->columns([
-                    TextColumn::make('title')
-                        ->searchable(['title', 'content'])
-                        ->icon('heroicon-s-document-text')
-                        ->description(fn(Blog $record): HtmlString => $record->content ? new HtmlString('<span style="font-size: 12px; line-height: 1;" class="text-gray-500 dark:text-gray-400">' . Str::limit(strip_tags($record->content), 100) . '</span>') : new HtmlString(''))
-                        ->wrap()
-                        ->sortable(),
-                    TextColumn::make('language.name')
-                        ->sortable()
-                        ->toggleable(isToggledHiddenByDefault: true),
-                    TextColumn::make('user.name')
-                        ->label('Author')
-                        ->sortable(),
-                    IconColumn::make('is_published')
-                        ->size(IconSize::Medium)
-                        ->alignCenter(true)
-                        ->boolean()
-                        ->action(function ($record) {
-                            $record->is_published = !$record->is_published;
-                            $record->save();
-                        }),
-                    TextColumn::make('created_at')
-                        ->dateTime()
-                        ->sortable()
-                        ->toggleable(isToggledHiddenByDefault: true),
-                ])
+                TextColumn::make('title')
+                    ->searchable(['title', 'content'])
+                    ->icon('heroicon-s-document-text')
+                    ->description(fn(Blog $record): HtmlString => $record->content ? new HtmlString('<span style="font-size: 12px; line-height: 1;" class="text-gray-500 dark:text-gray-400">' . Str::limit(strip_tags($record->content), 100) . '</span>') : new HtmlString(''))
+                    ->wrap()
+                    ->sortable(),
+                TextColumn::make('language.name')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('user.name')
+                    ->label('Author')
+                    ->sortable(),
+                IconColumn::make('is_published')
+                    ->size(IconSize::Medium)
+                    ->alignCenter(true)
+                    ->boolean()
+                    ->action(function ($record) {
+                        $record->is_published = !$record->is_published;
+                        $record->save();
+                    }),
+                TextColumn::make('created_at')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+            ])
             ->reorderable('sort')
             ->defaultSort('sort', 'asc')
             ->filters([
-                    SelectFilter::make('user_id')
-                        ->label('Author')
-                        ->relationship('user', 'name')
-                        ->searchable(),
-                    SelectFilter::make('language_id')
-                        ->label(__('label.language'))
-                        ->relationship('language', 'name'),
-                    SelectFilter::make('is_published')
-                        ->label('Publication Status')
-                        ->options([
-                                '1' => 'Published',
-                                '0' => 'Unpublished',
-                            ]),
-                ])
+                SelectFilter::make('user_id')
+                    ->label('Author')
+                    ->relationship('user', 'name')
+                    ->searchable(),
+                SelectFilter::make('language_id')
+                    ->label(__('label.language'))
+                    ->relationship('language', 'name'),
+                SelectFilter::make('is_published')
+                    ->label('Publication Status')
+                    ->options([
+                        '1' => 'Published',
+                        '0' => 'Unpublished',
+                    ]),
+            ])
             ->recordActions([
-                    Action::make('edit')
-                        ->url(fn(Blog $record): string => BlogResource::getUrl('edit', ['record' => $record]))
-                        ->icon('heroicon-o-pencil-square')
-                        ->label('')
-                        ->tooltip(__('button.edit')),
-                    DeleteAction::make()
-                        ->label('')
+                Action::make('edit')
+                    ->url(fn(Blog $record): string => BlogResource::getUrl('edit', ['record' => $record]))
+                    ->icon('heroicon-o-pencil-square')
+                    ->label('')
+                    ->tooltip(__('button.edit')),
+                DeleteAction::make()
+                    ->label('')
+                    ->icon('heroicon-o-trash')
+                    ->color('danger')
+                    ->tooltip(__('button.delete'))
+                    ->requiresConfirmation()
+                    ->action(fn($record) => $record->delete()),
+            ])
+            ->bulkActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make()
+                        ->label('Delete selected')
                         ->icon('heroicon-o-trash')
                         ->color('danger')
-                        ->tooltip(__('button.delete'))
                         ->requiresConfirmation()
-                        ->action(fn($record) => $record->delete()),
-                ])
-            ->bulkActions([
-                    BulkActionGroup::make([
-                        DeleteBulkAction::make()
-                            ->label('Delete selected')
-                            ->icon('heroicon-o-trash')
-                            ->color('danger')
-                            ->requiresConfirmation()
-                            ->action(fn($records) => $records->each->delete()),
-                    ]),
-                ]);
+                        ->action(fn($records) => $records->each->delete()),
+                    ExportBulkAction::make()
+                        ->label(__('button.export'))
+                        ->icon(Heroicon::OutlinedArrowUpOnSquareStack)
+                        ->exporter(BlogExporter::class),
+                ]),
+            ]);
     }
 }

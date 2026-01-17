@@ -34,6 +34,7 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->login()
             ->globalSearchDebounce('300ms')
+            ->databaseNotifications()
             ->colors([
                 'primary' => Color::Amber,
             ])

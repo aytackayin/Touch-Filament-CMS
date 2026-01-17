@@ -13,12 +13,28 @@ class ListBlogs extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make()
-                ->label('')
-                ->tooltip(__('button.new'))
-                ->color('success')
-                ->size('xs')
-                ->icon('heroicon-m-document-plus'),
+            Actions\ActionGroup::make([
+                Actions\ExportAction::make()
+                    ->label('')
+                    ->icon(\Filament\Support\Icons\Heroicon::OutlinedArrowUpOnSquareStack)
+                    ->tooltip(__('button.export'))
+                    ->color('gray')
+                    ->size('xs')
+                    ->exporter(\App\Filament\Exports\BlogExporter::class),
+                Actions\ImportAction::make()
+                    ->label('')
+                    ->icon(\Filament\Support\Icons\Heroicon::OutlinedArrowDownOnSquareStack)
+                    ->tooltip(__('button.import'))
+                    ->color('gray')
+                    ->size('xs')
+                    ->importer(\App\Filament\Imports\BlogImporter::class),
+                Actions\CreateAction::make()
+                    ->label('')
+                    ->tooltip(__('button.new'))
+                    ->color('success')
+                    ->size('xs')
+                    ->icon('heroicon-m-document-plus'),
+            ])->buttonGroup()
         ];
     }
 }

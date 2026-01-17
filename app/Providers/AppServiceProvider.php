@@ -5,6 +5,8 @@ namespace App\Providers;
 use Illuminate\Support\ServiceProvider;
 use BezhanSalleh\LanguageSwitch\LanguageSwitch;
 
+use Filament\View\PanelsRenderHook;
+
 class AppServiceProvider extends ServiceProvider
 {
     /**
@@ -27,6 +29,7 @@ class AppServiceProvider extends ServiceProvider
             $languages = \App\Models\Language::where('is_active', 1)->get();
 
             $switch
+                ->renderHook(PanelsRenderHook::USER_MENU_BEFORE)
                 ->circular()
                 ->locales(
                     $languages
