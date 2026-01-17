@@ -84,8 +84,8 @@ class TouchFileManagerTable
                             ? as parent_id, 
                             1 as is_folder, 
                             null as metadata, 
-                            now() as created_at, 
-                            now() as updated_at
+                            null as created_at, 
+                            null as updated_at
                         ", [$parentId]);
 
                     // Union
@@ -219,14 +219,15 @@ class TouchFileManagerTable
                         'presentation' => 'danger',
                         default => 'gray',
                     })
-                    ->formatStateUsing(fn(string $state): string => ucfirst($state))
-                    ->hidden(fn($record) => $record?->id === 0),
+                    ->formatStateUsing(fn(string $state, $record) => $record?->id === 0 ? '' : ucfirst($state))
+                    ->extraAttributes(fn($record) => $record?->id === 0 ? ['style' => 'display: none !important;'] : []),
 
                 TextColumn::make('created_at')
                     ->label('Date')
                     ->date()
                     ->sortable()
-                    ->toggleable(),
+                    ->toggleable()
+                    ->placeholder(''),
             ])
             ->filters([
                 SelectFilter::make('type')
