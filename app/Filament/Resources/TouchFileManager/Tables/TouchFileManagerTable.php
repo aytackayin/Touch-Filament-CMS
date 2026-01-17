@@ -108,7 +108,10 @@ class TouchFileManagerTable
             })
             ->striped()
             ->recordUrl(
-                function (TouchFile $record) use ($table): ?string {
+                function ($record) use ($table): ?string {
+                    if (!$record)
+                        return null;
+
                     if ($record->id === 0) {
                         // "Up" navigation logic
                         $currentParentId = $table->getLivewire()->parent_id;
@@ -144,9 +147,11 @@ class TouchFileManagerTable
                     ->state(fn(TouchFile $record) => $record->thumbnail_path)
                     ->width(60)
                     ->height(60)
-                    ->defaultImageUrl(function (TouchFile $record) {
+                    ->defaultImageUrl(function ($record) {
+                        if (!$record)
+                            return null;
                         if ($record->id === 0) {
-                            return url('/assets/icons/colorful-icons/grid-open-folder.svg');
+                            return url('/assets/icons/colorful-icons/open-folder.svg');
                         }
                         return $record->is_folder
                             ? url('/assets/icons/colorful-icons/folder.svg')
@@ -159,9 +164,9 @@ class TouchFileManagerTable
                     ->searchable()
                     ->weight('bold')
                     ->wrap()
-                    ->color(fn(TouchFile $record) => $record->is_folder ? 'warning' : null)
-                    ->formatStateUsing(fn(string $state, TouchFile $record) => $record->id === 0 ? 'Up' : $state)
-                    ->description(fn(TouchFile $record) => $record->is_folder ? '' : $record->human_size),
+                    ->color(fn($record) => $record?->is_folder ? 'warning' : null)
+                    ->formatStateUsing(fn(string $state, $record) => $record?->id === 0 ? 'Up' : $state)
+                    ->description(fn($record) => $record?->is_folder ? '' : $record?->human_size),
 
                 TextColumn::make('type')
                     ->label('Type')
@@ -176,7 +181,7 @@ class TouchFileManagerTable
                         default => 'gray',
                     })
                     ->formatStateUsing(fn(string $state): string => ucfirst($state))
-                    ->hidden(fn(TouchFile $record) => $record->id === 0),
+                    ->hidden(fn($record) => $record?->id === 0),
 
                 TextColumn::make('created_at')
                     ->label('Date')
@@ -222,32 +227,32 @@ class TouchFileManagerTable
                     ->icon('heroicon-o-arrow-down-tray')
                     ->label('')
                     ->tooltip('Download')
-                    ->hidden(fn(TouchFile $record) => $record->is_folder || $record->id === 0)
-                    ->url(fn(TouchFile $record) => Storage::disk('attachments')->url($record->path))
+                    ->hidden(fn($record) => $record && ($record->is_folder || $record->id === 0))
+                    ->url(fn($record) => $record ? Storage::disk('attachments')->url($record->path) : null)
                     ->openUrlInNewTab(),
 
                 Action::make('view')
                     ->icon('heroicon-o-eye')
                     ->label('')
                     ->tooltip('View')
-                    ->hidden(fn(TouchFile $record) => !in_array($record->type, ['image', 'video']) || $record->id === 0)
-                    ->modalContent(fn(TouchFile $record) => view('filament.modals.file-preview', [
+                    ->hidden(fn($record) => !$record || !in_array($record->type, ['image', 'video']) || $record->id === 0)
+                    ->modalContent(fn($record) => $record ? view('filament.modals.file-preview', [
                         'record' => $record,
                         'url' => Storage::disk('attachments')->url($record->path),
-                    ]))
+                    ]) : null)
                     ->modalWidth('5xl')
                     ->modalSubmitAction(false)
                     ->modalCancelActionLabel('Close'),
 
                 Action::make('edit')
-                    ->url(fn(TouchFile $record): string => TouchFileManagerResource::getUrl('edit', [
+                    ->url(fn($record): string => TouchFileManagerResource::getUrl('edit', [
                         'record' => $record,
                         'parent_id' => $record->parent_id
                     ]))
                     ->icon('heroicon-o-pencil-square')
                     ->label('')
                     ->tooltip('Edit')
-                    ->hidden(fn(TouchFile $record) => $record->id === 0),
+                    ->hidden(fn($record) => $record?->id === 0),
 
                 DeleteAction::make()
                     ->label('')
@@ -255,12 +260,12 @@ class TouchFileManagerTable
                     ->color('danger')
                     ->tooltip('Delete')
                     ->requiresConfirmation()
-                    ->modalHeading(fn(TouchFile $record) => $record->is_folder ? 'Delete Folder' : 'Delete File')
-                    ->modalDescription(fn(TouchFile $record) => $record->is_folder
+                    ->modalHeading(fn($record) => $record?->is_folder ? 'Delete Folder' : 'Delete File')
+                    ->modalDescription(fn($record) => $record?->is_folder
                         ? 'Are you sure you want to delete this folder? All files and subfolders inside will also be deleted.'
                         : 'Are you sure you want to delete this file?')
                     ->action(fn($record) => $record->delete())
-                    ->hidden(fn(TouchFile $record) => $record->id === 0),
+                    ->hidden(fn($record) => $record?->id === 0),
             ])
             ->bulkActions([
                 BulkActionGroup::make([
