@@ -37,14 +37,14 @@ class TouchFileManagerResource extends Resource
 
     public static function getGlobalSearchResultTitle(Model $record): string
     {
-        return $record->name;
+        return ' ';
     }
 
     public static function getGlobalSearchResultDetails(Model $record): array
     {
         $details = [];
 
-        // 1. Thumbnail or Icon (Moved to Details because Title escapes HTML)
+        // 1. Thumbnail or Icon + Name (Side-by-side)
         $imageUrl = '';
         if ($record->is_folder) {
             $imageUrl = url('/assets/icons/colorful-icons/folder.svg');
@@ -67,10 +67,15 @@ class TouchFileManagerResource extends Resource
         }
 
         $details[] = new HtmlString('
-            <div style="width: 48px; height: 48px; border-radius: 8px; overflow: hidden; background: rgba(156, 163, 175, 0.1); display: flex; align-items: center; justify-content: center; border: 1px solid rgba(156, 163, 175, 0.1); margin-top: 4px; margin-bottom: 4px;">
-                <img src="' . $imageUrl . '" 
-                     style="width: 100%; height: 100%; object-fit: ' . ($record->thumbnail_path ? 'cover' : 'contain; padding: 6px') . ';"
-                     onerror="this.src=\'' . url('/assets/icons/colorful-icons/grid-file.svg') . '\'">
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 6px; margin-top: -10px;">
+                <div style="width: 48px; height: 48px; border-radius: 8px; overflow: hidden; background: rgba(156, 163, 175, 0.1); display: flex; align-items: center; justify-content: center; border: 1px solid rgba(156, 163, 175, 0.1); flex-shrink: 0;">
+                    <img src="' . $imageUrl . '" 
+                         style="width: 100%; height: 100%; object-fit: ' . ($record->thumbnail_path ? 'cover' : 'contain; padding: 6px') . ';"
+                         onerror="this.src=\'' . url('/assets/icons/colorful-icons/file.svg') . '\'">
+                </div>
+                <div style="display: flex; flex-direction: column;">
+                    <span style="font-weight: 600; font-size: 14px; color: currentColor;">' . $record->name . '</span>
+                </div>
             </div>
         ');
 
