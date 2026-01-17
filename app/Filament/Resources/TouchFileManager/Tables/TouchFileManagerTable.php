@@ -75,8 +75,8 @@ class TouchFileManagerTable
                     ->width(60)
                     ->height(60)
                     ->defaultImageUrl(fn(TouchFile $record) => $record->is_folder
-                        ? url('/images/icons/folder.png')
-                        : url('/images/icons/file.png'))
+                        ? url('/assets/icons/colorful-icons/folder.svg')
+                        : url('/assets/icons/colorful-icons/file.svg'))
                     ->extraImgAttributes(['class' => 'object-cover object-center rounded-lg', 'style' => 'width: 60px; height: 60px; border-radius: 10px;']),
 
                 TextColumn::make('name')

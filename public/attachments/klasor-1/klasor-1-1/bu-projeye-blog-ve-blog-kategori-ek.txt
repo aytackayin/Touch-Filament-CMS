@@ -1,0 +1,81 @@
+Bu projeye Blog ve blog kategori eklenmesini istiyorum. Blog ile blog kategori arasındaki ilişki categorizables adlı tablo ile sağlanacak. Bu tablo yu başka kategori sistemi olan resource larda kullanabilmek için tabloya categorizable_type stunu ekledimki hangi ilişki hangi resource a ait belli olsun. Hali hazırda  blog_categories,  blogs ve categorizables migration larını oluşturup php artisan migrate ile veritabanında bu tabloları oluşturdum. Bu bilgileri kullanarak bana filament üzerinde bir blog sistemi oluştur. Aşağıda blog sisteminin özelliklerini veriyorum. 
+1- Her blog birden fazla blog kategorisine sahip olabilir.
+2- Sonsuz alt kategorili bir blog kategori sistemi. parent_id stunu ile
+3- Blog ve Blog kategori table da sıralama yapılabilir. Bunun için sort stununu kullanacak
+4- Blog ve Blog kategoride dil sistemi olacak. Bir kategori oluşturulurken dil seçmek mecburi olacak. Eğer parenti seçilmişse otomatik dil seçimi parentinin dili olacak. Bu bloglar içinde geçerli. Yani bir kategori seçilmiş ise o kategorinin dili blogun dili olarak otomatik seçilecek. İlerde bir kategorinin dili değiştirilirse otomatik olarak o kategoriye ait alt kategorilerin ve bloglarınında dilleri yeni dile güncellenecek.
+5- Attachments lar için şöyle bir sistem olacak. Örneğin bir veya birden çok görselli bir kategori oluşturduğumuzda görseller attachments/blog_categories/1/images içine kayıt edilecek. Buradaki 1 sayısı oluşturulan kategorinin id si. Ayrıca bu yüklenen görselin yanına bir thumb görselide oluşacak. Videolar ise 1 klasörü içinde videos kalsörüne thumbuda oluşturularak yüklenecek. Pdf, docs, txt gibi belgelerde documents klasörüne yüklenecek. Aynı durumlar bloglar içinde geçerli. Örneğin bir görsel yolu şöyle olacak : attachments/blogs/1/images .  Blog veya blog kategorisi silindiğinde örneğin 1 aydili kategori silindiğinde attachments/blog_categories/ içindeki 1 klasörünün silinmesi yeterli.
+6- Blog ve Blog kategorilerinde silme işlemide birbirine bağlı olarak gerçekleşecek. Bir kategori silindiğinde alt kategorileri, attachments ve bağlı tüm bloglar ve blogların attachments ları silinecek.
+7- slug lar hem blog kategorisinde hemde blog da title yazıldığında otomatik oluşturulacak ama istenilirse editlenebilecek. Kendi aralarında benzersiz olacaklar. Eğer bir blog kategorisi pluşturma veya editinde title yazıldığında örneğin "Sample Title" slug "sample_title" oldu diyelim ama bu slugdan hali hazırda başka bir blog kategorisi kayıtında var ozaman sonuna -1 eklesin. Eğer -1 li olanda varsa -2 olsun yani sondaki sayı artarak eşsiz olanakadar devam etsin. Aynı durum blog içinde geçerli. Sluglarda dikkat edilecek diğer nokta ise url e uygun olmalı örneğin title "Işın İzleme" olduğunda slug ise "isin_izleme" şeklinde olmalı. arapça veya  çince gibi farklı karakterlere sahip dillerde nasıl oluyor bilmiyorum, mümkünse bunlarada uygun yapılmalı.
+
+Blog System Verification Walkthrough
+Completed Features
+1. Blog & Blog Categories
+ Models: Implemented 
+Blog
+ and 
+BlogCategory
+.
+ Relationships:
+Blog
+ belongs to User and 
+Language
+.
+Blog
+ has many 
+Categories
+ (Polymorphic categorizables).
+BlogCategory
+ has parent/children (Recursive).
+ Resources: Created Filament resources for both models.
+2. Hierarchical Categories
+ Infinite Nesting: parent_id field allows assigning any category as parent (excluding self).
+ Sorting: Added sort column and field to both resources.
+3. Language System
+ Mandatory Selection: Language field is required.
+ Auto-Selection:
+When selecting a Parent Category, Language is auto-filled.
+When selecting a Category for a Blog, Language is auto-filled.
+ Cascading Update: Changing a Category's language updates all Children and associated Blogs via 
+BlogCategoryObserver
+.
+4. Attachments & Media
+ Custom Paths:
+BlogCategory
+ images saved to attachments/blog_categories/{id}/images.
+Blog
+ images saved to attachments/blogs/{id}/images.
+ Cleanup: Deleting a record deletes the corresponding folder.
+ Video Thumbnails: Placeholder logic added in Observers (requires FFmpeg/Server-side processing).
+5. Cascading Deletes
+ Logic: Deleting a Category deletes:
+Sub-categories.
+Associated Blogs.
+Attachments (physical files).
+Implemented in Model 
+boot
+ methods.
+6. Slugs
+ Auto-generation: Generated from Title using Str::slug.
+ Uniqueness: Handling of duplicates by appending -1, -2 etc.
+ Transliteration: Handled by Str::slug.
+Verification Steps
+To manually verify the system:
+
+Create Categories:
+Create a Root Category (Language: EN).
+Create a Sub-Category. Verify Language defaults to EN.
+Check Database: parent_id set correctly.
+Create Blog:
+Create a Blog. Select Sub-Category.
+Verify Language defaults to EN.
+Upload an image. Check filesystem public/attachments/blogs/{id}/images.
+Update Language:
+Change Root Category Language to TR.
+Check Sub-Category and Blog Language in Database. They should be TR.
+Delete Category:
+Delete Root Category.
+Verify Sub-Category and Blog are deleted from Database.
+Verify Attachment folders are removed.
+Future Improvements
+Video Thumbnails: Implement integration with FFmpeg for real video thumbnail generation.
+Cycle Prevention: Enhance Parent selection to exclude all descendants, not just self.

@@ -5,8 +5,8 @@
     $imageUrl = $record->thumbnail_path
         ? \Illuminate\Support\Facades\Storage::disk('attachments')->url($record->thumbnail_path)
         : ($isFolder
-            ? url('/images/icons/grid-folder.png')
-            : url('/images/icons/file.png'));
+            ? url('/assets/icons/colorful-icons/grid-folder.svg')
+            : url('/assets/icons/colorful-icons/grid-file.svg'));
 @endphp
 
 <div class="touch-file-card">
