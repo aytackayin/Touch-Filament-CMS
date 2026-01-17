@@ -35,6 +35,15 @@ class TouchFileManagerResource extends Resource
         return ['name', 'tags'];
     }
 
+    public static function getGlobalSearchResultUrl(Model $record): string
+    {
+        if ($record->is_folder) {
+            return static::getUrl('index', ['parent_id' => $record->id]);
+        }
+
+        return static::getUrl('edit', ['record' => $record]);
+    }
+
     public static function getGlobalSearchResultTitle(Model $record): string
     {
         return ' ';

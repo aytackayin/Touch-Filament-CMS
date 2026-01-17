@@ -29,6 +29,11 @@ class BlogCategoryResource extends Resource
         return ['title', 'description'];
     }
 
+    public static function getGlobalSearchResultUrl(Model $record): string
+    {
+        return static::getUrl('index', ['parent_id' => $record->id]);
+    }
+
     public static function getGlobalSearchResultTitle(Model $record): string
     {
         return ' ';
