@@ -13,6 +13,7 @@ use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Filament\Forms\Components\Placeholder;
 use Illuminate\Support\Str;
 use CodeWithDennis\FilamentSelectTree\SelectTree;
+use Illuminate\Database\Eloquent\Model;
 
 class TouchFileForm
 {
@@ -115,12 +116,47 @@ class TouchFileForm
                                         '1:1',
                                     ])
                                     ->preserveFilenames()
+                                    ->acceptedFileTypes(function (?Model $record) {
+                                        if (!$record) {
+                                            return [];
+                                        }
+
+                                        $ext = strtolower(pathinfo($record->path, PATHINFO_EXTENSION));
+
+                                        $types = [
+                                            'jpg' => ['image/jpeg'],
+                                            'jpeg' => ['image/jpeg'],
+                                            'png' => ['image/png'],
+                                            'gif' => ['image/gif'],
+                                            'webp' => ['image/webp'],
+                                            'svg' => ['image/svg+xml'],
+                                            'mp4' => ['video/mp4'],
+                                            'pdf' => ['application/pdf'],
+                                            'doc' => ['application/msword'],
+                                            'docx' => ['application/vnd.openxmlformats-officedocument.wordprocessingml.document'],
+                                            'xls' => ['application/vnd.ms-excel'],
+                                            'xlsx' => ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'],
+                                            'ppt' => ['application/vnd.ms-powerpoint'],
+                                            'pptx' => ['application/vnd.openxmlformats-officedocument.presentationml.presentation'],
+                                            'zip' => ['application/zip', 'application/x-zip-compressed', 'multipart/x-zip'],
+                                            'rar' => ['application/x-rar-compressed', 'application/vnd.rar'],
+                                            '7z' => ['application/x-7z-compressed'],
+                                            'txt' => ['text/plain'],
+                                        ];
+
+                                        return $types[$ext] ?? [];
+                                    })
                                     ->getUploadedFileNameForStorageUsing(
-                                        fn(TemporaryUploadedFile $file): string =>
-                                        (string) Str::of($file->getClientOriginalName())
-                                            ->beforeLast('.')
-                                            ->slug()
-                                            ->append('.' . $file->getClientOriginalExtension())
+                                        function (TemporaryUploadedFile $file, ?Model $record): string {
+                                            if ($record) {
+                                                return $record->path;
+                                            }
+
+                                            return (string) Str::of($file->getClientOriginalName())
+                                                ->beforeLast('.')
+                                                ->slug()
+                                                ->append('.' . $file->getClientOriginalExtension());
+                                        }
                                     )
                                     ->hidden(fn($operation) => $operation === 'create')
                                     ->visible(fn($record) => $record && !$record->is_folder)

@@ -111,8 +111,9 @@ class ListTouchFiles extends ListRecords
                     };
 
                     $addedCount = 0;
+                    $removedCount = 0;
 
-                    // 1. Process Directories
+                    // 1. Process Directories (Add Missing)
                     usort($allDirectories, function ($a, $b) {
                         return strlen($a) - strlen($b);
                     });
@@ -148,7 +149,7 @@ class ListTouchFiles extends ListRecords
                         }
                     }
 
-                    // 2. Process Files
+                    // 2. Process Files (Add Missing)
                     foreach ($allFiles as $filePath) {
                         if ($isExcluded($filePath))
                             continue;
@@ -187,9 +188,33 @@ class ListTouchFiles extends ListRecords
                         }
                     }
 
+                    // 3. Cleanup Orphaned Records
+                    // Check Files First
+                    $files = TouchFile::where('is_folder', false)->get();
+                    foreach ($files as $file) {
+                        if (!$disk->exists($file->path)) {
+                            $file->delete();
+                            $removedCount++;
+                        }
+                    }
+
+                    // Check Folders Next
+                    $folders = TouchFile::where('is_folder', true)->get();
+                    foreach ($folders as $folder) {
+                        // Skip if already deleted (by parent recursive delete)
+                        if (TouchFile::where('id', $folder->id)->doesntExist()) {
+                            continue;
+                        }
+
+                        if (!$disk->exists($folder->path)) {
+                            $folder->delete(); // This triggers recursive delete of children if any remain
+                            $removedCount++;
+                        }
+                    }
+
                     \Filament\Notifications\Notification::make()
                         ->title('Sync Completed')
-                        ->body("Added {$addedCount} new items.")
+                        ->body("Added {$addedCount} items. Removed {$removedCount} orphaned items.")
                         ->success()
                         ->send();
                 }),

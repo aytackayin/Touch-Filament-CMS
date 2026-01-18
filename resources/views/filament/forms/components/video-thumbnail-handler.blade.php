@@ -2,29 +2,19 @@
 
 <script>
     (function () {
-        const processedList = [];
-        let thumbnailsData = [];
-
-        function isProcessed(id) {
-            return processedList.includes(id);
-        }
-
-        function markProcessed(id) {
-            processedList.push(id);
-        }
-
-        function isVideoFile(filename) {
-            const videoExtensions = ['.mp4', '.webm', '.ogg', '.mov', '.avi', '.mkv'];
-            return videoExtensions.some(ext => filename.toLowerCase().endsWith(ext));
-        }
+        // We use a Map to track processed file IDs to avoid regenerating, 
+        // but we will sync the final output array based on CURRENT FilePond files.
+        const processedIds = new Set();
+        let thumbnailsData = []; // Array of { id, filename, thumbnail }
 
         function updateHiddenField() {
+            // Filter thumbnailsData to only include items that are currently in FilePond
+            // (This logic is actually handled in the sync loop, but we ensure cleanliness here)
             const jsonData = JSON.stringify(thumbnailsData);
 
-            // Update Livewire state directly - find the form component
+            // Update Livewire state
             if (window.Livewire) {
                 try {
-                    // Find the component that contains our hidden input
                     const hiddenInput = document.getElementById('form.video_thumbnails_store');
                     if (hiddenInput) {
                         const formElement = hiddenInput.closest('[wire\\:id]');
@@ -41,7 +31,7 @@
                 }
             }
 
-            // Also update DOM as fallback
+            // DOM fallback
             const hiddenInput = document.getElementById('form.video_thumbnails_store');
             if (hiddenInput) {
                 hiddenInput.value = jsonData;
@@ -51,23 +41,37 @@
 
         async function generateThumbnail(fileObject, id) {
             try {
-                const video = document.createElement('video');
-                video.src = URL.createObjectURL(fileObject);
-                video.currentTime = 1;
-                video.muted = true;
+                // Ensure we handle actual File objects (new uploads)
+                if (!(fileObject instanceof File)) {
+                    return; // Skip server-side files or mocks
+                }
 
-                await new Promise(resolve => {
+                const video = document.createElement('video');
+                // Use ObjectURL for specific file slice or full file
+                video.src = URL.createObjectURL(fileObject);
+                video.currentTime = 1; // Capture at 1s
+                video.muted = true;
+                video.playsInline = true;
+
+                await new Promise((resolve, reject) => {
                     video.onseeked = resolve;
-                    video.onerror = resolve;
-                    setTimeout(resolve, 3000);
+                    video.onerror = (e) => {
+                        // Try seeking to 0 if 1 fails (short video)
+                        if (video.currentTime > 0) {
+                            video.currentTime = 0;
+                        } else {
+                            resolve(); // Resolve anyway to avoid hanging
+                        }
+                    };
+                    // Timeout safety
+                    setTimeout(resolve, 2000);
                 });
 
                 if (video.videoWidth === 0) {
-                    console.warn('Video has no dimensions, skipping thumbnail');
+                    URL.revokeObjectURL(video.src);
                     return;
                 }
 
-                // Calculate resized dimensions (max width 150px)
                 const MAX_WIDTH = 150;
                 let width = video.videoWidth;
                 let height = video.videoHeight;
@@ -82,28 +86,21 @@
                 canvas.width = width;
                 canvas.height = height;
                 canvas.getContext('2d').drawImage(video, 0, 0, width, height);
-                const base64 = canvas.toDataURL('image/jpeg', 0.6); // Lower quality to 0.6
-
-                // Check if this file is already in our local array to prevent duplicates
-                if (!thumbnailsData.some(t => t.filename === fileObject.name)) {
-                    // Add new thumbnail to our local array
-                    thumbnailsData.push({
-                        id: id,
-                        filename: fileObject.name,
-                        thumbnail: base64
-                    });
-
-                    // Update the hidden field
-                    updateHiddenField();
-
-                    // console.log('Thumbnail generated for:', fileObject.name);
-                } else {
-                    // console.log('Thumbnail already exists for:', fileObject.name);
-                }
+                const base64 = canvas.toDataURL('image/jpeg', 0.7);
 
                 URL.revokeObjectURL(video.src);
+
+                // Add to store
+                thumbnailsData.push({
+                    id: id,
+                    filename: fileObject.name,
+                    thumbnail: base64
+                });
+
+                updateHiddenField();
+
             } catch (e) {
-                console.error('Thumbnail generation failed:', e);
+                console.error('Thumbnail gen error:', e);
             }
         }
 
@@ -111,36 +108,65 @@
             if (typeof FilePond === 'undefined') return;
 
             const roots = document.querySelectorAll('.filepond--root');
+            let foundFiles = [];
+
+            // 1. Collect all current valid video files across all instances
             for (const root of roots) {
                 const pond = FilePond.find(root);
                 if (!pond) continue;
 
-                const files = pond.getFiles();
-                for (const item of files) {
-                    if (!item.file || !item.file.type.startsWith('video/')) continue;
+                const items = pond.getFiles();
+                for (const item of items) {
+                    if (!item.file) continue;
 
-                    const id = item.serverId || item.id;
-                    if (!id || isProcessed(id)) continue;
+                    // Check if it's a video
+                    // Note: 'type' might be empty sometimes, check extension fallback
+                    let isVideo = item.file.type && item.file.type.startsWith('video/');
+                    if (!isVideo && item.file.name) {
+                        const ext = item.file.name.split('.').pop().toLowerCase();
+                        if (['mp4', 'mov', 'avi', 'webm', 'mkv'].includes(ext)) {
+                            isVideo = true;
+                        }
+                    }
 
-                    // console.log('Processing video:', item.file.name);
-                    markProcessed(id);
-                    generateThumbnail(item.file, id);
+                    if (isVideo) {
+                        const id = item.serverId || item.id;
+                        foundFiles.push({
+                            id: id,
+                            file: item.file
+                        });
+                    }
+                }
+            }
+
+            // 2. Sync thumbnailsData: Remove items NOT in foundFiles
+            const currentIds = foundFiles.map(f => f.id);
+            const initialCount = thumbnailsData.length;
+            thumbnailsData = thumbnailsData.filter(t => currentIds.includes(t.id));
+
+            // Remove from processedIds if no longer present (so we can re-process if added back)
+            for (const processedId of processedIds) {
+                if (!currentIds.includes(processedId)) {
+                    processedIds.delete(processedId);
+                }
+            }
+
+            if (thumbnailsData.length !== initialCount) {
+                updateHiddenField(); // Update if items removed
+            }
+
+            // 3. Process new files
+            for (const item of foundFiles) {
+                // If not processed yet, generate
+                if (!processedIds.has(item.id)) {
+                    processedIds.add(item.id);
+                    // Only generate for actual Files (uploads), not blobs/mocks usually
+                    generateThumbnail(item.file, item.id);
                 }
             }
         }
 
-        // Initialize
-        // console.log('Video Thumbnail Handler Initialized');
+        setInterval(scanFilePond, 1500);
 
-        // Scan periodically for FilePond uploads
-        setInterval(scanFilePond, 2000);
-
-        // Before form submit, ensure hidden field is updated
-        document.addEventListener('submit', function (e) {
-            if (thumbnailsData.length > 0) {
-                updateHiddenField();
-                // console.log('Form submitting with', thumbnailsData.length, 'video thumbnails');
-            }
-        }, true);
     })();
 </script>
