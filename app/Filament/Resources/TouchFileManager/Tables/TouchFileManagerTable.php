@@ -17,6 +17,9 @@ use Filament\Tables\Table;
 use Filament\Tables\Columns\Layout\Stack;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Database\Eloquent\Builder;
+use Filament\Notifications\Notification;
+use Illuminate\Support\HtmlString;
+use Filament\Support\Facades\Filament;
 
 class TouchFileManagerTable
 {
@@ -301,6 +304,25 @@ class TouchFileManagerTable
                     ->label('')
                     ->tooltip('Edit')
                     ->hidden(fn($record) => $record?->id === 0),
+
+                Action::make('copy_url')
+                    ->label('')
+                    ->tooltip('Copy Url')
+                    ->icon('heroicon-o-clipboard')
+                    ->action(null) // ÖNEMLİ: PHP action çalışmasın
+                    ->hidden(fn($record) => !$record || $record->is_folder || $record->id === 0)
+                    ->extraAttributes(fn($record) => [
+                        'x-data' => '{}',
+                        'x-on:click.prevent.stop' => "
+            navigator.clipboard.writeText('" .
+                            e(url('attachments/' . ltrim($record->path, '/'))) .
+                            "');
+            \$dispatch('notify', {
+                title: 'URL kopyalandı',
+                body: '" . e(url('attachments/' . ltrim($record->path, '/'))) . "'
+            });
+        ",
+                    ]),
 
                 DeleteAction::make()
                     ->label('')
