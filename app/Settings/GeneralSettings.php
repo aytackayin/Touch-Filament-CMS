@@ -12,6 +12,7 @@ class GeneralSettings extends Settings
     public ?string $contact_email = null;
     public ?string $google_maps_api_key = null;
     public ?string $google_analytics_id = null;
+    public string $attachments_path = 'attachments';
 
     public static function group(): string
     {

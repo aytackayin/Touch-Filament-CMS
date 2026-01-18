@@ -11,5 +11,6 @@ return new class extends SettingsMigration {
         $this->migrator->add('general.contact_email', 'admin@example.com');
         $this->migrator->add('general.google_maps_api_key', null);
         $this->migrator->add('general.google_analytics_id', null);
+        $this->migrator->add('general.attachments_path', 'attachments');
     }
 };

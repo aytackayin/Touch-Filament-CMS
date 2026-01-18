@@ -63,6 +63,16 @@ class AppServiceProvider extends ServiceProvider
                 'services.google_analytics.id' => $settings->google_analytics_id,
             ]);
 
+            // Dynamic Attachments Configuration
+            $attachPath = $settings->attachments_path ?: 'attachments';
+            config([
+                'filesystems.disks.attachments.root' => storage_path("app/public/{$attachPath}"),
+                'filesystems.disks.attachments.url' => rtrim(env('APP_URL'), '/') . "/{$attachPath}",
+                'filesystems.links' => [
+                    public_path($attachPath) => storage_path("app/public/{$attachPath}"),
+                ],
+            ]);
+
             // Optional: Override mail from address if set
             if ($settings->contact_email) {
                 config(['mail.from.address' => $settings->contact_email]);
