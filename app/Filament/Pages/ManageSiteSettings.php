@@ -8,6 +8,15 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TagsInput;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Checkbox;
+use Filament\Forms\Components\CheckboxList;
+use Filament\Forms\Components\Radio;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\TimePicker;
+use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\Toggle;
+use Filament\Forms\Components\KeyValue;
 use Filament\Forms\Components\Placeholder;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
@@ -35,14 +44,13 @@ class ManageSiteSettings extends SettingsPage
 
     public function form(Schema $schema): Schema
     {
-        // Sayfa state'ini stabilize etmek için veriyi alıyoruz.
-        // live() olmayan alanlar sayesinde yazarken refresh sorunu yaşanmaz.
-        $customSettings = $this->data['custom_settings'] ?? app(GeneralSettings::class)->custom_settings ?? [];
+        // Dinamik sekmeleri oluştururken HER ZAMAN veritabanındaki kayıtlı yapıyı kullanıyoruz.
+        // $this->data (form inputları) kullanırsak, validasyon sırasında 'options' gibi yapısal veriler eksik gelebilir.
+        // Bu da "The selected value is invalid" hatasına yol açar.
+        $savedSettings = app(GeneralSettings::class)->custom_settings ?? [];
 
-        // ÖNEMLİ: Repeater bazen UUID keyler kullanır. Dynamic Tab'ların veri yolu (path) kararlı olsun diye
-        // burada veriyi sadece değerler (values) olarak alıp 0, 1, 2 gibi indexlere zorluyoruz.
-        // Böylece Inputlar her zaman "tab_values.0.0" gibi erişilir.
-        $customSettings = array_values($customSettings);
+        // Veritabanından gelen veriyi normalize et (0, 1, 2...)
+        $savedSettings = array_values($savedSettings);
 
         $tabs = [];
 
@@ -68,7 +76,7 @@ class ManageSiteSettings extends SettingsPage
             ]);
 
         // 2. Dinamik sekmeler (Sadece değer düzenleme - Refresh yapmaz)
-        foreach ($customSettings as $index => $group) {
+        foreach ($savedSettings as $index => $group) {
             if (empty($group['tab_name']))
                 continue;
 
@@ -79,10 +87,12 @@ class ManageSiteSettings extends SettingsPage
 
             foreach ($groupFields as $fIndex => $fData) {
                 // Ekranda görünen kutu. Veriyi 'tab_values' dizisinden yöneteceğiz.
-                $fields[] = TextInput::make("tab_values.{$index}.{$fIndex}")
+                $component = $this->getComponentByType($fData, "tab_values.{$index}.{$fIndex}")
                     ->label($fData['label'] ?? 'Ayar')
                     ->helperText('Sistem Anahtarı: ' . ($fData['field_name'] ?? '-'))
                     ->key("custom_input_{$index}_{$fIndex}");
+
+                $fields[] = $component;
             }
 
             if (!empty($fields)) {
@@ -114,6 +124,33 @@ class ManageSiteSettings extends SettingsPage
                                 TextInput::make('field_name')
                                     ->label('Sistem Anahtarı')
                                     ->required(),
+                                Select::make('type')
+                                    ->label('Veri Tipi')
+                                    ->options([
+                                        'text' => 'Metin (Text)',
+                                        'email' => 'E-Posta',
+                                        'number' => 'Sayı (Number)',
+                                        'tel' => 'Telefon',
+                                        'url' => 'URL (Link)',
+                                        'password' => 'Şifre',
+                                        'textarea' => 'Geniş Metin (Textarea)',
+                                        'richtext' => 'Zengin Metin (Rich Editor)',
+                                        'select' => 'Seçim Kutusu (Select)',
+                                        'checkbox' => 'Onay Kutusu (Tek)',
+                                        'checkbox_list' => 'Onay Listesi (Çoklu)',
+                                        'radio' => 'Radyo Buton',
+                                        'date' => 'Tarih',
+                                        'time' => 'Saat',
+                                        'datetime' => 'Tarih ve Saat',
+                                        'tags' => 'Etiketler (Tags)',
+                                    ])
+                                    ->default('text')
+                                    ->required()
+                                    ->live(),
+                                KeyValue::make('options')
+                                    ->label('Seçenekler (Key => Label)')
+                                    ->helperText('Sadece Select, Radio ve Checkbox List için gereklidir.')
+                                    ->visible(fn($get) => in_array($get('type'), ['select', 'radio', 'checkbox_list'])),
                                 Hidden::make('value'), // Değeri korumak için gizli alan
                             ])
                             ->columns(2)
@@ -214,6 +251,42 @@ class ManageSiteSettings extends SettingsPage
 
         // Başarılı işlem sonrası net redirect
         $this->redirect(static::getUrl());
+    }
+
+    protected function getComponentByType(array $data, string $statePath)
+    {
+        $type = $data['type'] ?? 'text';
+        $options = $data['options'] ?? [];
+
+        // Seçeneklerin anahtarlarını al (Validasyon için)
+        $optionKeys = array_keys($options);
+
+        return match ($type) {
+            'text' => TextInput::make($statePath),
+            'email' => TextInput::make($statePath)->email(),
+            'number' => TextInput::make($statePath)->numeric(),
+            'tel' => TextInput::make($statePath)->tel(),
+            'url' => TextInput::make($statePath)->url(),
+            'password' => TextInput::make($statePath)->password()->revealable(),
+            'textarea' => Textarea::make($statePath)->rows(3),
+            'select' => Select::make($statePath)
+                ->options($options)
+                ->searchable()
+                ->native(false) // Daha iyi UI ve tip uyumu için
+                ->in($optionKeys), // Validasyon hatasını önlemek için açık kural
+            'checkbox' => Toggle::make($statePath),
+            'checkbox_list' => CheckboxList::make($statePath)
+                ->options($options)
+                ->in($optionKeys),
+            'radio' => Radio::make($statePath)
+                ->options($options)
+                ->in($optionKeys),
+            'date' => DatePicker::make($statePath),
+            'time' => TimePicker::make($statePath),
+            'datetime' => DateTimePicker::make($statePath),
+            'tags' => TagsInput::make($statePath),
+            default => TextInput::make($statePath),
+        };
     }
 
     protected function handleAttachmentsRename(string $oldPath, string $newPath): void
