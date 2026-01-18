@@ -13,6 +13,7 @@ use Filament\Schemas\Schema;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Filament\Forms\Components\Placeholder;
 use Illuminate\Support\Str;
+use CodeWithDennis\FilamentSelectTree\SelectTree;
 
 class TouchFileForm
 {
@@ -38,16 +39,14 @@ class TouchFileForm
                                 \Filament\Forms\Components\TagsInput::make('tags')
                                     ->columnSpanFull(),
 
-                                Select::make('parent_id')
+                                SelectTree::make('parent_id')
                                     ->label('Parent Folder')
-                                    ->options(function () {
-                                        return TouchFile::where('is_folder', true)
-                                            ->orderBy('name')
-                                            ->get()
-                                            ->mapWithKeys(function ($folder) {
-                                                return [$folder->id => $folder->full_path];
-                                            });
+                                    ->relationship('parent', 'name', 'parent_id', function ($query) {
+                                        return $query->where('is_folder', true);
+                                    }, function ($query) {
+                                        return $query->where('is_folder', true);
                                     })
+                                    ->enableBranchNode()
                                     ->searchable()
                                     ->default(fn() => request('parent_id'))
                                     ->visible(function ($livewire, $operation) {
@@ -160,16 +159,14 @@ class TouchFileForm
                             ->maxLength(255)
                             ->placeholder('e.g., Documents, Images, Videos'),
 
-                        Select::make('parent_id')
+                        SelectTree::make('parent_id')
                             ->label('Parent Folder')
-                            ->options(function () {
-                                return TouchFile::where('is_folder', true)
-                                    ->orderBy('name')
-                                    ->get()
-                                    ->mapWithKeys(function ($folder) {
-                                        return [$folder->id => $folder->full_path];
-                                    });
+                            ->relationship('parent', 'name', 'parent_id', function ($query) {
+                                return $query->where('is_folder', true);
+                            }, function ($query) {
+                                return $query->where('is_folder', true);
                             })
+                            ->enableBranchNode()
                             ->searchable()
                             ->placeholder('Root (attachments)')
                             ->helperText('Select a parent folder or leave empty for root directory'),

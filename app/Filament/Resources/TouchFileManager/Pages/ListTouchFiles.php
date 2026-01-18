@@ -15,6 +15,7 @@ use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Select;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
+use CodeWithDennis\FilamentSelectTree\SelectTree;
 
 class ListTouchFiles extends ListRecords
 {
@@ -111,16 +112,14 @@ class ListTouchFiles extends ListRecords
                                             ->default($parentId)
                                             ->visible((bool) $parentId),
 
-                                        Select::make('parent_id')
+                                        SelectTree::make('parent_id')
                                             ->label('Parent Folder')
-                                            ->options(function () {
-                                                return TouchFile::where('is_folder', true)
-                                                    ->orderBy('name')
-                                                    ->get()
-                                                    ->mapWithKeys(function ($folder) {
-                                                        return [$folder->id => $folder->full_path];
-                                                    });
+                                            ->relationship('parent', 'name', 'parent_id', function ($query) {
+                                                return $query->where('is_folder', true);
+                                            }, function ($query) {
+                                                return $query->where('is_folder', true);
                                             })
+                                            ->enableBranchNode()
                                             ->searchable()
                                             ->placeholder('Root (attachments)')
                                             ->visible(!$parentId),
