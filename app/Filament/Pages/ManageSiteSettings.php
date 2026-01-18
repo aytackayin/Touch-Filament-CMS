@@ -37,7 +37,7 @@ class ManageSiteSettings extends SettingsPage
                     ->tabs([
                         Tab::make('General')
                             ->label(__('Genel'))
-                            ->icon(Heroicon::Cog)
+                            ->icon(Heroicon::OutlinedCog6Tooth)
                             ->schema([
                                 TextInput::make('site_title')
                                     ->label(__('Site Başlığı'))
@@ -59,29 +59,37 @@ class ManageSiteSettings extends SettingsPage
                                     ->live(onBlur: true)
                                     ->afterStateUpdated(fn($state, callable $set) => $set('attachments_path', \Illuminate\Support\Str::slug($state))),
                             ]),
-                        Tab::make('Custom Settings')
+                        Tab::make('Dynamic Settings')
                             ->label(__('Dinamik Ayarlar'))
-                            ->icon(Heroicon::ListBullet)
+                            ->icon(Heroicon::OutlinedRectangleStack)
                             ->schema([
                                 \Filament\Forms\Components\Repeater::make('custom_settings')
-                                    ->label(__('Yeni Sekmeler ve Ayarlar'))
+                                    ->label(__('Ayar Grupları'))
                                     ->schema([
                                         TextInput::make('tab_name')
-                                            ->label('Sekme Adı')
-                                            ->required(),
+                                            ->label('Grup (Sekme) Adı')
+                                            ->required()
+                                            ->columnSpanFull(),
                                         \Filament\Forms\Components\Repeater::make('fields')
-                                            ->label('Ayarlar')
+                                            ->label('Bu Gruba Ait Ayarlar')
                                             ->schema([
                                                 TextInput::make('label')
-                                                    ->label('Başlık')
+                                                    ->label('Ayar Adı')
                                                     ->required(),
                                                 TextInput::make('value')
-                                                    ->label('Değer'),
+                                                    ->label('Değeri'),
                                             ])
-                                            ->collapsible(),
+                                            ->columns(2)
+                                            ->collapsible()
+                                            ->itemLabel(fn(array $state): ?string => $state['label'] ?? null)
+                                            ->addActionLabel('Yeni Ayar Ekle')
+                                            ->reorderableWithButtons(),
                                     ])
                                     ->itemLabel(fn(array $state): ?string => $state['tab_name'] ?? null)
-                                    ->collapsed(),
+                                    ->collapsed()
+                                    ->collapsible()
+                                    ->addActionLabel('Yeni Grup Ekle')
+                                    ->reorderableWithButtons(),
                             ]),
                     ])->columnSpan('full'),
             ]);
@@ -97,10 +105,6 @@ class ManageSiteSettings extends SettingsPage
         // Reload settings to get new value
         try {
             $settings = app(GeneralSettings::class);
-            // Force refresh from DB/Storage depending on implementation, 
-            // but normally app() gets the bound instance. Spatie Settings usually refreshes.
-            // If not, we might rely on the form state, but let's trust the updated singleton or manual refresh if needed.
-            // Actually, simplest is to use the form data.
         } catch (\Throwable $e) {
         }
 
@@ -143,18 +147,12 @@ class ManageSiteSettings extends SettingsPage
 
                 // Windows Force Attempts
                 if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
-                    // Force removal of junction/directory
                     exec("cmd /c rmdir \"{$winPath}\"");
-                    // Force removal of file link
                     exec("cmd /c del /q \"{$winPath}\"");
-
-                    // Nuclear validation: if it still exists as a directory junction, force remove recursive
                     if (is_dir($publicOld)) {
                         exec("cmd /c rmdir /s /q \"{$winPath}\"");
                     }
                 } else {
-                    // Linux/Unix Force Attempts
-                    // unlink() usually works, but for parity with the "Force" logic above:
                     exec("rm -rf \"{$publicOld}\"");
                 }
             }
