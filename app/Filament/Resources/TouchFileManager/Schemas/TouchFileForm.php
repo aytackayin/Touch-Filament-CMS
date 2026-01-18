@@ -83,7 +83,9 @@ class TouchFileForm
                                     ->imageEditorAspectRatios([
                                         null,
                                         '16:9',
+                                        '9:16',
                                         '4:3',
+                                        '3:4',
                                         '1:1',
                                     ])
                                     ->enableReordering()
@@ -107,7 +109,9 @@ class TouchFileForm
                                     ->imageEditorAspectRatios([
                                         null,
                                         '16:9',
+                                        '9:16',
                                         '4:3',
+                                        '3:4',
                                         '1:1',
                                     ])
                                     ->preserveFilenames()
