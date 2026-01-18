@@ -104,16 +104,13 @@ class ManageSiteSettings extends SettingsPage
                     ->schema([
                         TextInput::make('tab_name')
                             ->label('Sekme Adı')
-                            ->required()
-                            ->live(onBlur: true),
+                            ->required(),
                         Repeater::make('fields')
                             ->label('Ayarlar')
                             ->schema([
                                 TextInput::make('label')
                                     ->label('Görünen Ad')
-                                    ->required()
-                                    ->live(onBlur: true)
-                                    ->afterStateUpdated(fn($state, callable $set) => $set('field_name', Str::slug($state, '_'))),
+                                    ->required(),
                                 TextInput::make('field_name')
                                     ->label('Sistem Anahtarı')
                                     ->required(),
@@ -124,8 +121,7 @@ class ManageSiteSettings extends SettingsPage
                     ])
                     ->itemLabel(fn(array $state): ?string => $state['tab_name'] ?? null)
                     ->collapsible()
-                    ->collapsed()
-                    ->live(onBlur: true), // Sadece bu repeater yapı değişince yukarıya haber vermesi için live çalışır.
+                    ->collapsed(),
             ]);
 
         return $schema->components([
@@ -156,18 +152,12 @@ class ManageSiteSettings extends SettingsPage
         $repeaterSettings = $data['custom_settings'] ?? [];
         $tabValues = $data['tab_values'] ?? [];
 
-        \Illuminate\Support\Facades\Log::info('--- SAVE START ---');
-        \Illuminate\Support\Facades\Log::info('RAW custom_settings:', $repeaterSettings);
-        \Illuminate\Support\Facades\Log::info('RAW tab_values:', $tabValues);
-
         // 1. REPEATER tarafını normalize et (Keyleri temizle, sadece sıralı liste yap)
         $groups = array_values($repeaterSettings);
 
         // 2. INPUT tarafını normalize et (Keyleri temizle, sadece sıralı liste yap)
         // Yeni eklenenler UUID, eskiler Int gelebilir. Hepsini 0,1,2 silsilesine çeviriyoruz.
         $normalizedTabValues = array_values($tabValues);
-
-        \Illuminate\Support\Facades\Log::info('Normalized Tab Values:', $normalizedTabValues);
 
         $normalizedResult = [];
 
@@ -191,15 +181,10 @@ class ManageSiteSettings extends SettingsPage
                 $fields = array_values($group['fields']);
 
                 foreach ($fields as $fIndex => $field) {
-                    $oldVal = $field['value'] ?? 'NULL';
-
                     // Eşleşen değer var mı? (Sıra numarası ile)
                     if (array_key_exists($fIndex, $groupValues)) {
                         $newVal = $groupValues[$fIndex];
                         $field['value'] = $newVal;
-                        \Illuminate\Support\Facades\Log::info("Group [$gIndex] Field [$fIndex] ('{$field['label']}') UPDATE: $oldVal -> $newVal");
-                    } else {
-                        \Illuminate\Support\Facades\Log::warning("Group [$gIndex] Field [$fIndex] ('{$field['label']}') NO MATCH FOUND in tab_values.");
                     }
                     $cleanGroup['fields'][] = $field;
                 }
@@ -207,9 +192,6 @@ class ManageSiteSettings extends SettingsPage
 
             $normalizedResult[] = $cleanGroup;
         }
-
-        \Illuminate\Support\Facades\Log::info('FINAL custom_settings:', $normalizedResult);
-        \Illuminate\Support\Facades\Log::info('--- SAVE END ---');
 
         $data['custom_settings'] = $normalizedResult;
         unset($data['tab_values']);
