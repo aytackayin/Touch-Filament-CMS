@@ -45,11 +45,8 @@ class ManageSiteSettings extends SettingsPage
     public function form(Schema $schema): Schema
     {
         // Dinamik sekmeleri oluştururken HER ZAMAN veritabanındaki kayıtlı yapıyı kullanıyoruz.
-        // $this->data (form inputları) kullanırsak, validasyon sırasında 'options' gibi yapısal veriler eksik gelebilir.
-        // Bu da "The selected value is invalid" hatasına yol açar.
+        // Bu, Select bileşenlerinin options verisinin her zaman dolu olmasını sağlar.
         $savedSettings = app(GeneralSettings::class)->custom_settings ?? [];
-
-        // Veritabanından gelen veriyi normalize et (0, 1, 2...)
         $savedSettings = array_values($savedSettings);
 
         $tabs = [];
