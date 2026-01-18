@@ -59,22 +59,29 @@ class ManageSiteSettings extends SettingsPage
                                     ->live(onBlur: true)
                                     ->afterStateUpdated(fn($state, callable $set) => $set('attachments_path', \Illuminate\Support\Str::slug($state))),
                             ]),
-                        Tab::make('Contact & Social')
-                            ->label(__('İletişim & Sosyal'))
-                            ->icon(Heroicon::AtSymbol)
+                        Tab::make('Custom Settings')
+                            ->label(__('Dinamik Ayarlar'))
+                            ->icon(Heroicon::ListBullet)
                             ->schema([
-                                TextInput::make('contact_email')
-                                    ->label(__('İletişim E-postası'))
-                                    ->email(),
-                            ]),
-                        Tab::make('Services')
-                            ->label(__('Servisler'))
-                            ->icon(Heroicon::CpuChip)
-                            ->schema([
-                                TextInput::make('google_maps_api_key')
-                                    ->label(__('Google Maps API Anahtarı')),
-                                TextInput::make('google_analytics_id')
-                                    ->label(__('Google Analytics ID')),
+                                \Filament\Forms\Components\Repeater::make('custom_settings')
+                                    ->label(__('Yeni Sekmeler ve Ayarlar'))
+                                    ->schema([
+                                        TextInput::make('tab_name')
+                                            ->label('Sekme Adı')
+                                            ->required(),
+                                        \Filament\Forms\Components\Repeater::make('fields')
+                                            ->label('Ayarlar')
+                                            ->schema([
+                                                TextInput::make('label')
+                                                    ->label('Başlık')
+                                                    ->required(),
+                                                TextInput::make('value')
+                                                    ->label('Değer'),
+                                            ])
+                                            ->collapsible(),
+                                    ])
+                                    ->itemLabel(fn(array $state): ?string => $state['tab_name'] ?? null)
+                                    ->collapsed(),
                             ]),
                     ])->columnSpan('full'),
             ]);
