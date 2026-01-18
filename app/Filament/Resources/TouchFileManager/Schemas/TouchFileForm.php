@@ -29,6 +29,10 @@ class TouchFileForm
                                     ->label('Name')
                                     ->required()
                                     ->maxLength(255)
+                                    ->notIn(['thumbs', 'temp'])
+                                    ->validationMessages([
+                                        'not_in' => 'The name ":input" is reserved and cannot be used.',
+                                    ])
                                     ->visible(fn($operation) => $operation === 'edit'),
 
                                 TextInput::make('alt')
@@ -157,6 +161,10 @@ class TouchFileForm
                             ->label('Folder Name')
                             ->required()
                             ->maxLength(255)
+                            ->notIn(['thumbs', 'temp'])
+                            ->validationMessages([
+                                'not_in' => 'The name ":input" is reserved and cannot be used.',
+                            ])
                             ->placeholder('e.g., Documents, Images, Videos'),
 
                         SelectTree::make('parent_id')

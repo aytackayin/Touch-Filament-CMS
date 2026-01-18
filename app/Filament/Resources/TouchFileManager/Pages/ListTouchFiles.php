@@ -90,6 +90,110 @@ class ListTouchFiles extends ListRecords
                 ->url($upUrl)
                 ->size('xs'),
 
+            Action::make('sync')
+                ->label('Sync Files')
+                ->icon('heroicon-o-arrow-path')
+                ->color('info')
+                ->size('xs')
+                ->action(function () {
+                    $disk = Storage::disk('attachments');
+                    $allFiles = $disk->allFiles();
+                    $allDirectories = $disk->allDirectories();
+
+                    $isExcluded = function ($path) {
+                        $parts = explode('/', $path);
+                        foreach ($parts as $part) {
+                            if (in_array($part, ['thumbs', 'temp'])) {
+                                return true;
+                            }
+                        }
+                        return false;
+                    };
+
+                    $addedCount = 0;
+
+                    // 1. Process Directories
+                    usort($allDirectories, function ($a, $b) {
+                        return strlen($a) - strlen($b);
+                    });
+
+                    foreach ($allDirectories as $dirPath) {
+                        if ($isExcluded($dirPath))
+                            continue;
+
+                        $existing = TouchFile::where('is_folder', true)
+                            ->where('path', $dirPath)
+                            ->exists();
+
+                        if (!$existing) {
+                            $name = basename($dirPath);
+                            $parentPath = dirname($dirPath);
+                            $parentId = null;
+
+                            if ($parentPath !== '.') {
+                                $parent = TouchFile::where('is_folder', true)->where('path', $parentPath)->first();
+                                if ($parent) {
+                                    $parentId = $parent->id;
+                                }
+                            }
+
+                            TouchFile::create([
+                                'name' => $name,
+                                'path' => $dirPath,
+                                'is_folder' => true,
+                                'parent_id' => $parentId,
+                            ]);
+
+                            $addedCount++;
+                        }
+                    }
+
+                    // 2. Process Files
+                    foreach ($allFiles as $filePath) {
+                        if ($isExcluded($filePath))
+                            continue;
+
+                        $existing = TouchFile::where('is_folder', false)
+                            ->where('path', $filePath)
+                            ->exists();
+
+                        if (!$existing) {
+                            $name = basename($filePath);
+                            $parentPath = dirname($filePath);
+                            $parentId = null;
+
+                            if ($parentPath !== '.') {
+                                $parent = TouchFile::where('is_folder', true)->where('path', $parentPath)->first();
+                                if ($parent) {
+                                    $parentId = $parent->id;
+                                }
+                            }
+
+                            $mimeType = $disk->mimeType($filePath);
+                            $size = $disk->size($filePath);
+                            $type = TouchFile::determineFileType($mimeType ?? '');
+
+                            TouchFile::create([
+                                'name' => $name,
+                                'path' => $filePath,
+                                'is_folder' => false,
+                                'parent_id' => $parentId,
+                                'mime_type' => $mimeType,
+                                'size' => $size,
+                                'type' => $type,
+                            ]);
+
+                            $addedCount++;
+                        }
+                    }
+
+                    \Filament\Notifications\Notification::make()
+                        ->title('Sync Completed')
+                        ->body("Added {$addedCount} new items.")
+                        ->success()
+                        ->send();
+                }),
+
             Action::make('createFolder')
                 ->label('New Folder')
                 ->icon('heroicon-o-folder-plus')
@@ -106,6 +210,10 @@ class ListTouchFiles extends ListRecords
                                             ->label('Folder Name')
                                             ->required()
                                             ->maxLength(255)
+                                            ->notIn(['thumbs', 'temp'])
+                                            ->validationMessages([
+                                                'not_in' => 'The name ":input" is reserved and cannot be used.',
+                                            ])
                                             ->placeholder('e.g., Documents'),
 
                                         Hidden::make('parent_id')
