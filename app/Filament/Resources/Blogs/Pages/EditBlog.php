@@ -23,9 +23,48 @@ class EditBlog extends EditRecord
 
     public function mount(int|string $record): void
     {
+        $this->syncAttachmentsFromDisk($record);
         parent::mount($record);
 
         $this->previousUrl = url()->previous();
+    }
+
+    protected function syncAttachmentsFromDisk($recordId): void
+    {
+        $record = $this->resolveRecord($recordId);
+
+        if (!$record)
+            return;
+
+        $disk = \Illuminate\Support\Facades\Storage::disk('attachments');
+        $baseDir = "blogs/{$record->id}";
+
+        if ($disk->exists($baseDir)) {
+            // Get all files recursively
+            $allFiles = $disk->allFiles($baseDir);
+
+            // Filter: Exclude thumbs
+            $validAttachments = array_filter($allFiles, function ($path) {
+                return !str_contains($path, '/thumbs/');
+            });
+
+            // Normalize paths
+            $validAttachments = array_values(array_map(function ($path) {
+                return str_replace('\\', '/', $path);
+            }, $validAttachments));
+
+            // Compare
+            $currentAttachments = $record->attachments ?? [];
+
+            // Sort for comparison
+            sort($validAttachments);
+            sort($currentAttachments);
+
+            if ($validAttachments !== $currentAttachments) {
+                $record->attachments = $validAttachments;
+                $record->saveQuietly();
+            }
+        }
     }
 
     protected function mutateFormDataBeforeSave(array $data): array
