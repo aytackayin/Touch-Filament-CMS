@@ -2,11 +2,10 @@
 
 namespace App\Filament\Resources\TouchFileManager\Schemas;
 
-use App\Models\TouchFile;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Hidden;
-use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Textarea;
 use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
@@ -33,38 +32,28 @@ class TouchFileForm
                                     ->validationMessages([
                                         'not_in' => 'The name ":input" is reserved and cannot be used.',
                                     ])
+                                    ->extraInputAttributes(fn($record) => [
+                                        'style' => 'text-transform: lowercase',
+                                        'x-on:input' => $record?->is_folder
+                                            ? "\$el.value = \$el.value.toLowerCase().replace(/[çğışıöü]/g, c => ({'ç':'c','ğ':'g','ı':'i','ş':'s','ö':'o','ü':'u'}[c])).replace(/\s+/g, '-').replace(/[^a-z0-9\-_]/g, '').replace(/-+/g, '-'); \$el.dispatchEvent(new Event('input'))"
+                                            : "\$el.value = \$el.value.toLowerCase().replace(/[çğışıöü]/g, c => ({'ç':'c','ğ':'g','ı':'i','ş':'s','ö':'o','ü':'u'}[c])).replace(/\s+/g, '-').replace(/[^a-z0-9\-_.]/g, '').replace(/-+/g, '-'); \$el.dispatchEvent(new Event('input'))",
+                                    ])
+                                    ->live(onBlur: true)
+                                    ->afterStateUpdated(function ($state, $set, $record) {
+                                        if (!$state)
+                                            return;
+                                        if ($record?->is_folder) {
+                                            $set('name', Str::slug($state));
+                                        } else {
+                                            $ext = pathinfo($state, PATHINFO_EXTENSION);
+                                            $name = pathinfo($state, PATHINFO_FILENAME);
+                                            $slugged = Str::slug($name);
+                                            $result = $ext ? $slugged . '.' . $ext : $slugged;
+                                            $set('name', strtolower($result));
+                                        }
+                                    })
                                     ->visible(fn($operation) => $operation === 'edit'),
 
-                                TextInput::make('alt')
-                                    ->label('Description (Alt)')
-                                    ->placeholder('File description...')
-                                    ->maxLength(255),
-
-                                \Filament\Forms\Components\TagsInput::make('tags')
-                                    ->columnSpanFull(),
-
-                                SelectTree::make('parent_id')
-                                    ->label('Parent Folder')
-                                    ->relationship('parent', 'name', 'parent_id', function ($query) {
-                                        return $query->where('is_folder', true);
-                                    }, function ($query) {
-                                        return $query->where('is_folder', true);
-                                    })
-                                    ->enableBranchNode()
-                                    ->searchable()
-                                    ->default(fn() => request('parent_id'))
-                                    ->visible(function ($livewire, $operation) {
-                                        if ($operation === 'edit')
-                                            return true;
-                                        // If parent_id is set in Livewire component (CreateTouchFile) or Request, hide it
-                                        if (isset($livewire->parent_id) && $livewire->parent_id) {
-                                            return false;
-                                        }
-                                        return !request()->filled('parent_id');
-                                    })
-                                    ->dehydrated()
-                                    ->placeholder('Root (attachments)')
-                                    ->helperText('Select a parent folder or leave empty for root directory'),
 
                                 FileUpload::make('files')
                                     ->label('Upload Files')
@@ -143,6 +132,37 @@ class TouchFileForm
                                 Hidden::make('is_folder')
                                     ->default(false)
                                     ->dehydrated(),
+
+                                \Filament\Forms\Components\TagsInput::make('tags')
+                                    ->columnSpanFull(),
+
+                                SelectTree::make('parent_id')
+                                    ->label('Parent Folder')
+                                    ->relationship('parent', 'name', 'parent_id', function ($query) {
+                                        return $query->where('is_folder', true);
+                                    }, function ($query) {
+                                        return $query->where('is_folder', true);
+                                    })
+                                    ->enableBranchNode()
+                                    ->searchable()
+                                    ->default(fn() => request('parent_id'))
+                                    ->visible(function ($livewire, $operation) {
+                                        if ($operation === 'edit')
+                                            return true;
+                                        // If parent_id is set in Livewire component (CreateTouchFile) or Request, hide it
+                                        if (isset($livewire->parent_id) && $livewire->parent_id) {
+                                            return false;
+                                        }
+                                        return !request()->filled('parent_id');
+                                    })
+                                    ->dehydrated()
+                                    ->placeholder('Root (attachments)')
+                                    ->helperText('Select a parent folder or leave empty for root directory'),
+
+                                Textarea::make('alt')
+                                    ->label('Description (Alt)')
+                                    ->placeholder('File description...')
+                                    ->maxLength(255),
                             ])
                             ->columns(2),
                     ])
@@ -164,7 +184,14 @@ class TouchFileForm
                             ->notIn(['thumbs', 'temp'])
                             ->validationMessages([
                                 'not_in' => 'The name ":input" is reserved and cannot be used.',
+                                'slug' => 'Only slug-friendly characters are allowed.',
                             ])
+                            ->extraInputAttributes([
+                                'style' => 'text-transform: lowercase',
+                                'x-on:input' => "\$el.value = \$el.value.toLowerCase().replace(/[çğışıöü]/g, c => ({'ç':'c','ğ':'g','ı':'i','ş':'s','ö':'o','ü':'u'}[c])).replace(/\s+/g, '-').replace(/[^a-z0-9\-_]/g, '').replace(/-+/g, '-'); \$el.dispatchEvent(new Event('input'))",
+                            ])
+                            ->live(onBlur: true)
+                            ->afterStateUpdated(fn($state, callable $set) => $set('name', Str::slug($state)))
                             ->placeholder('e.g., Documents, Images, Videos'),
 
                         SelectTree::make('parent_id')

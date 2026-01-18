@@ -214,6 +214,12 @@ class ListTouchFiles extends ListRecords
                                             ->validationMessages([
                                                 'not_in' => 'The name ":input" is reserved and cannot be used.',
                                             ])
+                                            ->extraInputAttributes([
+                                                'style' => 'text-transform: lowercase',
+                                                'x-on:input' => "\$el.value = \$el.value.toLowerCase().replace(/[çğışıöü]/g, c => ({'ç':'c','ğ':'g','ı':'i','ş':'s','ö':'o','ü':'u'}[c])).replace(/\s+/g, '-').replace(/[^a-z0-9\-_]/g, '').replace(/-+/g, '-'); \$el.dispatchEvent(new Event('input'))",
+                                            ])
+                                            ->live(onBlur: true)
+                                            ->afterStateUpdated(fn($state, callable $set) => $set('name', Str::slug($state)))
                                             ->placeholder('e.g., Documents'),
 
                                         Hidden::make('parent_id')
