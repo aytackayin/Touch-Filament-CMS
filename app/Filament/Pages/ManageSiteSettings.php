@@ -69,32 +69,21 @@ class ManageSiteSettings extends SettingsPage
                 continue;
 
             $fields = $group['fields'] ?? [];
+            $fieldSchemas = [];
 
-            $tabs[] = Tab::make('dynamic_view_' . $index)
-                ->label($group['tab_name'])
-                ->schema([
-                    \Filament\Schemas\Components\Group::make()
-                        ->statePath("custom_settings.{$index}.fields")
-                        ->schema(function () use ($fields) {
-                            $inputs = [];
-                            foreach ($fields as $fIndex => $fData) {
-                                $inputs[] = \Filament\Schemas\Components\Grid::make(3)->schema([
-                                    TextInput::make("{$fIndex}.label")
-                                        ->label('Ayar Adı')
-                                        ->disabled()
-                                        ->dehydrated(),
-                                    TextInput::make("{$fIndex}.field_name")
-                                        ->label('Sistem Anahtarı')
-                                        ->disabled()
-                                        ->dehydrated(),
-                                    TextInput::make("{$fIndex}.value")
-                                        ->label('Değeri')
-                                        ->required(),
-                                ]);
-                            }
-                            return $inputs;
-                        })
-                ]);
+            foreach ($fields as $fIndex => $fData) {
+                // Sadece Label ve Giriş kutusu (Sistem anahtarı gizli/bilgi olarak var)
+                $fieldSchemas[] = TextInput::make("custom_settings.{$index}.fields.{$fIndex}.value")
+                    ->label($fData['label'] ?? 'Ayar')
+                    ->helperText('Sistem Anahtarı: ' . ($fData['field_name'] ?? '-'))
+                    ->required();
+            }
+
+            if (!empty($fieldSchemas)) {
+                $tabs[] = Tab::make('dynamic_tab_' . $index)
+                    ->label($group['tab_name'])
+                    ->schema($fieldSchemas);
+            }
         }
 
         // 3. Dinamik Ayar Yönetimi (Grup/Ayar Tanımlama ve Silme)
@@ -103,7 +92,7 @@ class ManageSiteSettings extends SettingsPage
             ->icon(Heroicon::OutlinedRectangleStack)
             ->schema([
                 \Filament\Forms\Components\Placeholder::make('info_help')
-                    ->content('Yeni sekmeler ve veri anahtarlarını buradan tanımlayın. Değerleri değiştirmek için yukarıda oluşan sekmeleri kullanın.'),
+                    ->content('Buradan yeni sekme grupları ve sistem anahtarları (field_name) tanımlayabilirsiniz. Değerleri ise yukarıda oluşan ilgili sekmeden güncelleyebilirsiniz.'),
                 \Filament\Forms\Components\Repeater::make('custom_settings')
                     ->label(__('Sekme Grupları ve Şema'))
                     ->schema([
