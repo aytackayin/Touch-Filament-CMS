@@ -51,7 +51,13 @@ class ManageSiteSettings extends SettingsPage
                                     ->label(__('Dosya Yolu (Disk Path)'))
                                     ->helperText('DİKKAT: Bu ayarı değiştirmek physical klasör adını değiştirir ve sembolik linkleri yeniden oluşturur.')
                                     ->default('attachments')
-                                    ->required(),
+                                    ->required()
+                                    ->extraInputAttributes([
+                                        'style' => 'text-transform: lowercase',
+                                        'x-on:input' => "\$el.value = \$el.value.toLowerCase().replace(/[çğışıöü]/g, c => ({'ç':'c','ğ':'g','ı':'i','ş':'s','ö':'o','ü':'u'}[c])).replace(/\s+/g, '-').replace(/[^a-z0-9\-_]/g, '').replace(/-+/g, '-'); \$el.dispatchEvent(new Event('input'))",
+                                    ])
+                                    ->live(onBlur: true)
+                                    ->afterStateUpdated(fn($state, callable $set) => $set('attachments_path', \Illuminate\Support\Str::slug($state))),
                             ]),
                         Tab::make('Contact & Social')
                             ->label(__('İletişim & Sosyal'))
@@ -139,6 +145,10 @@ class ManageSiteSettings extends SettingsPage
                     if (is_dir($publicOld)) {
                         exec("cmd /c rmdir /s /q \"{$winPath}\"");
                     }
+                } else {
+                    // Linux/Unix Force Attempts
+                    // unlink() usually works, but for parity with the "Force" logic above:
+                    exec("rm -rf \"{$publicOld}\"");
                 }
             }
 
