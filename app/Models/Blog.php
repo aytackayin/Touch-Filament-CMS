@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
+use App\Models\TouchFile;
 
 class Blog extends Model
 {
@@ -100,6 +101,7 @@ class Blog extends Model
                     if ($disk->exists($deletedFile)) {
                         $disk->delete($deletedFile);
                     }
+                    TouchFile::unregisterFile($deletedFile);
 
                     // Delete thumbnail
                     $filename = basename($deletedFile);
@@ -123,6 +125,10 @@ class Blog extends Model
                     $allFiles = $disk->allFiles($blogDir);
                     if (empty($allFiles)) {
                         $disk->deleteDirectory($blogDir);
+                        // Also remove folder from TouchFile
+                        $touchFolder = TouchFile::where('path', $blogDir)->first();
+                        if ($touchFolder)
+                            $touchFolder->delete();
                     }
                 }
 
@@ -165,6 +171,7 @@ class Blog extends Model
 
                         // Move main file
                         $disk->move($attachment, $newPath);
+                        TouchFile::registerFile($newPath);
 
                         // Handle image-specific logic (thumbnails)
                         if ($isImage) {
@@ -193,10 +200,16 @@ class Blog extends Model
                         $changed = true;
                     } else {
                         $newAttachments[] = $attachment;
+                        // Attempt to register strictly if it exists physically
+                        if ($disk->exists($attachment)) {
+                            TouchFile::registerFile($attachment);
+                        }
                     }
                 } else {
                     // Handle existing files - check if thumbnail exists ONLY for images
                     if ($disk->exists($attachment)) {
+                        TouchFile::registerFile($attachment); // SYNC HERE
+
                         $mimeType = $disk->mimeType($attachment);
                         $isImage = str_starts_with($mimeType, 'image/');
 

@@ -4,6 +4,7 @@ namespace App\Observers;
 
 use App\Models\BlogCategory;
 use Illuminate\Support\Facades\Storage;
+use App\Models\TouchFile;
 
 class BlogCategoryObserver
 {
@@ -72,6 +73,7 @@ class BlogCategoryObserver
                 if ($disk->exists($deletedFile)) {
                     $disk->delete($deletedFile);
                 }
+                TouchFile::unregisterFile($deletedFile);
 
                 // Delete thumbnail
                 $filename = basename($deletedFile);
@@ -119,6 +121,7 @@ class BlogCategoryObserver
 
                     // Move main file
                     $disk->move($attachment, $newPath);
+                    TouchFile::registerFile($newPath);
 
                     // Generate thumbnail
                     if ($manager) {
@@ -138,29 +141,36 @@ class BlogCategoryObserver
                     $changed = true;
                 } else {
                     $newAttachments[] = $attachment;
+                    if ($disk->exists($attachment)) {
+                        TouchFile::registerFile($attachment);
+                    }
                 }
             } else {
                 // Handle existing files - check if thumbnail exists
-                $filename = basename($attachment);
-                $thumbsDir = "blog_categories/{$blogCategory->id}/images/thumbs";
-                $thumbPath = "{$thumbsDir}/{$filename}";
+                if ($disk->exists($attachment)) {
+                    TouchFile::registerFile($attachment); // SYNC HERE
 
-                // If main file exists but thumbnail doesn't, create it
-                if ($disk->exists($attachment) && !$disk->exists($thumbPath) && $manager) {
-                    try {
-                        // Ensure thumbs directory exists
-                        if (!$disk->exists($thumbsDir)) {
-                            $disk->makeDirectory($thumbsDir);
+                    $filename = basename($attachment);
+                    $thumbsDir = "blog_categories/{$blogCategory->id}/images/thumbs";
+                    $thumbPath = "{$thumbsDir}/{$filename}";
+
+                    // If main file exists but thumbnail doesn't, create it
+                    if (!$disk->exists($thumbPath) && $manager) {
+                        try {
+                            // Ensure thumbs directory exists
+                            if (!$disk->exists($thumbsDir)) {
+                                $disk->makeDirectory($thumbsDir);
+                            }
+
+                            $fullPath = $disk->path($attachment);
+                            $thumbFullPath = $disk->path($thumbPath);
+
+                            $image = $manager->read($fullPath);
+                            $image->scale(width: 150);
+                            $image->save($thumbFullPath);
+                        } catch (\Exception $e) {
+                            // Fail silently
                         }
-
-                        $fullPath = $disk->path($attachment);
-                        $thumbFullPath = $disk->path($thumbPath);
-
-                        $image = $manager->read($fullPath);
-                        $image->scale(width: 150);
-                        $image->save($thumbFullPath);
-                    } catch (\Exception $e) {
-                        // Fail silently
                     }
                 }
 

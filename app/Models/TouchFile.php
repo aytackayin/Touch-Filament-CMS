@@ -383,4 +383,68 @@ class TouchFile extends Model
 
         return 'other';
     }
+    /**
+     * Sync file to TouchFileManager (Create/Update)
+     */
+    public static function registerFile(string $path): void
+    {
+        $disk = Storage::disk('attachments');
+        if (!$disk->exists($path)) {
+            return;
+        }
+
+        // Check if already exists
+        if (static::where('path', $path)->exists()) {
+            return;
+        }
+
+        $parts = explode('/', $path);
+        $fileName = array_pop($parts);
+        $currentPath = '';
+        $parentId = null;
+
+        // 1. Ensure Folder Structure Exists
+        foreach ($parts as $part) {
+            $currentPath = $currentPath ? $currentPath . '/' . $part : $part;
+
+            $folder = static::where('is_folder', true)
+                ->where('path', $currentPath)
+                ->first();
+
+            if (!$folder) {
+                $folder = static::create([
+                    'name' => $part,
+                    'path' => $currentPath,
+                    'is_folder' => true,
+                    'parent_id' => $parentId,
+                ]);
+            }
+
+            $parentId = $folder->id;
+        }
+
+        // 2. Create File Record
+        $mimeType = $disk->mimeType($path);
+
+        static::create([
+            'name' => $fileName,
+            'path' => $path,
+            'is_folder' => false,
+            'parent_id' => $parentId,
+            'mime_type' => $mimeType,
+            'size' => $disk->size($path),
+            'type' => static::determineFileType($mimeType ?? ''),
+        ]);
+    }
+
+    /**
+     * Remove file from TouchFileManager
+     */
+    public static function unregisterFile(string $path): void
+    {
+        $file = static::where('path', $path)->where('is_folder', false)->first();
+        if ($file) {
+            $file->delete();
+        }
+    }
 }
