@@ -231,6 +231,7 @@ class TouchFileManagerTable
                     ->badge()
                     ->separator(',')
                     ->searchable()
+                    ->wrap()
                     ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('created_at')
@@ -314,12 +315,10 @@ class TouchFileManagerTable
                     ->extraAttributes(fn($record) => [
                         'x-data' => '{}',
                         'x-on:click.prevent.stop' => "
-            navigator.clipboard.writeText('" .
-                            e(url('attachments/' . ltrim($record->path, '/'))) .
-                            "');
+            navigator.clipboard.writeText('" . e(Storage::disk('attachments')->url($record->path)) . "');
             \$dispatch('notify', {
                 title: 'URL kopyalandı',
-                body: '" . e(url('attachments/' . ltrim($record->path, '/'))) . "'
+                body: '" . e(Storage::disk('attachments')->url($record->path)) . "'
             });
         ",
                     ]),
