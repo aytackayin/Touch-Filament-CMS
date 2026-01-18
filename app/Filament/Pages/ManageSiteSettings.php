@@ -18,6 +18,7 @@ use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\KeyValue;
 use Filament\Forms\Components\Placeholder;
+use Filament\Forms\Components\ColorPicker;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Schema;
@@ -136,6 +137,7 @@ class ManageSiteSettings extends SettingsPage
                                         'checkbox' => 'Onay Kutusu (Tek)',
                                         'checkbox_list' => 'Onay Listesi (Çoklu)',
                                         'radio' => 'Radyo Buton',
+                                        'color' => 'Renk Seçici (Color Picker)',
                                         'date' => 'Tarih',
                                         'time' => 'Saat',
                                         'datetime' => 'Tarih ve Saat',
@@ -278,6 +280,7 @@ class ManageSiteSettings extends SettingsPage
             'radio' => Radio::make($statePath)
                 ->options($options)
                 ->in($optionKeys),
+            'color' => ColorPicker::make($statePath),
             'date' => DatePicker::make($statePath),
             'time' => TimePicker::make($statePath),
             'datetime' => DateTimePicker::make($statePath),
