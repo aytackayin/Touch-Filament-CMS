@@ -27,7 +27,7 @@ use Filament\Support\Icons\Heroicon;
 use BackedEnum;
 use Illuminate\Support\Str;
 
-use App\Filament\Forms\Components\SelectIcon;
+use AytacKayin\FilamentSelectIcon\Forms\Components\SelectIcon;
 
 class ManageSiteSettings extends SettingsPage
 {

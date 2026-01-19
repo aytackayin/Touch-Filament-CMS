@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "3cc640126afa9aceb6d0a5e271fa2335",
+    "content-hash": "e040545db21c5995b4fef6f651678471",
     "packages": [
         {
             "name": "andreia/filament-nord-theme",
@@ -151,6 +151,63 @@
                 "source": "https://github.com/AnourValar/eloquent-serialize/tree/1.3.5"
             },
             "time": "2025-12-04T13:38:21+00:00"
+        },
+        {
+            "name": "aytackayin/filament-select-icon",
+            "version": "v1.0.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/aytackayin/SelectIcon-Plugin.git",
+                "reference": "f5848d37f44bb3f0c1bbaf66a1f7a7f2195fe722"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/aytackayin/SelectIcon-Plugin/zipball/f5848d37f44bb3f0c1bbaf66a1f7a7f2195fe722",
+                "reference": "f5848d37f44bb3f0c1bbaf66a1f7a7f2195fe722",
+                "shasum": ""
+            },
+            "require": {
+                "filament/filament": "^3.0|^4.0",
+                "php": "^8.1",
+                "spatie/laravel-package-tools": "^1.15"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "AytacKayin\\FilamentSelectIcon\\FilamentSelectIconServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "AytacKayin\\FilamentSelectIcon\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Aytaç Kayın",
+                    "email": "aytackayin@gmail.com",
+                    "role": "Developer"
+                }
+            ],
+            "description": "A custom Filament form component that provides a beautiful, grid-based icon picker with a built-in search functionality and custom tooltips.",
+            "homepage": "https://github.com/aytackayin/SelectIcon-Plugin",
+            "keywords": [
+                "aytackayin",
+                "filament",
+                "laravel",
+                "select-icon"
+            ],
+            "support": {
+                "issues": "https://github.com/aytackayin/SelectIcon-Plugin/issues",
+                "source": "https://github.com/aytackayin/SelectIcon-Plugin/tree/v1.0.2"
+            },
+            "time": "2026-01-19T16:02:15+00:00"
         },
         {
             "name": "aytackayin/tinymce",
