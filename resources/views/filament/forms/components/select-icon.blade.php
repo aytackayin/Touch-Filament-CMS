@@ -34,7 +34,7 @@
                 display: grid;
                 grid-template-columns: repeat(auto-fill, minmax(44px, 1fr));
                 gap: 8px;
-                padding: 60px 30px 8px 30px;
+                padding: 50px 30px 8px 30px;
                 max-height: 350px;
                 overflow-y: auto;
                 overflow-x: hidden;
@@ -56,7 +56,7 @@
             .select-icon-tooltip {
                 visibility: hidden;
                 position: absolute;
-                bottom: 100%;
+                bottom: 65%;
                 left: 50%;
                 transform: translateX(-50%) translateY(5px);
                 background-color: #111827;
