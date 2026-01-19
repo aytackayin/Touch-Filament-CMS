@@ -29,8 +29,11 @@ use Illuminate\Support\Str;
 
 use AytacKayin\FilamentSelectIcon\Forms\Components\SelectIcon;
 
+use BezhanSalleh\FilamentShield\Traits\HasPageShield;
+
 class ManageSiteSettings extends SettingsPage
 {
+    use HasPageShield;
     protected static string $settings = GeneralSettings::class;
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedAdjustmentsHorizontal;
 

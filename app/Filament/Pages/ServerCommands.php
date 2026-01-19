@@ -9,8 +9,11 @@ use Illuminate\Support\Facades\Artisan;
 use Filament\Support\Icons\Heroicon;
 use BackedEnum;
 
+use BezhanSalleh\FilamentShield\Traits\HasPageShield;
+
 class ServerCommands extends Page
 {
+    use HasPageShield;
     protected string $view = 'filament.pages.server-commands';
 
     protected static ?string $navigationLabel = 'Server Commands';

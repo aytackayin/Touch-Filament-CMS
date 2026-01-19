@@ -11,7 +11,7 @@ use Illuminate\Auth\Access\HandlesAuthorization;
 class BlogPolicy
 {
     use HandlesAuthorization;
-    
+
     public function viewAny(AuthUser $authUser): bool
     {
         return $authUser->can('ViewAny:Blog');
@@ -35,6 +35,11 @@ class BlogPolicy
     public function delete(AuthUser $authUser, Blog $blog): bool
     {
         return $authUser->can('Delete:Blog');
+    }
+
+    public function deleteAny(AuthUser $authUser): bool
+    {
+        return $authUser->can('DeleteAny:Blog');
     }
 
     public function restore(AuthUser $authUser, Blog $blog): bool

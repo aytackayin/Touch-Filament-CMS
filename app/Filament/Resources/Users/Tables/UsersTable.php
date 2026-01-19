@@ -36,17 +36,19 @@ class UsersTable
             ->filters([
                 //
             ])
-            ->recordActions([
+            ->actions([
                 EditAction::make()
                     ->icon('heroicon-o-pencil-square')
                     ->label('')
-                    ->tooltip(__('button.edit')),
+                    ->tooltip(__('button.edit'))
+                    ->visible(fn($record) => auth()->user()->can('update', $record)),
                 DeleteAction::make()
                     ->icon('heroicon-o-trash')
                     ->label('')
-                    ->tooltip(__('button.delete')),
+                    ->tooltip(__('button.delete'))
+                    ->visible(fn($record) => auth()->user()->can('delete', $record)),
             ])
-            ->toolbarActions([
+            ->bulkActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),

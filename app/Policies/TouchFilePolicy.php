@@ -11,7 +11,7 @@ use Illuminate\Auth\Access\HandlesAuthorization;
 class TouchFilePolicy
 {
     use HandlesAuthorization;
-    
+
     public function viewAny(AuthUser $authUser): bool
     {
         return $authUser->can('ViewAny:TouchFile');
@@ -35,6 +35,11 @@ class TouchFilePolicy
     public function delete(AuthUser $authUser, TouchFile $touchFile): bool
     {
         return $authUser->can('Delete:TouchFile');
+    }
+
+    public function deleteAny(AuthUser $authUser): bool
+    {
+        return $authUser->can('DeleteAny:TouchFile');
     }
 
     public function restore(AuthUser $authUser, TouchFile $touchFile): bool

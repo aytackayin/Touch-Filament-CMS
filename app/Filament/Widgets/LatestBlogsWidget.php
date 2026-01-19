@@ -10,9 +10,12 @@ use Filament\Support\Enums\IconSize;
 use Filament\Tables\Columns\TextColumn;
 use App\Filament\Resources\Blogs\BlogResource;
 use Filament\Widgets\TableWidget as BaseWidget;
+use Filament\Actions\EditAction;
+use BezhanSalleh\FilamentShield\Traits\HasWidgetShield;
 
 class LatestBlogsWidget extends BaseWidget
 {
+    use HasWidgetShield;
     protected int|string|array $columnSpan = 1;
 
     protected static ?int $sort = 2;
@@ -29,28 +32,30 @@ class LatestBlogsWidget extends BaseWidget
             ->paginated(false)
             ->striped()
             ->columns([
-                    TextColumn::make('title')
-                        ->icon('heroicon-s-document-text')
-                        ->wrap(),
-                    IconColumn::make('is_published')
-                        ->label('')
-                        ->size(IconSize::Medium)
-                        ->alignCenter(true)
-                        ->boolean()
-                        ->action(function ($record) {
+                TextColumn::make('title')
+                    ->icon('heroicon-s-document-text')
+                    ->wrap(),
+                IconColumn::make('is_published')
+                    ->label('')
+                    ->size(IconSize::Medium)
+                    ->alignCenter(true)
+                    ->boolean()
+                    ->action(function ($record) {
+                        if (auth()->user()->can('update', $record)) {
                             $record->is_published = !$record->is_published;
                             $record->save();
-                        }),
-                    /*                     TextColumn::make('created_at')
-                                            ->label(__('Oluşturulma Tarihi'))
-                                            ->date(), */
-                ])
+                        }
+                    }),
+                /*                     TextColumn::make('created_at')
+                                        ->label(__('Oluşturulma Tarihi'))
+                                        ->date(), */
+            ])
             ->actions([
-                    Action::make('edit')
-                        ->url(fn(Blog $record): string => BlogResource::getUrl('edit', ['record' => $record]))
-                        ->icon('heroicon-o-pencil-square')
-                        ->label('')
-                        ->tooltip(__('button.edit')),
-                ]);
+                EditAction::make()
+                    ->url(fn(Blog $record): string => BlogResource::getUrl('edit', ['record' => $record]))
+                    ->label('')
+                    ->tooltip(__('button.edit'))
+                    ->visible(fn($record) => auth()->user()->can('update', $record)),
+            ]);
     }
 }

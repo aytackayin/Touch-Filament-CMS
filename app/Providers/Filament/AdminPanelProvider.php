@@ -51,7 +51,11 @@ class AdminPanelProvider extends PanelProvider
             ->plugins([
 
                 BreezyCore::make()
-                    ->myProfile(),
+                    ->myProfile(
+                        shouldRegisterNavigation: true,
+                        slug: 'my-profile'
+                    )
+                    ->customMyProfilePage(\App\Filament\Pages\BreezyProfile::class),
                 \BezhanSalleh\FilamentShield\FilamentShieldPlugin::make(),
             ])
             ->middleware([

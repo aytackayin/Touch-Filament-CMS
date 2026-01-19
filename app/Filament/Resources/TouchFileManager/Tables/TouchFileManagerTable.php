@@ -274,7 +274,7 @@ class TouchFileManagerTable
                     })
                     ->searchable(),
             ])
-            ->recordActions([
+            ->actions([
                 Action::make('download')
                     ->icon('heroicon-o-arrow-down-tray')
                     ->label('')
@@ -304,6 +304,7 @@ class TouchFileManagerTable
                     ->icon('heroicon-o-pencil-square')
                     ->label('')
                     ->tooltip('Edit')
+                    ->visible(fn($record) => $record?->id !== 0 && auth()->user()->can('update', $record))
                     ->hidden(fn($record) => $record?->id === 0),
 
                 Action::make('copy_url')
@@ -334,6 +335,7 @@ class TouchFileManagerTable
                         ? 'Are you sure you want to delete this folder? All files and subfolders inside will also be deleted.'
                         : 'Are you sure you want to delete this file?')
                     ->action(fn($record) => $record->delete())
+                    ->visible(fn($record) => $record?->id !== 0 && auth()->user()->can('delete', $record))
                     ->hidden(fn($record) => $record?->id === 0),
             ])
             ->bulkActions([

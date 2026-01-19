@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Languages\Tables;
 
 use Filament\Actions\Action;
+use Filament\Actions\EditAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -29,6 +30,9 @@ class LanguagesTable
                 IconColumn::make('is_default')
                     ->boolean()
                     ->action(function (Language $record) {
+                        if (!auth()->user()->can('update', $record)) {
+                            return;
+                        }
                         if ($record->is_default) {
                             // Varsayılan dil ise kapatmaya çalışılıyor
                             // Başka varsayılan dil var mı kontrol et
@@ -59,6 +63,9 @@ class LanguagesTable
                 IconColumn::make('is_active')
                     ->boolean()
                     ->action(function (Language $record) {
+                        if (!auth()->user()->can('update', $record)) {
+                            return;
+                        }
                         // Varsayılan dil pasif yapılamaz
                         if ($record->is_default && $record->is_active) {
                             return;
@@ -80,20 +87,15 @@ class LanguagesTable
             ->filters([
                 //
             ])
-            ->recordActions([
-                Action::make('edit')
-                    ->url(fn(Language $record) => LanguageResource::getUrl('edit', ['record' => $record]))
-                    ->icon('heroicon-o-pencil-square')
+            ->actions([
+                EditAction::make()
                     ->label('')
-                    ->tooltip('Edit'),
+                    ->tooltip('Edit')
+                    ->visible(fn($record) => auth()->user()->can('update', $record)),
                 DeleteAction::make()
                     ->label('')
-                    ->icon('heroicon-o-trash')
-                    ->color('danger')
                     ->tooltip(__('button.delete'))
-                    ->requiresConfirmation()
-                    ->action(fn($record) => $record->delete())
-                    ->visible(fn($record) => !$record->is_default)
+                    ->visible(fn($record) => !$record->is_default && auth()->user()->can('delete', $record))
                     ->disabled(fn($record) => $record->is_default),
             ])
             ->bulkActions([

@@ -11,7 +11,7 @@ use Illuminate\Auth\Access\HandlesAuthorization;
 class BlogCategoryPolicy
 {
     use HandlesAuthorization;
-    
+
     public function viewAny(AuthUser $authUser): bool
     {
         return $authUser->can('ViewAny:BlogCategory');
@@ -35,6 +35,11 @@ class BlogCategoryPolicy
     public function delete(AuthUser $authUser, BlogCategory $blogCategory): bool
     {
         return $authUser->can('Delete:BlogCategory');
+    }
+
+    public function deleteAny(AuthUser $authUser): bool
+    {
+        return $authUser->can('DeleteAny:BlogCategory');
     }
 
     public function restore(AuthUser $authUser, BlogCategory $blogCategory): bool

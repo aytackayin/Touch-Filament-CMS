@@ -11,7 +11,7 @@ use Illuminate\Auth\Access\HandlesAuthorization;
 class LanguagePolicy
 {
     use HandlesAuthorization;
-    
+
     public function viewAny(AuthUser $authUser): bool
     {
         return $authUser->can('ViewAny:Language');
@@ -35,6 +35,11 @@ class LanguagePolicy
     public function delete(AuthUser $authUser, Language $language): bool
     {
         return $authUser->can('Delete:Language');
+    }
+
+    public function deleteAny(AuthUser $authUser): bool
+    {
+        return $authUser->can('DeleteAny:Language');
     }
 
     public function restore(AuthUser $authUser, Language $language): bool

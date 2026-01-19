@@ -25,12 +25,11 @@ class UserForm
                     ->label(__('label.password'))
                     ->password()
                     ->confirmed()
-                    ->dehydrateStateUsing(fn ($state) => Hash::make($state))
-                    ->dehydrated(fn ($state) => filled($state))
-                    ->required(fn (string $context): bool => $context === 'create'),
+                    ->dehydrated(fn($state) => filled($state))
+                    ->required(fn(string $context): bool => $context === 'create'),
                 TextInput::make('password_confirmation')
                     ->label(__('label.password_confirmation'))
-                    ->required(fn (string $context): bool => $context === 'create')
+                    ->required(fn(string $context): bool => $context === 'create')
                     ->password()
                     ->dehydrated(false),
 

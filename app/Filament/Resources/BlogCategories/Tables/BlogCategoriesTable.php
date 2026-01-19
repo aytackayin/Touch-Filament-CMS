@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\BlogCategories\Tables;
 
 use Filament\Actions\Action;
+use Filament\Actions\EditAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -49,15 +50,17 @@ class BlogCategoriesTable
                     ->alignCenter(true)
                     ->boolean()
                     ->action(function ($record) {
-                        $record->is_published = !$record->is_published;
-                        $record->save();
+                        if (auth()->user()->can('update', $record)) {
+                            $record->is_published = !$record->is_published;
+                            $record->save();
+                        }
                     }),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
-            ->reorderable('sort')
+            ->reorderable(auth()->user()->can('reorder', \App\Models\BlogCategory::class) ? 'sort' : null)
             ->defaultSort('sort', 'asc')
             ->filters([
                 SelectFilter::make('language_id')
@@ -70,19 +73,19 @@ class BlogCategoriesTable
                         '0' => 'Unpublished',
                     ]),
             ])
-            ->recordActions([
-                Action::make('edit')
-                    ->url(fn($record) => BlogCategoryResource::getUrl('edit', ['record' => $record]))
-                    ->icon('heroicon-o-pencil-square')
+            ->actions([
+                EditAction::make()
                     ->label('')
-                    ->tooltip(__('button.edit')),
+                    ->tooltip(__('button.edit'))
+                    ->visible(fn($record) => auth()->user()->can('update', $record)),
                 DeleteAction::make()
                     ->label('')
-                    ->icon('heroicon-o-trash')
-                    ->color('danger')
                     ->tooltip(__('button.delete'))
-                    ->requiresConfirmation()
-                    ->action(fn($record) => $record->delete()),
+                    ->visible(fn($record) => auth()->user()->can('delete', $record))
+                    ->action(function ($record) {
+                        $deletionService = app(BlogCategoryDeletionService::class);
+                        $deletionService->delete($record);
+                    }),
             ])
             ->bulkActions([
                 BulkActionGroup::make([
