@@ -10,7 +10,6 @@
     "license": "MIT",
     "require": {
         "php": "^8.2",
-        "andreia/filament-nord-theme": "2.0.2",
         "aytackayin/tinymce": "^1.0",
         "bezhansalleh/filament-language-switch": "^4.0",
         "codewithdennis/filament-select-tree": "^4.0",

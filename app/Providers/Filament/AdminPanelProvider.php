@@ -19,7 +19,7 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Jeffgreco13\FilamentBreezy\BreezyCore;
-use Andreia\FilamentNordTheme\FilamentNordThemePlugin;
+
 use App\Http\Middleware\FilamentIframeMiddleware;
 use Filament\Support\Facades\FilamentView;
 use Illuminate\Support\Facades\Blade;
@@ -49,7 +49,7 @@ class AdminPanelProvider extends PanelProvider
                 FilamentInfoWidget::class,
             ])
             ->plugins([
-                FilamentNordThemePlugin::make(),
+
                 BreezyCore::make()
                     ->myProfile(),
             ])

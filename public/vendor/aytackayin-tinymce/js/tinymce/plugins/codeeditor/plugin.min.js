@@ -8,7 +8,6 @@
 
 
 var aceEditor, tryToBuildAceTimer;
-console.log('Filament TinyMCE CodeEditor Plugin Loaded v3');
 
 function displayToxEditorModal(display = true) {
     let el = document.getElementById('tox-codeeditor-wrap');
