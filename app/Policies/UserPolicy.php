@@ -17,6 +17,10 @@ class UserPolicy
 
     public function view(AuthUser $authUser, User $model): bool
     {
+        /** @var \App\Models\User $authUser */
+        if ($model->hasRole('super_admin') && !$authUser->hasRole('super_admin')) {
+            return false;
+        }
         return $authUser->can('View:User');
     }
 
@@ -27,11 +31,61 @@ class UserPolicy
 
     public function update(AuthUser $authUser, User $model): bool
     {
+        /** @var \App\Models\User $authUser */
+        // Kendini düzenleyebilir (şifre vs. için)
+        if ($authUser->id === $model->id) {
+            return $authUser->can('Update:User');
+        }
+
+        // Super Admin her şeyi yapabilir
+        if ($authUser->hasRole('super_admin')) {
+            return true;
+        }
+
+        // Super Admin düzenlenemez
+        if ($model->hasRole('super_admin')) {
+            return false;
+        }
+
+        // Dinamik Hiyerarşi Kontrolü:
+        // Hedef kullanıcının sahip olduğu HERHANGİ BİR izin, düzenleyen kişide YOKSA işlemi engelle.
+        // Bu sayede "Writer", "Admin"i düzenleyemez çünkü Admin'in izinleri Writer'da yoktur.
+        $targetPermissions = $model->getAllPermissions()->pluck('id');
+        $myPermissions = $authUser->getAllPermissions()->pluck('id');
+
+        if ($targetPermissions->diff($myPermissions)->isNotEmpty()) {
+            return false;
+        }
+
         return $authUser->can('Update:User');
     }
 
     public function delete(AuthUser $authUser, User $model): bool
     {
+        /** @var \App\Models\User $authUser */
+        // Kimse kendini silemez
+        if ($authUser->id === $model->id) {
+            return false;
+        }
+
+        // Super Admin her şeyi yapabilir
+        if ($authUser->hasRole('super_admin')) {
+            return true;
+        }
+
+        // Super Admin silinemez
+        if ($model->hasRole('super_admin')) {
+            return false;
+        }
+
+        // Dinamik Hiyerarşi Kontrolü (Silme için de aynı mantık)
+        $targetPermissions = $model->getAllPermissions()->pluck('id');
+        $myPermissions = $authUser->getAllPermissions()->pluck('id');
+
+        if ($targetPermissions->diff($myPermissions)->isNotEmpty()) {
+            return false;
+        }
+
         return $authUser->can('Delete:User');
     }
 

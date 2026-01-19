@@ -39,7 +39,26 @@ class UserForm
                     ->preload()
                     ->required()
                     ->multiple()
-                    ->relationship('roles', 'name'),
+                    ->relationship('roles', 'name', function ($query) {
+                        /** @var \App\Models\User $authUser */
+                        $authUser = auth()->user();
+
+                        // Super Admin her rolü görebilir
+                        if ($authUser->hasRole('super_admin')) {
+                            return $query;
+                        }
+
+                        // Mevcut kullanıcının tüm izinlerini al
+                        $authUserPermissions = $authUser->getAllPermissions()->pluck('id')->toArray();
+
+                        // Sadece kullanıcının sahip olduğu izinlerin bir alt kümesine sahip rolleri getir
+                        // super_admin rolünü her zaman hariç tut (çünkü super_admin tüm izinlere sahiptir)
+                        return $query->where('name', '!=', 'super_admin')
+                            ->whereDoesntHave('permissions', function ($q) use ($authUserPermissions) {
+                            // Kullanıcının sahip olmadığı bir izne sahip olan rolleri ele
+                            $q->whereNotIn('id', $authUserPermissions);
+                        });
+                    }),
             ]);
     }
 }
