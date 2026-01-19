@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "166ccd813bc7b4560628159545535d20",
+    "content-hash": "89d917444ef2482c14b42adafdd763fd",
     "packages": [
         {
             "name": "anourvalar/eloquent-serialize",
@@ -131,16 +131,16 @@
         },
         {
             "name": "aytackayin/tinymce",
-            "version": "1.0.2",
+            "version": "1.0.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aytackayin/tinymce.git",
-                "reference": "66ad2cb5c033bc345c75893be6e885eb59f2aaa1"
+                "reference": "33695173118f2f99bc18e05eef3fb07ce768f3b5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aytackayin/tinymce/zipball/66ad2cb5c033bc345c75893be6e885eb59f2aaa1",
-                "reference": "66ad2cb5c033bc345c75893be6e885eb59f2aaa1",
+                "url": "https://api.github.com/repos/aytackayin/tinymce/zipball/33695173118f2f99bc18e05eef3fb07ce768f3b5",
+                "reference": "33695173118f2f99bc18e05eef3fb07ce768f3b5",
                 "shasum": ""
             },
             "require": {
@@ -172,9 +172,9 @@
             "description": "Filament 4/3 Tinymce Plugin with Code Editor",
             "support": {
                 "issues": "https://github.com/aytackayin/tinymce/issues",
-                "source": "https://github.com/aytackayin/tinymce/tree/v1.0.2"
+                "source": "https://github.com/aytackayin/tinymce/tree/v1.0.4"
             },
-            "time": "2026-01-15T20:13:45+00:00"
+            "time": "2026-01-19T17:51:51+00:00"
         },
         {
             "name": "bacon/bacon-qr-code",

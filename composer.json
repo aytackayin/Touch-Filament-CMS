@@ -10,6 +10,7 @@
     "license": "MIT",
     "require": {
         "php": "^8.2",
+        "aytackayin/filament-select-icon": "^1.0.2",
         "aytackayin/tinymce": "^1.0",
         "bezhansalleh/filament-language-switch": "^4.0",
         "codewithdennis/filament-select-tree": "^4.0",
@@ -21,7 +22,6 @@
         "laravel/tinker": "^2.10.1",
         "livewire/livewire": "^3.6.4",
         "livewire/volt": "^1.7.0",
-        "aytackayin/filament-select-icon": "^1.0.2",
         "spatie/laravel-settings": "^3.6"
     },
     "require-dev": {
