@@ -83,7 +83,7 @@
                     <div class="flex items-center" x-html="selectedLabel"></div>
                 </template>
                 <template x-if="!selectedLabel">
-                    <span class="text-gray-400">Select an icon</span>
+                    <span class="text-gray-400">{{ __('Select an icon') }}</span>
                 </template>
             </span>
         </button>
@@ -95,9 +95,10 @@
             <!-- Search Input -->
             <div
                 class="p-2 border-b border-gray-200 dark:border-gray-700 sticky top-0 bg-white dark:bg-gray-800 z-10 rounded-t-lg">
-                <input type="text" x-model="search" placeholder="Search icons..."
-                    class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary-600 sm:text-sm sm:leading-6 dark:bg-gray-700 dark:text-gray-200 dark:ring-gray-600"
-                    @keydown.escape="open = false">
+                <x-filament::input.wrapper prefix-icon="heroicon-m-magnifying-glass">
+                    <x-filament::input type="text" x-model="search" :placeholder="__('Search icons...')"
+                        @keydown.escape="open = false" autocomplete="off" />
+                </x-filament::input.wrapper>
             </div>
 
             <!-- Grid Options -->
@@ -111,8 +112,10 @@
                 </template>
 
                 <template x-if="Object.keys(filteredOptions).length === 0">
-                    <div class="p-4 text-center text-sm text-gray-500 dark:text-gray-400 col-span-full">
-                        No icons found.
+                    <div class="col-span-full flex items-center justify-center py-12 px-4 text-center">
+                        <span class="text-sm text-gray-400 dark:text-gray-500 opacity-60 italic">
+                            {{ __('No icons found.') }}
+                        </span>
                     </div>
                 </template>
             </div>
