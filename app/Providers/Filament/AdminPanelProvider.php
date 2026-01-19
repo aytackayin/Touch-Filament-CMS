@@ -52,6 +52,7 @@ class AdminPanelProvider extends PanelProvider
 
                 BreezyCore::make()
                     ->myProfile(),
+                \BezhanSalleh\FilamentShield\FilamentShieldPlugin::make(),
             ])
             ->middleware([
                 EncryptCookies::class,
