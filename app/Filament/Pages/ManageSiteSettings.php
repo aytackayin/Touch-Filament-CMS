@@ -27,6 +27,8 @@ use Filament\Support\Icons\Heroicon;
 use BackedEnum;
 use Illuminate\Support\Str;
 
+use App\Filament\Forms\Components\SelectIcon;
+
 class ManageSiteSettings extends SettingsPage
 {
     protected static string $settings = GeneralSettings::class;
@@ -119,15 +121,11 @@ class ManageSiteSettings extends SettingsPage
                         TextInput::make('tab_name')
                             ->label('Sekme Adı')
                             ->required(),
-                        Select::make('tab_icon')
+                        SelectIcon::make('tab_icon')
                             ->label('Sekme İkonu')
-                            ->allowHtml()
                             ->options(collect(static::getIcons())->mapWithKeys(function ($label, $value) {
                                 return [$value => "<div style='display: flex; align-items: center; gap: 8px; white-space: nowrap;'> <div style='width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;'>" . svg($value)->style('width: 20px; height: 20px;')->toHtml() . "</div> <span style='line-height: 1;'>{$label}</span></div>"];
-                            })->toArray())
-                            ->optionsLimit(false)
-                            ->searchable()
-                            ->native(false),
+                            })->toArray()),
 
 
 
