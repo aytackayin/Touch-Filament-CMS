@@ -76,8 +76,7 @@
         </style>
 
         <!-- Trigger Button -->
-        <button type="button" @click="open = !open"
-            class="flex w-full items-center justify-between rounded-lg border border-gray-300 bg-white px-3 py-2 text-left shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200">
+        <button type="button" @click="open = !open" class="fi-btn fi-size-md" style="margin-bottom: 10px;">
             <span class="flex items-center gap-2 truncate min-h-[24px]">
                 <template x-if="selectedLabel">
                     <div class="flex items-center" x-html="selectedLabel"></div>
@@ -102,7 +101,7 @@
             </div>
 
             <!-- Grid Options -->
-            <div class="select-icon-grid">
+            <div class="select-icon-grid" x-show="Object.keys(filteredOptions).length > 0">
                 <template x-for="[value, label] in Object.entries(filteredOptions)" :key="value">
                     <div @click="state = value; open = false;" class="select-icon-item"
                         :class="{'selected': state === value}" :title="value">
@@ -110,14 +109,14 @@
                         <div x-html="label"></div>
                     </div>
                 </template>
+            </div>
 
-                <template x-if="Object.keys(filteredOptions).length === 0">
-                    <div class="col-span-full flex items-center justify-center py-12 px-4 text-center">
-                        <span class="text-sm text-gray-400 dark:text-gray-500 opacity-60 italic">
-                            {{ __('No icons found.') }}
-                        </span>
-                    </div>
-                </template>
+            <!-- Empty State -->
+            <div x-show="Object.keys(filteredOptions).length === 0" class="py-12 text-center"
+                style="text-align: center;padding-top: 10px;">
+                <span class="text-sm text-gray-400 dark:text-gray-500" style="opacity: 0.4; font-style: italic;">
+                    {{ __('No icons found.') }}
+                </span>
             </div>
         </div>
     </div>
