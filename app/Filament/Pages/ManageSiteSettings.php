@@ -127,7 +127,6 @@ class ManageSiteSettings extends SettingsPage
                             })->toArray())
                             ->optionsLimit(false)
                             ->searchable()
-                            ->prefixIcon(fn($state) => (blank($state) || str_starts_with($state, 'heroicon-')) ? $state : 'heroicon-' . $state)
                             ->native(false),
 
 
