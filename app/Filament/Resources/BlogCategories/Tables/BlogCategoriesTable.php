@@ -103,7 +103,9 @@ class BlogCategoriesTable
                         ->action(function ($records) {
                             $deletionService = app(BlogCategoryDeletionService::class);
                             foreach ($records as $record) {
-                                $deletionService->delete($record);
+                                if (auth()->user()->can('delete', $record)) {
+                                    $deletionService->delete($record);
+                                }
                             }
                         }),
                 ]),

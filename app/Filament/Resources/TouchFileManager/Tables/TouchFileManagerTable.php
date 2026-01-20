@@ -362,7 +362,7 @@ class TouchFileManagerTable
                         ->requiresConfirmation()
                         ->modalHeading('Delete Selected Items')
                         ->modalDescription('Are you sure you want to delete the selected items? Folders will be deleted with all their contents.')
-                        ->action(fn($records) => $records->each->delete()),
+                        ->action(fn($records) => $records->filter(fn($record) => auth()->user()->can('delete', $record))->each->delete()),
 
                     BulkAction::make('download_selected')
                         ->label('Download Selected')

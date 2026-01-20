@@ -97,7 +97,7 @@ class BlogsTable
                         ->icon('heroicon-o-trash')
                         ->color('danger')
                         ->requiresConfirmation()
-                        ->action(fn($records) => $records->each->delete()),
+                        ->action(fn($records) => $records->filter(fn($blog) => auth()->user()->can('delete', $blog))->each->delete()),
                     ExportBulkAction::make()
                         ->label(__('button.export'))
                         ->icon(Heroicon::OutlinedArrowUpOnSquareStack)
