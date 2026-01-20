@@ -28,6 +28,10 @@
                     <span class="text-xs text-gray-500">Dosya erişimi için sembolik link (public storage)
                         oluşturur.</span>
                 </div>
+                <div class="flex flex-col">
+                    <strong class="text-sm font-bold">Queue Komutu</strong>
+                    <span class="text-xs text-gray-500">php artisan queue:work --queue=high,low</span>
+                </div>
             </div>
         </x-filament::section>
     </div>
