@@ -29,6 +29,18 @@ class BlogCategoryImporter extends Importer
             ImportColumn::make('description')
                 ->rules(['nullable']),
             ImportColumn::make('attachments')
+                ->castStateUsing(function (?string $state): ?array {
+                    if (blank($state)) {
+                        return null;
+                    }
+
+                    $decoded = json_decode($state, true);
+                    if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                        return $decoded;
+                    }
+
+                    return array_map('trim', explode(',', $state));
+                })
                 ->rules(['nullable']),
             ImportColumn::make('parent_id')
                 ->numeric()
@@ -54,6 +66,18 @@ class BlogCategoryImporter extends Importer
                 ->numeric()
                 ->rules(['nullable', 'integer']),
             ImportColumn::make('tags')
+                ->castStateUsing(function (?string $state): ?array {
+                    if (blank($state)) {
+                        return null;
+                    }
+
+                    $decoded = json_decode($state, true);
+                    if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                        return $decoded;
+                    }
+
+                    return array_map('trim', explode(',', $state));
+                })
                 ->rules(['nullable']),
         ];
     }

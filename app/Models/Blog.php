@@ -34,13 +34,16 @@ class Blog extends Model
         'tags',
     ];
 
-    protected $casts = [
-        'attachments' => 'array',
-        'is_published' => 'boolean',
-        'publish_start' => 'datetime',
-        'publish_end' => 'datetime',
-        'tags' => 'array',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'attachments' => 'array',
+            'is_published' => 'boolean',
+            'publish_start' => 'datetime',
+            'publish_end' => 'datetime',
+            'tags' => 'array',
+        ];
+    }
 
     // Temporary storage for old attachments (not a database column)
     public $oldAttachmentsForCleanup = null;

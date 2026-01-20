@@ -21,7 +21,7 @@ class BlogCategoryExporter extends Exporter
             ExportColumn::make('slug'),
             ExportColumn::make('description'),
             ExportColumn::make('attachments')
-                ->state(fn(BlogCategory $record) => is_array($record->attachments) ? implode(', ', $record->attachments) : ''),
+                ->state(fn(BlogCategory $record) => is_array($record->attachments) ? json_encode($record->attachments) : null),
             ExportColumn::make('parent_id'),
             ExportColumn::make('parent_name')
                 ->label('Parent Category')
@@ -43,7 +43,7 @@ class BlogCategoryExporter extends Exporter
             ExportColumn::make('publish_end'),
             ExportColumn::make('sort'),
             ExportColumn::make('tags')
-                ->state(fn(BlogCategory $record) => is_array($record->tags) ? implode(', ', $record->tags) : ''),
+                ->state(fn(BlogCategory $record) => is_array($record->tags) ? json_encode($record->tags) : null),
             ExportColumn::make('created_at'),
             ExportColumn::make('updated_at'),
         ];

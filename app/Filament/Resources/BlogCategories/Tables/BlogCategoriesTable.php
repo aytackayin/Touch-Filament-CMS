@@ -10,6 +10,8 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Support\Enums\IconSize;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Actions\ExportBulkAction;
+use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use App\Filament\Resources\BlogCategories\BlogCategoryResource;
@@ -116,6 +118,10 @@ class BlogCategoriesTable
                                 }
                             }
                         }),
+                    ExportBulkAction::make()
+                        ->label(__('button.export'))
+                        ->icon(Heroicon::OutlinedArrowUpOnSquareStack)
+                        ->exporter(\App\Filament\Exports\BlogCategoryExporter::class),
                 ]),
             ]);
     }

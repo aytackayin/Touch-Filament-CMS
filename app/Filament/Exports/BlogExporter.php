@@ -20,7 +20,7 @@ class BlogExporter extends Exporter
             ExportColumn::make('slug'),
             ExportColumn::make('content'),
             ExportColumn::make('attachments')
-                ->state(fn(Blog $record) => is_array($record->attachments) ? implode(', ', $record->attachments) : ''),
+                ->state(fn(Blog $record) => is_array($record->attachments) ? json_encode($record->attachments) : null),
             ExportColumn::make('categories')
                 ->state(fn(Blog $record) => $record->categories->pluck('title')->implode(', ')),
             ExportColumn::make('language_id'),
@@ -40,10 +40,7 @@ class BlogExporter extends Exporter
             ExportColumn::make('publish_end'),
             ExportColumn::make('sort'),
             ExportColumn::make('tags')
-                ->state(fn(Blog $record) => is_array($record->tags) ? implode(', ', $record->tags) : ''),
-            ExportColumn::make('seo_title'),
-            ExportColumn::make('seo_description'),
-            ExportColumn::make('seo_keywords'),
+                ->state(fn(Blog $record) => is_array($record->tags) ? json_encode($record->tags) : null),
             ExportColumn::make('created_at'),
             ExportColumn::make('updated_at'),
         ];

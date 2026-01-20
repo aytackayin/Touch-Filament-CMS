@@ -29,6 +29,18 @@ class BlogImporter extends Importer
                 ->requiredMapping()
                 ->rules(['required']),
             ImportColumn::make('attachments')
+                ->castStateUsing(function (?string $state): ?array {
+                    if (blank($state)) {
+                        return null;
+                    }
+
+                    $decoded = json_decode($state, true);
+                    if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                        return $decoded;
+                    }
+
+                    return array_map('trim', explode(',', $state));
+                })
                 ->rules(['nullable']),
             ImportColumn::make('language_id')
                 ->requiredMapping()
@@ -46,13 +58,19 @@ class BlogImporter extends Importer
             ImportColumn::make('sort')
                 ->rules(['nullable', 'integer']),
             ImportColumn::make('tags')
+                ->castStateUsing(function (?string $state): ?array {
+                    if (blank($state)) {
+                        return null;
+                    }
+
+                    $decoded = json_decode($state, true);
+                    if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                        return $decoded;
+                    }
+
+                    return array_map('trim', explode(',', $state));
+                })
                 ->rules(['nullable']),
-            ImportColumn::make('seo_title')
-                ->rules(['nullable', 'max:255']),
-            ImportColumn::make('seo_description')
-                ->rules(['nullable']),
-            ImportColumn::make('seo_keywords')
-                ->rules(['nullable', 'max:255']),
         ];
     }
 
