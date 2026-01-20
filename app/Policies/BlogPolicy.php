@@ -81,4 +81,13 @@ class BlogPolicy
         return $authUser->can('Reorder:Blog');
     }
 
+    public function import(AuthUser $authUser): bool
+    {
+        return $authUser->can('Import:Blog');
+    }
+
+    public function export(AuthUser $authUser): bool
+    {
+        return $authUser->can('Export:Blog');
+    }
 }

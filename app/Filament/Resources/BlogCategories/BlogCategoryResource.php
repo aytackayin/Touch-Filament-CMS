@@ -12,13 +12,14 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 use Filament\Support\Icons\Heroicon;
+use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
 use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Facades\Storage;
 use BackedEnum;
 
-class BlogCategoryResource extends Resource
+class BlogCategoryResource extends Resource implements HasShieldPermissions
 {
     protected static ?string $model = BlogCategory::class;
 
@@ -114,6 +115,22 @@ class BlogCategoryResource extends Resource
             'index' => ListBlogCategories::route('/'),
             'create' => CreateBlogCategory::route('/create'),
             'edit' => EditBlogCategory::route('/{record}/edit'),
+        ];
+    }
+
+    public static function getPermissionPrefixes(): array
+    {
+        return [
+            'view',
+            'view_any',
+            'create',
+            'update',
+            'delete',
+            'delete_any',
+            'replicate',
+            'reorder',
+            'import',
+            'export',
         ];
     }
 }

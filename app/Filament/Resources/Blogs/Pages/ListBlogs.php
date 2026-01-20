@@ -26,14 +26,16 @@ class ListBlogs extends ListRecords
                     ->tooltip(__('button.export'))
                     ->color('gray')
                     ->size('xs')
-                    ->exporter(BlogExporter::class),
+                    ->exporter(BlogExporter::class)
+                    ->visible(fn() => auth()->user()->can('export', BlogResource::getModel())),
                 ImportAction::make()
                     ->label('')
                     ->icon(Heroicon::OutlinedArrowDownOnSquareStack)
                     ->tooltip(__('button.import'))
                     ->color('gray')
                     ->size('xs')
-                    ->importer(BlogImporter::class),
+                    ->importer(BlogImporter::class)
+                    ->visible(fn() => auth()->user()->can('import', BlogResource::getModel())),
                 CreateAction::make()
                     ->label('')
                     ->tooltip(__('button.new'))

@@ -81,4 +81,13 @@ class BlogCategoryPolicy
         return $authUser->can('Reorder:BlogCategory');
     }
 
+    public function import(AuthUser $authUser): bool
+    {
+        return $authUser->can('Import:BlogCategory');
+    }
+
+    public function export(AuthUser $authUser): bool
+    {
+        return $authUser->can('Export:BlogCategory');
+    }
 }

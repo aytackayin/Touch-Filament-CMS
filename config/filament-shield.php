@@ -173,6 +173,14 @@ return [
             \App\Filament\Resources\TouchFileManager\TouchFileManagerResource::class => [
                 'sync',
             ],
+            \App\Filament\Resources\Blogs\BlogResource::class => [
+                'import',
+                'export',
+            ],
+            \App\Filament\Resources\BlogCategories\BlogCategoryResource::class => [
+                'import',
+                'export',
+            ],
             \BezhanSalleh\FilamentShield\Resources\Roles\RoleResource::class => [
                 'viewAny',
                 'view',

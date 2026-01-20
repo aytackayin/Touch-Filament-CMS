@@ -82,6 +82,24 @@ class ListBlogCategories extends ListRecords
             ];
         }
 
+        $actions[] = \Filament\Actions\ExportAction::make()
+            ->label('')
+            ->icon(\Filament\Support\Icons\Heroicon::OutlinedArrowUpOnSquareStack)
+            ->tooltip(__('button.export'))
+            ->color('gray')
+            ->size('xs')
+            ->exporter(\App\Filament\Exports\BlogCategoryExporter::class)
+            ->visible(fn() => auth()->user()->can('export', BlogCategoryResource::getModel()));
+
+        $actions[] = \Filament\Actions\ImportAction::make()
+            ->label('')
+            ->icon(\Filament\Support\Icons\Heroicon::OutlinedArrowDownOnSquareStack)
+            ->tooltip(__('button.import'))
+            ->color('gray')
+            ->size('xs')
+            ->importer(\App\Filament\Imports\BlogCategoryImporter::class)
+            ->visible(fn() => auth()->user()->can('import', BlogCategoryResource::getModel()));
+
         $actions[] =
             CreateAction::make()
                 ->label('')

@@ -66,6 +66,7 @@ class BlogForm
                                     ->columnSpanFull(),
                                 FileUpload::make('attachments')
                                     ->multiple()
+                                    ->panelLayout('grid')
                                     ->disk('attachments')
                                     ->directory('blogs/temp')
                                     ->acceptedFileTypes(['image/*', 'video/*'])

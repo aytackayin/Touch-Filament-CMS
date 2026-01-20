@@ -15,5 +15,7 @@ return [
         'replicate' => 'Kopyala/Çoğalt',
         'reorder' => 'Sırala',
         'sync' => 'Senkronize Et',
+        'import' => 'İçeri Aktar',
+        'export' => 'Dışarı Aktar',
     ],
 ];
