@@ -324,7 +324,8 @@ class TouchFileManagerTable
                 Action::make('edit')
                     ->url(fn($record): string => TouchFileManagerResource::getUrl('edit', [
                         'record' => $record,
-                        'parent_id' => $record->parent_id
+                        'parent_id' => $record->parent_id,
+                        'view_type' => $table->getLivewire()->view_type ?? 'grid'
                     ]))
                     ->icon('heroicon-o-pencil-square')
                     ->label('')

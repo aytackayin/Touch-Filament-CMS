@@ -21,6 +21,9 @@ class EditTouchFile extends EditRecord
     #[\Livewire\Attributes\Url]
     public ?string $parent_id = null;
 
+    #[\Livewire\Attributes\Url]
+    public ?string $view_type = null;
+
     public function getBreadcrumbs(): array
     {
         $breadcrumbs = [
@@ -62,9 +65,11 @@ class EditTouchFile extends EditRecord
                     : 'Are you sure you want to delete this file?')
                 ->successRedirectUrl(function () {
                     $parentId = $this->parent_id ?? ($this->record ? $this->record->parent_id : null);
-                    return $parentId
-                        ? $this->getResource()::getUrl('index', ['parent_id' => $parentId])
-                        : $this->getResource()::getUrl('index');
+                    $params = ['view_type' => $this->view_type];
+                    if ($parentId) {
+                        $params['parent_id'] = $parentId;
+                    }
+                    return $this->getResource()::getUrl('index', $params);
                 }),
         ];
     }
@@ -80,12 +85,13 @@ class EditTouchFile extends EditRecord
     protected function getRedirectUrl(): string
     {
         $parentId = $this->parent_id ?? ($this->record ? $this->record->parent_id : null);
+        $params = ['view_type' => $this->view_type];
 
         if ($parentId) {
-            return $this->getResource()::getUrl('index', ['parent_id' => $parentId]);
+            $params['parent_id'] = $parentId;
         }
 
-        return $this->getResource()::getUrl('index');
+        return $this->getResource()::getUrl('index', $params);
     }
 
     protected function handleRecordUpdate(Model $record, array $data): Model
@@ -95,9 +101,10 @@ class EditTouchFile extends EditRecord
             $parentId = $this->parent_id ?? $record->parent_id;
             $record->delete();
 
-            $redirectUrl = $parentId
-                ? $this->getResource()::getUrl('index', ['parent_id' => $parentId])
-                : $this->getResource()::getUrl('index');
+            $redirectUrl = $this->getResource()::getUrl('index', array_filter([
+                'parent_id' => $parentId,
+                'view_type' => $this->view_type,
+            ]));
 
             $this->redirect($redirectUrl);
             return $record;
