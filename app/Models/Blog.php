@@ -20,6 +20,7 @@ class Blog extends Model
 
     protected $fillable = [
         'user_id',
+        'edit_user_id',
         'language_id',
         'title',
         'slug',
@@ -58,6 +59,11 @@ class Blog extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function editor(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'edit_user_id');
+    }
+
     public function language(): BelongsTo
     {
         return $this->belongsTo(Language::class);
@@ -84,6 +90,10 @@ class Blog extends Model
         static::updating(function ($model) {
             if ($model->isDirty('title') && empty($model->slug)) {
                 $model->slug = static::generateUniqueSlug($model->title, $model->id);
+            }
+
+            if (auth()->check()) {
+                $model->edit_user_id = auth()->id();
             }
 
             // Store old attachments for cleanup

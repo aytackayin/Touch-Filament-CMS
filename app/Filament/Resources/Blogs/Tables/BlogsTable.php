@@ -41,6 +41,10 @@ class BlogsTable
                 TextColumn::make('user.name')
                     ->label('Author')
                     ->sortable(),
+                TextColumn::make('editor.name')
+                    ->label('Last Editor')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('tags')
                     ->badge()
                     ->separator(',')

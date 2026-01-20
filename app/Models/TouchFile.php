@@ -5,12 +5,15 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class TouchFile extends Model
 {
     use HasFactory;
 
     protected $fillable = [
+        'user_id',
+        'edit_user_id',
         'name',
         'alt',
         'path',
@@ -33,9 +36,25 @@ class TouchFile extends Model
     /**
      * Get the parent folder
      */
-    public function parent()
+    public function parent(): BelongsTo
     {
         return $this->belongsTo(TouchFile::class, 'parent_id');
+    }
+
+    /**
+     * Get the user who created the file
+     */
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Get the user who last edited the file
+     */
+    public function editor(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'edit_user_id');
     }
 
     /**
@@ -178,7 +197,17 @@ class TouchFile extends Model
      */
     protected static function booted()
     {
+        static::creating(function ($model) {
+            if (auth()->check() && empty($model->user_id)) {
+                $model->user_id = auth()->id();
+            }
+        });
+
         static::updating(function ($model) {
+            if (auth()->check()) {
+                $model->edit_user_id = auth()->id();
+            }
+
             $disk = Storage::disk('attachments');
 
             // 📂 CASE 1: FOLDER RENAME / MOVE

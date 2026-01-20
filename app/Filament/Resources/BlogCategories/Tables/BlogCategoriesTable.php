@@ -41,6 +41,14 @@ class BlogCategoriesTable
                     ->separator(',')
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('user.name')
+                    ->label('Author')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('editor.name')
+                    ->label('Last Editor')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('parent.title')
                     ->label('Parent Category')
                     ->sortable()

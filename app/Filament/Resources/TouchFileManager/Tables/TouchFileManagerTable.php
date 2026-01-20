@@ -236,6 +236,16 @@ class TouchFileManagerTable
                     ->searchable()
                     ->wrap()
                     ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('user.name')
+                    ->label('Author')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->formatStateUsing(fn($state, $record) => $record?->id === 0 ? '' : $state),
+                TextColumn::make('editor.name')
+                    ->label('Last Editor')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->formatStateUsing(fn($state, $record) => $record?->id === 0 ? '' : $state),
 
                 TextColumn::make('created_at')
                     ->label('Date')
@@ -258,6 +268,10 @@ class TouchFileManagerTable
                     ])
                     ->multiple(),
 
+                SelectFilter::make('user_id')
+                    ->label('Author')
+                    ->relationship('user', 'name')
+                    ->searchable(),
                 SelectFilter::make('is_folder')
                     ->label('Type')
                     ->options([

@@ -15,6 +15,8 @@ class BlogCategory extends Model
     use HasFactory;
 
     protected $fillable = [
+        'user_id',
+        'edit_user_id',
         'language_id',
         'title',
         'description',
@@ -57,6 +59,16 @@ class BlogCategory extends Model
         return $this->hasMany(BlogCategory::class, 'parent_id');
     }
 
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function editor(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'edit_user_id');
+    }
+
     public function blogs(): MorphToMany
     {
         return $this->morphedByMany(Blog::class, 'categorizable', 'categorizables', 'category_id');
@@ -68,6 +80,21 @@ class BlogCategory extends Model
     protected static function boot()
     {
         parent::boot();
+
+        static::creating(function ($model) {
+            if (empty($model->slug)) {
+                $model->slug = static::generateUniqueSlug($model->title);
+            }
+            if (auth()->check() && empty($model->user_id)) {
+                $model->user_id = auth()->id();
+            }
+        });
+
+        static::updating(function ($model) {
+            if (auth()->check()) {
+                $model->edit_user_id = auth()->id();
+            }
+        });
 
         // Handle deletion using the professional service
         static::deleting(function ($model) {
