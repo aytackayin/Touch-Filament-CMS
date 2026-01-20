@@ -128,11 +128,6 @@ return [
             'update',
             'delete',
             'deleteAny',
-            'restore',
-            'forceDelete',
-            'forceDeleteAny',
-            'restoreAny',
-            'replicate',
             'reorder',
         ],
         'single_parameter_methods' => [
@@ -157,7 +152,7 @@ return [
     */
 
     'localization' => [
-        'enabled' => false,
+        'enabled' => true,
         'key' => 'filament-shield::filament-shield.resource_permission_prefixes_labels',
     ],
 
@@ -175,6 +170,9 @@ return [
     'resources' => [
         'subject' => 'model',
         'manage' => [
+            \App\Filament\Resources\TouchFileManager\TouchFileManagerResource::class => [
+                'sync',
+            ],
             \BezhanSalleh\FilamentShield\Resources\Roles\RoleResource::class => [
                 'viewAny',
                 'view',

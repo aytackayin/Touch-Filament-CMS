@@ -96,6 +96,7 @@ class ListTouchFiles extends ListRecords
                 ->icon('heroicon-o-arrow-path')
                 ->color('info')
                 ->size('xs')
+                ->visible(fn() => auth()->user()->can('sync', TouchFile::class))
                 ->action(function () {
                     $disk = Storage::disk('attachments');
                     $allFiles = $disk->allFiles();
@@ -140,6 +141,7 @@ class ListTouchFiles extends ListRecords
                             }
 
                             TouchFile::create([
+                                'user_id' => auth()->id(),
                                 'name' => $name,
                                 'path' => $dirPath,
                                 'is_folder' => true,
@@ -176,6 +178,7 @@ class ListTouchFiles extends ListRecords
                             $type = TouchFile::determineFileType($mimeType ?? '');
 
                             TouchFile::create([
+                                'user_id' => auth()->id(),
                                 'name' => $name,
                                 'path' => $filePath,
                                 'is_folder' => false,
@@ -294,6 +297,7 @@ class ListTouchFiles extends ListRecords
                         $disk->makeDirectory($path);
                     }
 
+                    $data['user_id'] = auth()->id();
                     static::getResource()::getModel()::create($data);
                 })
                 ->successNotificationTitle('Folder created successfully'),

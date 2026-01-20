@@ -72,6 +72,10 @@ class BlogsTable
                     ->label('Author')
                     ->relationship('user', 'name')
                     ->searchable(),
+                SelectFilter::make('edit_user_id')
+                    ->label('Last Editor')
+                    ->relationship('editor', 'name')
+                    ->searchable(),
                 SelectFilter::make('language_id')
                     ->label(__('label.language'))
                     ->relationship('language', 'name'),

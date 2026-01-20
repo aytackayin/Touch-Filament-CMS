@@ -210,6 +210,7 @@ class CreateTouchFile extends CreateRecord
 
             // Create database record
             $uploadedFiles[] = TouchFile::create([
+                'user_id' => auth()->id(),
                 'name' => $fileName,
                 'alt' => $data['alt'] ?? null,
                 'tags' => $data['tags'] ?? null,

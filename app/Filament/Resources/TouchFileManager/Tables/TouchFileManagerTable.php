@@ -59,6 +59,8 @@ class TouchFileManagerTable
                 if ($parentId) {
                     $columns = [
                         'id',
+                        'user_id',
+                        'edit_user_id',
                         'name',
                         'alt',
                         'path',
@@ -82,6 +84,8 @@ class TouchFileManagerTable
                     $fakeRow = TouchFile::query()
                         ->selectRaw("
                             0 as id, 
+                            null as user_id,
+                            null as edit_user_id,
                             'Up' as name,
                             null as alt,
                             '' as path, 
@@ -271,6 +275,10 @@ class TouchFileManagerTable
                 SelectFilter::make('user_id')
                     ->label('Author')
                     ->relationship('user', 'name')
+                    ->searchable(),
+                SelectFilter::make('edit_user_id')
+                    ->label('Last Editor')
+                    ->relationship('editor', 'name')
                     ->searchable(),
                 SelectFilter::make('is_folder')
                     ->label('Type')

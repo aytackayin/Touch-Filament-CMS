@@ -81,4 +81,8 @@ class TouchFilePolicy
         return $authUser->can('Reorder:TouchFile');
     }
 
+    public function sync(AuthUser $authUser): bool
+    {
+        return $authUser->can('Sync:TouchFile');
+    }
 }

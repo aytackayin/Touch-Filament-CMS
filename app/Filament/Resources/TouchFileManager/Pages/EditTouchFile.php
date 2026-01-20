@@ -276,6 +276,7 @@ class EditTouchFile extends EditRecord
             }
         }
 
+        $data['edit_user_id'] = auth()->id();
         $record->update($data);
         return $record;
     }

@@ -13,12 +13,13 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Facades\Storage;
 
-class TouchFileManagerResource extends Resource
+class TouchFileManagerResource extends Resource implements HasShieldPermissions
 {
     protected static ?string $model = TouchFile::class;
 
@@ -150,5 +151,18 @@ class TouchFileManagerResource extends Resource
     public static function canCreate(): bool
     {
         return true;
+    }
+
+    public static function getPermissionPrefixes(): array
+    {
+        return [
+            'view',
+            'view_any',
+            'create',
+            'update',
+            'delete',
+            'delete_any',
+            'sync',
+        ];
     }
 }
