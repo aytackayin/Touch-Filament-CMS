@@ -228,6 +228,7 @@ class ListTouchFiles extends ListRecords
                 ->icon('heroicon-o-folder-plus')
                 ->color('warning')
                 ->size('xs')
+                ->visible(fn() => auth()->user()->can('create', TouchFile::class))
                 ->form(function () {
                     $parentId = $this->parent_id;
                     return [
