@@ -22,6 +22,7 @@ use Filament\Support\Facades\Filament;
 use Filament\Actions\BulkAction;
 use Illuminate\Database\Eloquent\Collection;
 use ZipArchive;
+use Illuminate\Database\Eloquent\Builder;
 
 class TouchFileManagerTable
 {
