@@ -96,11 +96,19 @@ class UserPolicy
 
     public function restore(AuthUser $authUser, User $model): bool
     {
+        /** @var \App\Models\User $authUser */
+        if ($model->hasRole('super_admin') && !$authUser->hasRole('super_admin')) {
+            return false;
+        }
         return $authUser->can('Restore:User');
     }
 
     public function forceDelete(AuthUser $authUser, User $model): bool
     {
+        /** @var \App\Models\User $authUser */
+        if ($model->hasRole('super_admin') && !$authUser->hasRole('super_admin')) {
+            return false;
+        }
         return $authUser->can('ForceDelete:User');
     }
 
@@ -116,6 +124,10 @@ class UserPolicy
 
     public function replicate(AuthUser $authUser, User $model): bool
     {
+        /** @var \App\Models\User $authUser */
+        if ($model->hasRole('super_admin') && !$authUser->hasRole('super_admin')) {
+            return false;
+        }
         return $authUser->can('Replicate:User');
     }
 

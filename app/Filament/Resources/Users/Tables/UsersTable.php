@@ -14,6 +14,15 @@ class UsersTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(function ($query) {
+                /** @var \App\Models\User $authUser */
+                $authUser = auth()->user();
+                if (!$authUser->hasRole('super_admin')) {
+                    $query->whereDoesntHave('roles', function ($q) {
+                        $q->where('name', 'super_admin');
+                    });
+                }
+            })
             ->striped()
             ->columns([
                 TextColumn::make('name')

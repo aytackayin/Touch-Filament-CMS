@@ -11,7 +11,7 @@ use Illuminate\Auth\Access\HandlesAuthorization;
 class RolePolicy
 {
     use HandlesAuthorization;
-    
+
     public function viewAny(AuthUser $authUser): bool
     {
         return $authUser->can('ViewAny:Role');
@@ -19,6 +19,10 @@ class RolePolicy
 
     public function view(AuthUser $authUser, Role $role): bool
     {
+        /** @var \App\Models\User $authUser */
+        if ($role->name === 'super_admin' && !$authUser->hasRole('super_admin')) {
+            return false;
+        }
         return $authUser->can('View:Role');
     }
 
@@ -29,11 +33,19 @@ class RolePolicy
 
     public function update(AuthUser $authUser, Role $role): bool
     {
+        /** @var \App\Models\User $authUser */
+        if ($role->name === 'super_admin' && !$authUser->hasRole('super_admin')) {
+            return false;
+        }
         return $authUser->can('Update:Role');
     }
 
     public function delete(AuthUser $authUser, Role $role): bool
     {
+        /** @var \App\Models\User $authUser */
+        if ($role->name === 'super_admin') {
+            return false; // Kimse super_admin rolünü silememeli
+        }
         return $authUser->can('Delete:Role');
     }
 
@@ -59,6 +71,10 @@ class RolePolicy
 
     public function replicate(AuthUser $authUser, Role $role): bool
     {
+        /** @var \App\Models\User $authUser */
+        if ($role->name === 'super_admin' && !$authUser->hasRole('super_admin')) {
+            return false;
+        }
         return $authUser->can('Replicate:Role');
     }
 
