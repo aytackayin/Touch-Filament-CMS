@@ -303,6 +303,7 @@ class TouchFileManagerTable
                 Action::make('download')
                     ->icon('heroicon-o-arrow-down-tray')
                     ->label('')
+                    ->color('success')
                     ->tooltip('Download')
                     ->hidden(fn($record) => $record && ($record->is_folder || $record->id === 0))
                     ->url(fn($record) => $record ? Storage::disk('attachments')->url($record->path) : null)
@@ -311,6 +312,7 @@ class TouchFileManagerTable
                 Action::make('view')
                     ->icon('heroicon-o-eye')
                     ->label('')
+                    ->color('gray')
                     ->tooltip('View')
                     ->hidden(fn($record) => !$record || !in_array($record->type, ['image', 'video']) || $record->id === 0)
                     ->modalContent(fn($record) => $record ? view('filament.modals.touchfilemanager-preview', [
@@ -330,12 +332,14 @@ class TouchFileManagerTable
                     ->icon('heroicon-o-pencil-square')
                     ->label('')
                     ->tooltip('Edit')
+                    ->color('warning')
                     ->hidden(fn($record) => $record?->id === 0),
 
                 Action::make('copy_url')
                     ->label('')
                     ->tooltip('Copy Url')
                     ->icon('heroicon-o-clipboard')
+                    ->color('info')
                     ->action(null) // ÖNEMLİ: PHP action çalışmasın
                     ->hidden(fn($record) => !$record || $record->is_folder || $record->id === 0)
                     ->extraAttributes(fn($record) => [
