@@ -92,6 +92,9 @@ class BlogCategoriesTable
                     ]),
             ])
             ->actions([
+                \Filament\Actions\ViewAction::make()
+                    ->label('')
+                    ->tooltip(__('button.view')),
                 EditAction::make()
                     ->label('')
                     ->tooltip(__('button.edit')),
