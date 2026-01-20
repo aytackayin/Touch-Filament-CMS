@@ -16,10 +16,12 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Filament\Tables\Columns\Layout\Stack;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Database\Eloquent\Builder;
 use Filament\Notifications\Notification;
 use Illuminate\Support\HtmlString;
 use Filament\Support\Facades\Filament;
+use Filament\Actions\BulkAction;
+use Illuminate\Database\Eloquent\Collection;
+use ZipArchive;
 
 class TouchFileManagerTable
 {
@@ -347,53 +349,25 @@ class TouchFileManagerTable
                         ->modalDescription('Are you sure you want to delete the selected items? Folders will be deleted with all their contents.')
                         ->action(fn($records) => $records->each->delete()),
 
-                    \Filament\Actions\BulkAction::make('download_selected')
+                    BulkAction::make('download_selected')
                         ->label('Download Selected')
                         ->icon('heroicon-o-arrow-down-tray')
-                        ->action(function (\Illuminate\Database\Eloquent\Collection $records) {
+                        ->action(function (Collection $records) {
                             $zipName = 'files-' . now()->timestamp . '.zip';
                             $zipPath = storage_path('app/' . $zipName);
 
-                            $zip = new \ZipArchive();
-                            if ($zip->open($zipPath, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) !== true) {
-                                \Filament\Notifications\Notification::make()
+                            $zip = new ZipArchive();
+                            if ($zip->open($zipPath, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== true) {
+                                Notification::make()
                                     ->title('Error creating ZIP file')
                                     ->danger()
                                     ->send();
                                 return;
                             }
 
-                            $addFileToZip = function ($record, $zip, $relativePath = '') {
-                                $disk = \Illuminate\Support\Facades\Storage::disk('attachments');
-                                $fullPath = $record->path;
-
-                                if (!$disk->exists($fullPath)) {
-                                    return;
-                                }
-
-                                if ($record->is_folder) {
-                                    $folderName = $relativePath . $record->name . '/';
-                                    $zip->addEmptyDir($folderName);
-
-                                    // Find children of this folder
-                                    $children = TouchFile::where('parent_id', $record->id)->get();
-                                    foreach ($children as $child) {
-                                        // Recursively add children
-                                        // Note: we can't recursively call the closure easily without passing it to itself or using $this approach, 
-                                        // but since we are inside a closure, we can pass $addFileToZip by reference if needed, 
-                                        // or better, just define a separate recursive function or method. 
-                                        // For simplicity in this inline action, I will use a helper function reference logic.
-                                    }
-                                } else {
-                                    $filePath = $disk->path($fullPath);
-                                    $zip->addFile($filePath, $relativePath . $record->name . ($record->extension ? '.' . $record->extension : ''));
-                                }
-                            };
-
-                            // To handle recursion properly within this anonymous function context:
                             $addRecursively = null;
                             $addRecursively = function ($record, $zip, $relativePath) use (&$addRecursively) {
-                                $disk = \Illuminate\Support\Facades\Storage::disk('attachments');
+                                $disk = Storage::disk('attachments');
                                 $fullPath = $record->path;
 
                                 if ($record->is_folder) {

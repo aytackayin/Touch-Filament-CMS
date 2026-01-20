@@ -3,7 +3,7 @@
 namespace App\Filament\Resources\TouchFileManager\Pages;
 
 use App\Filament\Resources\TouchFileManager\TouchFileManagerResource;
-use Filament\Actions;
+use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\TouchFile;
@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Intervention\Image\ImageManager;
 use Intervention\Image\Drivers\Gd\Driver;
+use Exception;
 
 class EditTouchFile extends EditRecord
 {
@@ -53,7 +54,7 @@ class EditTouchFile extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\DeleteAction::make()
+            DeleteAction::make()
                 ->requiresConfirmation()
                 ->modalHeading(fn() => $this->record->is_folder ? 'Delete Folder' : 'Delete File')
                 ->modalDescription(fn() => $this->record->is_folder
@@ -197,7 +198,7 @@ class EditTouchFile extends EditRecord
                     $image->scale(width: 150);
                     $image->save($thumbFullPath);
 
-                } catch (\Exception $e) {
+                } catch (Exception $e) {
                     Log::error('Thumbnail generation failed on edit: ' . $e->getMessage());
                 }
             }
@@ -265,7 +266,7 @@ class EditTouchFile extends EditRecord
                                     if ($decodedImage !== false) {
                                         $disk->put($thumbPath, $decodedImage);
                                     }
-                                } catch (\Exception $e) {
+                                } catch (Exception $e) {
                                     Log::error('Video thumbnail save failed on edit: ' . $e->getMessage());
                                 }
                             }

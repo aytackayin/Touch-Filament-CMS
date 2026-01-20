@@ -5,11 +5,12 @@ namespace App\Filament\Resources\TouchFileManager\Pages;
 use App\Filament\Resources\TouchFileManager\TouchFileManagerResource;
 use App\Filament\Resources\TouchFileManager\Schemas\TouchFileForm;
 use App\Models\TouchFile;
-use Filament\Actions;
-use Filament\Resources\Pages\ListRecords;
 use Filament\Actions\Action;
+use Filament\Actions\CreateAction;
+use Filament\Resources\Pages\ListRecords;
 use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Section;
+use Filament\Notifications\Notification;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Select;
@@ -82,7 +83,7 @@ class ListTouchFiles extends ListRecords
         }
 
         return [
-            Actions\Action::make('up')
+            Action::make('up')
                 ->label('Up')
                 ->icon('heroicon-m-arrow-uturn-up')
                 ->color('gray')
@@ -212,7 +213,7 @@ class ListTouchFiles extends ListRecords
                         }
                     }
 
-                    \Filament\Notifications\Notification::make()
+                    Notification::make()
                         ->title('Sync Completed')
                         ->body("Added {$addedCount} items. Removed {$removedCount} orphaned items.")
                         ->success()
@@ -297,7 +298,7 @@ class ListTouchFiles extends ListRecords
                 })
                 ->successNotificationTitle('Folder created successfully'),
 
-            Actions\CreateAction::make()
+            CreateAction::make()
                 ->label('Upload Files')
                 ->tooltip('Upload new files')
                 ->color('success')

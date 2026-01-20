@@ -3,9 +3,12 @@
 namespace App\Filament\Resources\BlogCategories\Pages;
 
 use App\Filament\Resources\BlogCategories\BlogCategoryResource;
-use Filament\Actions;
+use Filament\Actions\Action;
+use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
 use App\Models\BlogCategory;
+use Illuminate\Database\Eloquent\Builder;
+use App\Filament\Resources\Blogs\Widgets\RelatedItemsWidget;
 
 class ListBlogCategories extends ListRecords
 {
@@ -19,7 +22,7 @@ class ListBlogCategories extends ListRecords
         $this->parent_id = request()->query('parent_id') ? (int) request()->query('parent_id') : null;
     }
 
-    protected function getTableQuery(): ?\Illuminate\Database\Eloquent\Builder
+    protected function getTableQuery(): ?Builder
     {
         $query = parent::getTableQuery();
 
@@ -68,7 +71,7 @@ class ListBlogCategories extends ListRecords
             $upParams = ($parent && $parent->parent_id) ? ['parent_id' => $parent->parent_id] : [];
 
             $actions = [
-                Actions\Action::make('up')
+                Action::make('up')
                     ->label('')
                     ->tooltip(__('button.parent_category'))
                     ->color('gray')
@@ -80,7 +83,7 @@ class ListBlogCategories extends ListRecords
         }
 
         $actions[] =
-            Actions\CreateAction::make()
+            CreateAction::make()
                 ->label('')
                 ->tooltip(__('button.new'))
                 ->color('success')
@@ -98,7 +101,7 @@ class ListBlogCategories extends ListRecords
         }
 
         return [
-            \App\Filament\Resources\Blogs\Widgets\RelatedItemsWidget::make([
+            RelatedItemsWidget::make([
                 'parent_id' => $this->parent_id,
             ]),
         ];

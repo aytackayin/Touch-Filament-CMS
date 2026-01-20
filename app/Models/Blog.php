@@ -9,6 +9,10 @@ use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 use App\Models\TouchFile;
+use Illuminate\Support\Facades\Log;
+use Intervention\Image\ImageManager;
+use Intervention\Image\Drivers\Gd\Driver;
+use Exception;
 
 class Blog extends Model
 {
@@ -146,8 +150,8 @@ class Blog extends Model
 
             // Initialize Intervention Image Manager
             $manager = null;
-            if (class_exists(\Intervention\Image\ImageManager::class)) {
-                $manager = new \Intervention\Image\ImageManager(new \Intervention\Image\Drivers\Gd\Driver());
+            if (class_exists(ImageManager::class)) {
+                $manager = new ImageManager(new Driver());
             }
 
             foreach ($attachments as $attachment) {
@@ -190,7 +194,7 @@ class Blog extends Model
                                     $image = $manager->read($fullPath);
                                     $image->scale(width: 150);
                                     $image->save($thumbPath);
-                                } catch (\Exception $e) {
+                                } catch (Exception $e) {
                                     // Fail silently or log
                                 }
                             }
@@ -232,7 +236,7 @@ class Blog extends Model
                                     $image = $manager->read($fullPath);
                                     $image->scale(width: 150);
                                     $image->save($thumbFullPath);
-                                } catch (\Exception $e) {
+                                } catch (Exception $e) {
                                     // Fail silently or log
                                 }
                             }
@@ -282,7 +286,7 @@ class Blog extends Model
                             $originalNameWithoutExt = pathinfo($filename, PATHINFO_FILENAME);
                             $extension = pathinfo($filename, PATHINFO_EXTENSION);
 
-                            $sluggedName = \Illuminate\Support\Str::slug($originalNameWithoutExt);
+                            $sluggedName = Str::slug($originalNameWithoutExt);
                             $expectedVideoName = $sluggedName . '.' . $extension;
                             $thumbFilename = $sluggedName . '.jpg';
 
@@ -312,12 +316,12 @@ class Blog extends Model
                                 if ($decodedImage !== false) {
                                     // Save thumbnail using Storage disk
                                     $disk->put($thumbPath, $decodedImage);
-                                    \Log::info("Video thumbnail saved: {$thumbPath}");
+                                    Log::info("Video thumbnail saved: {$thumbPath}");
                                 } else {
-                                    \Log::error("Failed to decode base64 for thumbnail");
+                                    Log::error("Failed to decode base64 for thumbnail");
                                 }
                             } else {
-                                \Log::info("Skipping thumbnail for deleted/missing video: {$expectedVideoName}");
+                                Log::info("Skipping thumbnail for deleted/missing video: {$expectedVideoName}");
                                 // Optional: Ensure thumbnail is deleted if it exists?
                                 // The cleanup logic at the start of saved() or in deleting() should handle this handled via oldAttachmentsForCleanup
                                 // But if this is a subsequent save where video was removed, cleanup logic ran first.
@@ -326,10 +330,10 @@ class Blog extends Model
                         }
                     }
                 } else {
-                    \Log::debug('Video Thumbnails - Not an array or empty');
+                    Log::debug('Video Thumbnails - Not an array or empty');
                 }
             } else {
-                \Log::debug('Video Thumbnails - No data received');
+                Log::debug('Video Thumbnails - No data received');
             }
         });
 

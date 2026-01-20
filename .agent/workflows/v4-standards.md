@@ -24,3 +24,6 @@ Bu proje **Filament v4** ve **Laravel 12** kullanmaktadır. Tüm geliştirmelerd
 
 ### 5. Kodlama Standartları
 - **Model Kullanımı:** Model sınıfları kod içinde tam yol (\App\Models\Blog::...) yerine her zaman use App\Models\Blog; şeklinde import edilerek (Blog::...) kullanılmalıdır.
+- **Heroicon Kullanımı:** İkonlar `\Filament\Support\Icons\Heroicon::...` şeklinde tam yol yerine, dosya başında `use Filament\Support\Icons\Heroicon;` eklenerek `Heroicon::...` şeklinde kullanılmalıdır.
+- **Namespace Alias Kullanımı:** `use Filament\Actions as Actions;` yapılıp kod içinde `Actions\CreateAction::...` şeklinde kullanım yasaktır. Her sınıf (`CreateAction`, `EditAction` vb.) ayrı ayrı import edilip doğrudan (`CreateAction::...`) kullanılmalıdır.
+- **FQCN Yasağı:** Kod içerisinde (metot gövdeleri dahil) `\App\...`, `\Filament\...`, `\Illuminate\...` gibi tam yol sınıf kullanımları yasaktır. Tüm sınıflar dosya başında `use` ile import edilmelidir.

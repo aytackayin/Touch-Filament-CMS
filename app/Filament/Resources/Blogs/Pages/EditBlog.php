@@ -3,8 +3,9 @@
 namespace App\Filament\Resources\Blogs\Pages;
 
 use App\Filament\Resources\Blogs\BlogResource;
-use Filament\Actions;
+use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
+use Illuminate\Support\Facades\Storage;
 
 class EditBlog extends EditRecord
 {
@@ -13,7 +14,7 @@ class EditBlog extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\DeleteAction::make(),
+            DeleteAction::make(),
         ];
     }
 
@@ -36,7 +37,7 @@ class EditBlog extends EditRecord
         if (!$record)
             return;
 
-        $disk = \Illuminate\Support\Facades\Storage::disk('attachments');
+        $disk = Storage::disk('attachments');
         $baseDir = "blogs/{$record->id}";
 
         if ($disk->exists($baseDir)) {

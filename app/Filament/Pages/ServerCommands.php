@@ -8,6 +8,7 @@ use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\Artisan;
 use Filament\Support\Icons\Heroicon;
 use BackedEnum;
+use UnitEnum;
 
 use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 
@@ -18,7 +19,7 @@ class ServerCommands extends Page
 
     protected static ?string $navigationLabel = 'Server Commands';
     protected static BackedEnum|string|null $navigationIcon = Heroicon::OutlinedCpuChip;
-    protected static \UnitEnum|string|null $navigationGroup = 'System';
+    protected static UnitEnum|string|null $navigationGroup = 'System';
     protected static ?int $navigationSort = 999;
 
     protected function getHeaderActions(): array
