@@ -3,6 +3,7 @@
 namespace App\Filament\Imports;
 
 use App\Models\Blog;
+use App\Models\User;
 use Filament\Actions\Imports\ImportColumn;
 use Filament\Actions\Imports\Importer;
 use Filament\Actions\Imports\Models\Import;
@@ -16,7 +17,8 @@ class BlogImporter extends Importer
     {
         return [
             ImportColumn::make('id')
-                ->label('ID'),
+                ->label('ID')
+                ->rules(['nullable', 'integer']),
             ImportColumn::make('title')
                 ->requiredMapping()
                 ->rules(['required', 'max:255']),
@@ -26,12 +28,15 @@ class BlogImporter extends Importer
             ImportColumn::make('content')
                 ->requiredMapping()
                 ->rules(['required']),
+            ImportColumn::make('attachments')
+                ->rules(['nullable']),
             ImportColumn::make('language_id')
                 ->requiredMapping()
                 ->rules(['required', 'integer']),
             ImportColumn::make('user_id')
-                ->requiredMapping()
-                ->rules(['required', 'integer']),
+                ->rules(['nullable', 'integer']),
+            ImportColumn::make('edit_user_id')
+                ->rules(['nullable', 'integer']),
             ImportColumn::make('is_published')
                 ->boolean(),
             ImportColumn::make('publish_start')
@@ -40,28 +45,58 @@ class BlogImporter extends Importer
                 ->rules(['nullable', 'datetime']),
             ImportColumn::make('sort')
                 ->rules(['nullable', 'integer']),
+            ImportColumn::make('tags')
+                ->rules(['nullable']),
+            ImportColumn::make('seo_title')
+                ->rules(['nullable', 'max:255']),
+            ImportColumn::make('seo_description')
+                ->rules(['nullable']),
+            ImportColumn::make('seo_keywords')
+                ->rules(['nullable', 'max:255']),
         ];
     }
 
     public function resolveRecord(): ?Blog
     {
-        // If an ID is provided, use it as the primary lookup key.
-        if (!empty($this->data['id'])) {
-            $blog = Blog::find($this->data['id']);
-            if ($blog) {
-                return $blog; // Found by ID, return for updating.
-            }
+        // Get the user who initiated the import from the Import model
+        $importingUser = $this->getImport()->user;
+
+        if (!$importingUser) {
+            return null;
         }
 
-        // If no ID is provided, or if the ID was not found,
-        // try to find a record based on a composite unique key.
-        // This prevents creating duplicates.
-        return Blog::firstOrNew([
-            'title' => $this->data['title'],
-            'slug' => $this->data['slug'],
-            'language_id' => $this->data['language_id'],
-            'user_id' => $this->data['user_id'] ?? null,
-        ]);
+        $isAdminOrSuperAdmin = $importingUser->hasAnyRole(['admin', 'super_admin']);
+
+
+        // Override user_id in import data with importing user's ID if not admin/super_admin
+        if (!$isAdminOrSuperAdmin) {
+            $this->data['user_id'] = $importingUser->id;
+        }
+
+        $existingRecord = null;
+
+        // Try to find existing record by ID first
+        if (!empty($this->data['id'])) {
+            $existingRecord = Blog::find($this->data['id']);
+        }
+
+        // If not found by ID, try by slug
+        if (!$existingRecord && !empty($this->data['slug'])) {
+            $existingRecord = Blog::where('slug', $this->data['slug'])->first();
+        }
+
+        // If existing record found, check ownership
+        if ($existingRecord) {
+
+            // If user is not admin/super_admin and doesn't own the record, skip this import
+            if (!$isAdminOrSuperAdmin && $existingRecord->user_id !== $importingUser->id) {
+                return null;
+            }
+
+            return $existingRecord;
+        }
+
+        return new Blog();
     }
 
     public static function getCompletedNotificationBody(Import $import): string

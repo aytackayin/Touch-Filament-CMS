@@ -57,6 +57,11 @@ class EditBlog extends EditRecord
             // Compare
             $currentAttachments = $record->attachments ?? [];
 
+            // Ensure it's an array (could be string from old data)
+            if (!is_array($currentAttachments)) {
+                $currentAttachments = [];
+            }
+
             // Sort for comparison
             sort($validAttachments);
             sort($currentAttachments);

@@ -19,6 +19,8 @@ class BlogExporter extends Exporter
             ExportColumn::make('title'),
             ExportColumn::make('slug'),
             ExportColumn::make('content'),
+            ExportColumn::make('attachments')
+                ->state(fn(Blog $record) => is_array($record->attachments) ? implode(', ', $record->attachments) : ''),
             ExportColumn::make('categories')
                 ->state(fn(Blog $record) => $record->categories->pluck('title')->implode(', ')),
             ExportColumn::make('language_id'),
@@ -29,9 +31,19 @@ class BlogExporter extends Exporter
             ExportColumn::make('user_name')
                 ->label('Author')
                 ->state(fn(Blog $record): ?string => $record->user?->name),
+            ExportColumn::make('edit_user_id'),
+            ExportColumn::make('edit_user_name')
+                ->label('Last Editor')
+                ->state(fn(Blog $record): ?string => $record->editor?->name),
             ExportColumn::make('is_published'),
             ExportColumn::make('publish_start'),
             ExportColumn::make('publish_end'),
+            ExportColumn::make('sort'),
+            ExportColumn::make('tags')
+                ->state(fn(Blog $record) => is_array($record->tags) ? implode(', ', $record->tags) : ''),
+            ExportColumn::make('seo_title'),
+            ExportColumn::make('seo_description'),
+            ExportColumn::make('seo_keywords'),
             ExportColumn::make('created_at'),
             ExportColumn::make('updated_at'),
         ];

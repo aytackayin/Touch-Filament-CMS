@@ -64,6 +64,7 @@ class BlogCategoryForm
                                     })
                                     ->image()
                                     ->imageEditor()
+                                    ->enableReordering()
                                     ->columnSpanFull(),
                             ])->columns(2),
                     ])
