@@ -12,6 +12,15 @@ class BlogCategoryPolicy
 {
     use HandlesAuthorization;
 
+    public function before(AuthUser $authUser, string $ability): ?bool
+    {
+        if ($authUser->hasAnyRole(['super_admin', 'admin'])) {
+            return true;
+        }
+
+        return null;
+    }
+
     public function viewAny(AuthUser $authUser): bool
     {
         return $authUser->can('ViewAny:BlogCategory');
@@ -29,12 +38,12 @@ class BlogCategoryPolicy
 
     public function update(AuthUser $authUser, BlogCategory $blogCategory): bool
     {
-        return $authUser->can('Update:BlogCategory');
+        return $authUser->can('Update:BlogCategory') && $authUser->id === $blogCategory->user_id;
     }
 
     public function delete(AuthUser $authUser, BlogCategory $blogCategory): bool
     {
-        return $authUser->can('Delete:BlogCategory');
+        return $authUser->can('Delete:BlogCategory') && $authUser->id === $blogCategory->user_id;
     }
 
     public function deleteAny(AuthUser $authUser): bool
@@ -44,12 +53,12 @@ class BlogCategoryPolicy
 
     public function restore(AuthUser $authUser, BlogCategory $blogCategory): bool
     {
-        return $authUser->can('Restore:BlogCategory');
+        return $authUser->can('Restore:BlogCategory') && $authUser->id === $blogCategory->user_id;
     }
 
     public function forceDelete(AuthUser $authUser, BlogCategory $blogCategory): bool
     {
-        return $authUser->can('ForceDelete:BlogCategory');
+        return $authUser->can('ForceDelete:BlogCategory') && $authUser->id === $blogCategory->user_id;
     }
 
     public function forceDeleteAny(AuthUser $authUser): bool
@@ -64,7 +73,7 @@ class BlogCategoryPolicy
 
     public function replicate(AuthUser $authUser, BlogCategory $blogCategory): bool
     {
-        return $authUser->can('Replicate:BlogCategory');
+        return $authUser->can('Replicate:BlogCategory') && $authUser->id === $blogCategory->user_id;
     }
 
     public function reorder(AuthUser $authUser): bool

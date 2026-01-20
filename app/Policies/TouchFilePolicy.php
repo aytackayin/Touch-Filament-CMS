@@ -12,6 +12,15 @@ class TouchFilePolicy
 {
     use HandlesAuthorization;
 
+    public function before(AuthUser $authUser, string $ability): ?bool
+    {
+        if ($authUser->hasAnyRole(['super_admin', 'admin'])) {
+            return true;
+        }
+
+        return null;
+    }
+
     public function viewAny(AuthUser $authUser): bool
     {
         return $authUser->can('ViewAny:TouchFile');
@@ -29,12 +38,12 @@ class TouchFilePolicy
 
     public function update(AuthUser $authUser, TouchFile $touchFile): bool
     {
-        return $authUser->can('Update:TouchFile');
+        return $authUser->can('Update:TouchFile') && $authUser->id === $touchFile->user_id;
     }
 
     public function delete(AuthUser $authUser, TouchFile $touchFile): bool
     {
-        return $authUser->can('Delete:TouchFile');
+        return $authUser->can('Delete:TouchFile') && $authUser->id === $touchFile->user_id;
     }
 
     public function deleteAny(AuthUser $authUser): bool
@@ -44,12 +53,12 @@ class TouchFilePolicy
 
     public function restore(AuthUser $authUser, TouchFile $touchFile): bool
     {
-        return $authUser->can('Restore:TouchFile');
+        return $authUser->can('Restore:TouchFile') && $authUser->id === $touchFile->user_id;
     }
 
     public function forceDelete(AuthUser $authUser, TouchFile $touchFile): bool
     {
-        return $authUser->can('ForceDelete:TouchFile');
+        return $authUser->can('ForceDelete:TouchFile') && $authUser->id === $touchFile->user_id;
     }
 
     public function forceDeleteAny(AuthUser $authUser): bool
@@ -64,7 +73,7 @@ class TouchFilePolicy
 
     public function replicate(AuthUser $authUser, TouchFile $touchFile): bool
     {
-        return $authUser->can('Replicate:TouchFile');
+        return $authUser->can('Replicate:TouchFile') && $authUser->id === $touchFile->user_id;
     }
 
     public function reorder(AuthUser $authUser): bool
