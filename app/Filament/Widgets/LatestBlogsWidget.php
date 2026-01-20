@@ -54,8 +54,7 @@ class LatestBlogsWidget extends BaseWidget
                 EditAction::make()
                     ->url(fn(Blog $record): string => BlogResource::getUrl('edit', ['record' => $record]))
                     ->label('')
-                    ->tooltip(__('button.edit'))
-                    ->visible(fn($record) => auth()->user()->can('update', $record)),
+                    ->tooltip(__('button.edit')),
             ]);
     }
 }

@@ -60,7 +60,7 @@ class BlogCategoriesTable
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
-            ->reorderable(auth()->user()->can('reorder', \App\Models\BlogCategory::class) ? 'sort' : null)
+            ->reorderable('sort')
             ->defaultSort('sort', 'asc')
             ->filters([
                 SelectFilter::make('language_id')
@@ -76,12 +76,10 @@ class BlogCategoriesTable
             ->actions([
                 EditAction::make()
                     ->label('')
-                    ->tooltip(__('button.edit'))
-                    ->visible(fn($record) => auth()->user()->can('update', $record)),
+                    ->tooltip(__('button.edit')),
                 DeleteAction::make()
                     ->label('')
                     ->tooltip(__('button.delete'))
-                    ->visible(fn($record) => auth()->user()->can('delete', $record))
                     ->action(function ($record) {
                         $deletionService = app(BlogCategoryDeletionService::class);
                         $deletionService->delete($record);

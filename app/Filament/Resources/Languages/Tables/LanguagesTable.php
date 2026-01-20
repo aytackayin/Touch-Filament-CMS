@@ -90,12 +90,11 @@ class LanguagesTable
             ->actions([
                 EditAction::make()
                     ->label('')
-                    ->tooltip('Edit')
-                    ->visible(fn($record) => auth()->user()->can('update', $record)),
+                    ->tooltip('Edit'),
                 DeleteAction::make()
                     ->label('')
                     ->tooltip(__('button.delete'))
-                    ->visible(fn($record) => !$record->is_default && auth()->user()->can('delete', $record))
+                    ->hidden(fn($record) => $record->is_default)
                     ->disabled(fn($record) => $record->is_default),
             ])
             ->bulkActions([

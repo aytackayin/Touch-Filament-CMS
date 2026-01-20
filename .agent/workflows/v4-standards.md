@@ -20,4 +20,7 @@ Bu proje **Filament v4** ve **Laravel 12** kullanmaktadır. Tüm geliştirmelerd
 
 ### 4. Tasarım ve UI
 - Tasarımlar modern, premium ve responsive olmalıdır.
-- İkon sütunları (IconColumn) her zaman yetki kontrolü (`auth()->user()->can('update', $record)`) içermelidir.
+- İkon sütunları (IconColumn) her zaman yetki kontrolü (auth()->user()->can('update', $record)) içermelidir. (Not: Global auto-resolver aktifse manuel eklemeye gerek yoktur.)
+
+### 5. Kodlama Standartları
+- **Model Kullanımı:** Model sınıfları kod içinde tam yol (\App\Models\Blog::...) yerine her zaman use App\Models\Blog; şeklinde import edilerek (Blog::...) kullanılmalıdır.

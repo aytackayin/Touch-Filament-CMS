@@ -61,7 +61,7 @@ class BlogsTable
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
-            ->reorderable(auth()->user()->can('reorder', \App\Models\Blog::class) ? 'sort' : null)
+            ->reorderable('sort')
             ->defaultSort('sort', 'asc')
             ->filters([
                 SelectFilter::make('user_id')
@@ -81,12 +81,10 @@ class BlogsTable
             ->actions([
                 EditAction::make()
                     ->label('')
-                    ->tooltip(__('button.edit'))
-                    ->visible(fn($record) => auth()->user()->can('update', $record)),
+                    ->tooltip(__('button.edit')),
                 DeleteAction::make()
                     ->label('')
-                    ->tooltip(__('button.delete'))
-                    ->visible(fn($record) => auth()->user()->can('delete', $record)),
+                    ->tooltip(__('button.delete')),
             ])
             ->bulkActions([
                 BulkActionGroup::make([

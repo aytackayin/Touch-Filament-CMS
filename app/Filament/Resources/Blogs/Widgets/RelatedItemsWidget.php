@@ -56,8 +56,7 @@ class RelatedItemsWidget extends BaseWidget
                         ->color('success')
                         ->size('xs')
                         ->icon('heroicon-m-document-plus')
-                        ->url(fn(): string => BlogResource::getUrl('create', ['category_id' => $this->parent_id]))
-                        ->visible(fn() => auth()->user()->can('create', \App\Models\Blog::class)),
+                        ->url(fn(): string => BlogResource::getUrl('create', ['category_id' => $this->parent_id])),
                 ])->buttonGroup()
             ]);
 

@@ -304,7 +304,6 @@ class TouchFileManagerTable
                     ->icon('heroicon-o-pencil-square')
                     ->label('')
                     ->tooltip('Edit')
-                    ->visible(fn($record) => $record?->id !== 0 && auth()->user()->can('update', $record))
                     ->hidden(fn($record) => $record?->id === 0),
 
                 Action::make('copy_url')
@@ -335,7 +334,6 @@ class TouchFileManagerTable
                         ? 'Are you sure you want to delete this folder? All files and subfolders inside will also be deleted.'
                         : 'Are you sure you want to delete this file?')
                     ->action(fn($record) => $record->delete())
-                    ->visible(fn($record) => $record?->id !== 0 && auth()->user()->can('delete', $record))
                     ->hidden(fn($record) => $record?->id === 0),
             ])
             ->bulkActions([
@@ -378,7 +376,7 @@ class TouchFileManagerTable
                                     $zip->addEmptyDir($folderName);
 
                                     // Find children of this folder
-                                    $children = \App\Models\TouchFile::where('parent_id', $record->id)->get();
+                                    $children = TouchFile::where('parent_id', $record->id)->get();
                                     foreach ($children as $child) {
                                         // Recursively add children
                                         // Note: we can't recursively call the closure easily without passing it to itself or using $this approach, 
@@ -402,7 +400,7 @@ class TouchFileManagerTable
                                     $folderName = $relativePath . $record->name;
                                     $zip->addEmptyDir($folderName);
 
-                                    $children = \App\Models\TouchFile::where('parent_id', $record->id)->get();
+                                    $children = TouchFile::where('parent_id', $record->id)->get();
                                     foreach ($children as $child) {
                                         $addRecursively($child, $zip, $folderName . '/');
                                     }

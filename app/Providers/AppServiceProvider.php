@@ -4,8 +4,17 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use BezhanSalleh\LanguageSwitch\LanguageSwitch;
-
 use Filament\View\PanelsRenderHook;
+use Filament\Actions\Action;
+use Filament\Tables\Columns\Column as TableColumn;
+use Filament\Tables\Table;
+use Illuminate\Support\Facades\Gate;
+use App\Models\Blog;
+use App\Models\BlogCategory;
+use App\Models\Language;
+use App\Observers\BlogObserver;
+use App\Observers\BlogCategoryObserver;
+use App\Settings\GeneralSettings;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -22,11 +31,105 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        \App\Models\Blog::observe(\App\Observers\BlogObserver::class);
-        \App\Models\BlogCategory::observe(\App\Observers\BlogCategoryObserver::class);
+        Blog::observe(BlogObserver::class);
+        BlogCategory::observe(BlogCategoryObserver::class);
+
+        // Global Policy Auto-Resolver for Actions
+        $autoAuthorize = function ($action, $record = null) {
+            $model = $record ? (is_string($record) ? $record : get_class($record)) : null;
+
+            if (!$model) {
+                if (method_exists($action, 'getTable') && $action->getTable()) {
+                    $model = $action->getTable()->getModel();
+                } elseif (method_exists($action, 'getModel')) {
+                    $model = $action->getModel();
+                }
+            }
+
+            if (!$model)
+                return true;
+
+            $policy = Gate::getPolicyFor($model);
+            if (!$policy)
+                return true;
+
+            $ability = $action->getName();
+
+            // Map common action names to policy methods if needed
+            $abilityMap = [
+                'edit' => 'update',
+                'create' => 'create',
+                'delete' => 'delete',
+            ];
+
+            $ability = $abilityMap[$ability] ?? $ability;
+
+            if (method_exists($policy, $ability)) {
+                $reflection = new \ReflectionMethod($policy, $ability);
+                $numParams = $reflection->getNumberOfParameters();
+
+                // If policy method expects a model instance (2nd param) but we don't have one,
+                // we skip the check to avoid ArgumentCountError.
+                if ($numParams > 1 && !$record && !is_object($record)) {
+                    return true;
+                }
+
+                return auth()->user()?->can($ability, $record ?? $model) ?? true;
+            }
+
+            return true;
+        };
+
+        Action::configureUsing(fn(Action $action) => $action->visible(fn($record = null) => $autoAuthorize($action, $record)));
+
+        // Global Policy Auto-Resolver for Columns (especially IconColumn with actions)
+        TableColumn::configureUsing(function (TableColumn $column) {
+            $column->visible(function ($record = null) use ($column) {
+                $table = $column->getTable();
+                if (!$table)
+                    return true;
+
+                $model = $table->getModel();
+                if (!$model)
+                    return true;
+
+                $policy = Gate::getPolicyFor($model);
+                if (!$policy)
+                    return true;
+
+                $ability = $column->getName();
+                if (method_exists($policy, $ability)) {
+                    $reflection = new \ReflectionMethod($policy, $ability);
+                    $numParams = $reflection->getNumberOfParameters();
+
+                    if ($numParams > 1 && !$record && !is_object($record)) {
+                        return true;
+                    }
+
+                    return auth()->user()?->can($ability, $record ?? $model) ?? true;
+                }
+
+                return true;
+            });
+        });
+
+        // Global Policy Auto-Resolver for Table Reordering
+        Table::configureUsing(function (Table $table) {
+            $table->authorizeReorder(function () use ($table) {
+                $model = $table->getModel();
+                if (!$model)
+                    return true;
+
+                $policy = Gate::getPolicyFor($model);
+                if (!$policy || !method_exists($policy, 'reorder'))
+                    return true;
+
+                return auth()->user()?->can('reorder', $model) ?? true;
+            });
+        });
 
         LanguageSwitch::configureUsing(function (LanguageSwitch $switch) {
-            $languages = \App\Models\Language::where('is_active', 1)->get();
+            $languages = Language::where('is_active', 1)->get();
 
             $switch
                 ->renderHook(PanelsRenderHook::USER_MENU_BEFORE)
@@ -51,8 +154,8 @@ class AppServiceProvider extends ServiceProvider
 
 
         try {
-            /** @var \App\Settings\GeneralSettings $settings */
-            $settings = app(\App\Settings\GeneralSettings::class);
+            /** @var GeneralSettings $settings */
+            $settings = app(GeneralSettings::class);
 
             config([
                 'site.title' => $settings->site_title,

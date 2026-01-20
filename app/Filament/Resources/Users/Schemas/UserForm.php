@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Users\Schemas;
 
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use App\Models\User;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Hash;
 
@@ -40,7 +41,7 @@ class UserForm
                     ->required()
                     ->multiple()
                     ->relationship('roles', 'name', function ($query) {
-                        /** @var \App\Models\User $authUser */
+                        /** @var User $authUser */
                         $authUser = auth()->user();
 
                         // Super Admin her rolü görebilir

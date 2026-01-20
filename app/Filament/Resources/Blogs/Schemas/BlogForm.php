@@ -12,7 +12,9 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\TagsInput;
 use Filament\Schemas\Schema;
+use App\Models\Language;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Placeholder;
@@ -60,7 +62,7 @@ class BlogForm
                                 TinyEditor::make('content')
                                     ->columnSpanFull()
                                     ->required(),
-                                \Filament\Forms\Components\TagsInput::make('tags')
+                                TagsInput::make('tags')
                                     ->columnSpanFull(),
                                 FileUpload::make('attachments')
                                     ->multiple()
@@ -100,7 +102,7 @@ class BlogForm
                                                 return $category->language_id;
                                             }
                                         }
-                                        return \App\Models\Language::where('is_default', true)->first()?->id;
+                                        return Language::where('is_default', true)->first()?->id;
                                     })
                                     ->live()
                                     ->afterStateUpdated(fn($set) => $set('categories', [])),

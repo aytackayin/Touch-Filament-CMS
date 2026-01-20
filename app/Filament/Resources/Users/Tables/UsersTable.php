@@ -40,13 +40,11 @@ class UsersTable
                 EditAction::make()
                     ->icon('heroicon-o-pencil-square')
                     ->label('')
-                    ->tooltip(__('button.edit'))
-                    ->visible(fn($record) => auth()->user()->can('update', $record)),
+                    ->tooltip(__('button.edit')),
                 DeleteAction::make()
                     ->icon('heroicon-o-trash')
                     ->label('')
-                    ->tooltip(__('button.delete'))
-                    ->visible(fn($record) => auth()->user()->can('delete', $record)),
+                    ->tooltip(__('button.delete')),
             ])
             ->bulkActions([
                 BulkActionGroup::make([
