@@ -24,7 +24,9 @@ return [
         'blogs' => 'Blogs',
         'blog_category' => 'Blog Category',
         'blog_categories' => 'Blog Categories',
-        'latest_blogs' => 'Latest Blogs',
+        'latest_blogs' => 'Latest Blog Posts',
+        'articles' => 'Articles',
+        'articles_in' => 'Articles in ":name"',
     ],
     'nav' => [
         'group' => 'Blog',

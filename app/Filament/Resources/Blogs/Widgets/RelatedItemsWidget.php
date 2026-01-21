@@ -16,7 +16,6 @@ class RelatedItemsWidget extends BaseWidget
     protected int|string|array $columnSpan = 'full';
 
     public ?int $parent_id = null;
-
     protected static ?string $heading = null;
 
     public function mount(): void
@@ -24,12 +23,12 @@ class RelatedItemsWidget extends BaseWidget
         if ($this->parent_id) {
             $record = BlogCategory::find($this->parent_id);
             if ($record) {
-                static::$heading = "Articles in " . $record->title;
+                static::$heading = __('blog.label.articles_in', ['name' => $record->title]);
             } else {
-                static::$heading = "Articles";
+                static::$heading = __('blog.label.articles');
             }
         } else {
-            static::$heading = "Articles";
+            static::$heading = __('blog.label.articles');
         }
     }
 
@@ -52,7 +51,7 @@ class RelatedItemsWidget extends BaseWidget
                 ActionGroup::make([
                     CreateAction::make()
                         ->label('')
-                        ->tooltip('New Blog')
+                        ->tooltip(__('filament-actions::create.single.modal.actions.create.label'))
                         ->color('success')
                         ->size('xs')
                         ->icon('heroicon-m-document-plus')

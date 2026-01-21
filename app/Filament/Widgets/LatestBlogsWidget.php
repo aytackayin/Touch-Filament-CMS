@@ -18,6 +18,12 @@ class LatestBlogsWidget extends BaseWidget
     protected int|string|array $columnSpan = 1;
 
     protected static ?int $sort = 2;
+    protected static ?string $heading = null;
+
+    public function mount(): void
+    {
+        static::$heading = __('blog.label.latest_blogs');
+    }
 
     public function table(Table $table): Table
     {
@@ -54,7 +60,7 @@ class LatestBlogsWidget extends BaseWidget
                 EditAction::make()
                     ->url(fn(Blog $record): string => BlogResource::getUrl('edit', ['record' => $record]))
                     ->label('')
-                    ->tooltip(__('button.edit')),
+                    ->tooltip(__('filament-actions::edit.single.label')),
             ]);
     }
 }

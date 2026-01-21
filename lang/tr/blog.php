@@ -24,7 +24,9 @@ return [
         'blogs' => 'Bloglar',
         'blog_category' => 'Blog Kategorisi',
         'blog_categories' => 'Blog Kategorileri',
-        'latest_blogs' => 'Son Bloglar',
+        'latest_blogs' => 'Son Blog Yazıları',
+        'articles' => 'Yazılar',
+        'articles_in' => '":name" Kategorisindeki Yazılar',
     ],
     'nav' => [
         'group' => 'Blog',
