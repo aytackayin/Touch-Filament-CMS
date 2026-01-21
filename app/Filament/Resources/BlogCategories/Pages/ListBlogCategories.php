@@ -108,7 +108,7 @@ class ListBlogCategories extends ListRecords
         $actions[] =
             CreateAction::make()
                 ->label('')
-                ->tooltip(__('filament-actions::create.modal.actions.create.label'))
+                ->tooltip(__('filament-actions::create.single.modal.actions.create.label'))
                 ->color('success')
                 ->size('xs')
                 ->icon('heroicon-m-squares-plus')
