@@ -97,15 +97,15 @@ class BlogCategoriesTable
                     ]),
             ])
             ->actions([
-                \Filament\Actions\ViewAction::make()
-                    ->label('')
-                    ->tooltip(__('filament-actions::view.single.label')),
                 EditAction::make()
                     ->label('')
-                    ->tooltip(__('filament-actions::edit.single.label')),
+                    ->tooltip(__('filament-actions::edit.single.label'))
+                    ->url(fn(BlogCategory $record): string => BlogCategoryResource::getUrl('edit', ['record' => $record])),
                 DeleteAction::make()
                     ->label('')
                     ->tooltip(__('filament-actions::delete.single.label'))
+                    ->modalHeading(fn(BlogCategory $record) => __('blog.delete_confirmation_title.category', ['name' => $record->title]))
+                    ->modalDescription(__('blog.delete_confirmation_description'))
                     ->action(function ($record) {
                         $deletionService = app(BlogCategoryDeletionService::class);
                         $deletionService->delete($record);

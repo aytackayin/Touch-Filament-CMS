@@ -1,0 +1,29 @@
+<?php
+
+return [
+    'label' => [
+        'title' => 'Title',
+        'category' => 'Category',
+        'slug' => 'Slug',
+        'content' => 'Content',
+        'description' => 'Description',
+        'tags' => 'Tags',
+        'attachments' => 'Attachments',
+        'author' => 'Author',
+        'last_edited_by' => 'Last Edited By',
+        'language' => 'Language',
+        'categories' => 'Categories',
+        'parent_category' => 'Parent Category',
+        'is_published' => 'Publish Status',
+        'publish_start' => 'Publish Start Date',
+        'publish_end' => 'Publish End Date',
+        'created_at' => 'Created At',
+        'updated_at' => 'Updated At',
+        'sort' => 'Sort',
+    ],
+    'delete_confirmation_title' => [
+        'blog' => 'Delete Blog: ":name"',
+        'category' => 'Delete Category: ":name"',
+    ],
+    'delete_confirmation_description' => 'Are you sure you want to do this?',
+];

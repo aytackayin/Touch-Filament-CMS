@@ -4,7 +4,6 @@ namespace App\Filament\Resources\Blogs\Tables;
 
 use Filament\Actions\EditAction;
 use Filament\Actions\DeleteAction;
-use Filament\Actions\ViewAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Tables\Columns\IconColumn;
@@ -18,6 +17,7 @@ use Filament\Tables\Filters\SelectFilter;
 use App\Filament\Exports\BlogExporter;
 use Filament\Actions\ExportBulkAction;
 use Filament\Support\Icons\Heroicon;
+use App\Filament\Resources\Blogs\BlogResource;
 
 class BlogsTable
 {
@@ -91,15 +91,15 @@ class BlogsTable
                     ]),
             ])
             ->actions([
-                ViewAction::make()
-                    ->label('')
-                    ->tooltip(__('filament-actions::view.single.label')),
                 EditAction::make()
                     ->label('')
-                    ->tooltip(__('filament-actions::edit.single.label')),
+                    ->tooltip(__('filament-actions::edit.single.label'))
+                    ->url(fn(Blog $record): string => BlogResource::getUrl('edit', ['record' => $record])),
                 DeleteAction::make()
                     ->label('')
-                    ->tooltip(__('filament-actions::delete.single.label')),
+                    ->tooltip(__('filament-actions::delete.single.label'))
+                    ->modalHeading(fn(Blog $record) => __('blog.delete_confirmation_title.blog', ['name' => $record->title]))
+                    ->modalDescription(__('blog.delete_confirmation_description')),
             ])
             ->bulkActions([
                 BulkActionGroup::make([

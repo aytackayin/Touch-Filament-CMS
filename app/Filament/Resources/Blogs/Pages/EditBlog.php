@@ -14,7 +14,10 @@ class EditBlog extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            DeleteAction::make(),
+            DeleteAction::make()
+                ->modalHeading(fn() => __('blog.delete_confirmation_title.blog', ['name' => $this->record->title]))
+                ->modalDescription(__('blog.delete_confirmation_description'))
+                ->successRedirectUrl(fn() => $this->previousUrl ?? BlogResource::getUrl('index')),
         ];
     }
 

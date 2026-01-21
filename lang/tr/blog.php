@@ -21,4 +21,9 @@ return [
         'updated_at' => 'Güncellenme Tarihi',
         'sort' => 'Sıralama',
     ],
+    'delete_confirmation_title' => [
+        'blog' => '":name" Yazısını Sil',
+        'category' => '":name" Kategorisini Sil',
+    ],
+    'delete_confirmation_description' => 'Bunu yapmak istediğinizden emin misiniz?',
 ];

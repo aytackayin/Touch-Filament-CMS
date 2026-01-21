@@ -1,5 +1,5 @@
 ---
-description: Filament 4 ve Laravel 11 Geliştirme Standartları
+description: Filament 4 ve Laravel 12 Geliştirme Standartları
 ---
 
 Bu proje **Filament v4** ve **Laravel 12** kullanmaktadır. Tüm geliştirmelerde aşağıdaki teknik kurallar ZORUNLUDUR:
