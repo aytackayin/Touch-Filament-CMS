@@ -131,10 +131,12 @@ class ManageSiteSettings extends SettingsPage
                     ->expandAllAction(fn(Action $action) => $action->size('xs')->extraAttributes(['style' => 'opacity: 0.6']))
                     ->schema([
                         TextInput::make('tab_name')
-                            ->label(__('settings.label.tab_name'))
+                            ->label(new HtmlString('<span style="opacity: 0.7; font-weight: 500;">' . __('settings.label.tab_name') . '</span>'))
+                            ->extraInputAttributes(['style' => 'opacity: 0.8;'])
                             ->required(),
                         SelectIcon::make('tab_icon')
-                            ->label(__('settings.label.tab_icon')),
+                            ->label(new HtmlString('<span style="opacity: 0.7; font-weight: 500;">' . __('settings.label.tab_icon') . '</span>'))
+                            ->extraInputAttributes(['style' => 'opacity: 0.8;']),
 
 
 
@@ -142,15 +144,19 @@ class ManageSiteSettings extends SettingsPage
 
                         Repeater::make('fields')
                             ->label(__('settings.label.fields'))
+                            ->addActionLabel(__('settings.label.add_field'))
                             ->schema([
                                 TextInput::make('label')
-                                    ->label(__('settings.label.field_label'))
+                                    ->label(new HtmlString('<span style="opacity: 0.7; font-weight: 500;">' . __('settings.label.field_label') . '</span>'))
+                                    ->extraInputAttributes(['style' => 'opacity: 0.8;'])
                                     ->required(),
                                 TextInput::make('field_name')
-                                    ->label(__('settings.label.field_name'))
+                                    ->label(new HtmlString('<span style="opacity: 0.7; font-weight: 500;">' . __('settings.label.field_name') . '</span>'))
+                                    ->extraInputAttributes(['style' => 'opacity: 0.8;'])
                                     ->required(),
                                 Select::make('type')
-                                    ->label(__('settings.label.field_type'))
+                                    ->label(new HtmlString('<span style="opacity: 0.7; font-weight: 500;">' . __('settings.label.field_type') . '</span>'))
+                                    ->extraInputAttributes(['style' => 'opacity: 0.8;'])
                                     ->options([
                                         'text' => __('settings.label.types.text'),
                                         'email' => __('settings.label.types.email'),
@@ -174,7 +180,8 @@ class ManageSiteSettings extends SettingsPage
                                     ->required()
                                     ->live(),
                                 KeyValue::make('options')
-                                    ->label(__('settings.label.options'))
+                                    ->label(new HtmlString('<span style="opacity: 0.7; font-weight: 500;">' . __('settings.label.options') . '</span>'))
+                                    ->extraAttributes(['style' => 'opacity: 0.8;'])
                                     ->helperText(__('settings.label.options_helper'))
                                     ->visible(fn($get) => in_array($get('type'), ['select', 'radio', 'checkbox_list'])),
                                 Hidden::make('value'), // Değeri korumak için gizli alan
@@ -296,18 +303,19 @@ class ManageSiteSettings extends SettingsPage
         $optionKeys = array_keys($options);
 
         return match ($type) {
-            'text' => TextInput::make($statePath),
-            'email' => TextInput::make($statePath)->email(),
-            'number' => TextInput::make($statePath)->numeric(),
-            'tel' => TextInput::make($statePath)->tel(),
-            'url' => TextInput::make($statePath)->url(),
-            'password' => TextInput::make($statePath)->password()->revealable(),
-            'textarea' => Textarea::make($statePath)->rows(3),
+            'text' => TextInput::make($statePath)->extraInputAttributes(['style' => 'opacity: 0.8']),
+            'email' => TextInput::make($statePath)->email()->extraInputAttributes(['style' => 'opacity: 0.8']),
+            'number' => TextInput::make($statePath)->numeric()->extraInputAttributes(['style' => 'opacity: 0.8']),
+            'tel' => TextInput::make($statePath)->tel()->extraInputAttributes(['style' => 'opacity: 0.8']),
+            'url' => TextInput::make($statePath)->url()->extraInputAttributes(['style' => 'opacity: 0.8']),
+            'password' => TextInput::make($statePath)->password()->revealable()->extraInputAttributes(['style' => 'opacity: 0.8']),
+            'textarea' => Textarea::make($statePath)->rows(3)->extraInputAttributes(['style' => 'opacity: 0.8']),
             'select' => Select::make($statePath)
                 ->options($options)
                 ->searchable()
                 ->native(false) // Daha iyi UI ve tip uyumu için
-                ->in($optionKeys), // Validasyon hatasını önlemek için açık kural
+                ->in($optionKeys) // Validasyon hatasını önlemek için açık kural
+                ->extraInputAttributes(['style' => 'opacity: 0.8']),
             'checkbox' => Toggle::make($statePath),
             'checkbox_list' => CheckboxList::make($statePath)
                 ->options($options)
@@ -316,11 +324,11 @@ class ManageSiteSettings extends SettingsPage
                 ->options($options)
                 ->in($optionKeys),
             'color' => ColorPicker::make($statePath),
-            'date' => DatePicker::make($statePath),
-            'time' => TimePicker::make($statePath),
-            'datetime' => DateTimePicker::make($statePath),
-            'tags' => TagsInput::make($statePath),
-            default => TextInput::make($statePath),
+            'date' => DatePicker::make($statePath)->extraInputAttributes(['style' => 'opacity: 0.8']),
+            'time' => TimePicker::make($statePath)->extraInputAttributes(['style' => 'opacity: 0.8']),
+            'datetime' => DateTimePicker::make($statePath)->extraInputAttributes(['style' => 'opacity: 0.8']),
+            'tags' => TagsInput::make($statePath)->extraInputAttributes(['style' => 'opacity: 0.8']),
+            default => TextInput::make($statePath)->extraInputAttributes(['style' => 'opacity: 0.8']),
         };
     }
 

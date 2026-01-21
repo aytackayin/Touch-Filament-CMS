@@ -13,6 +13,7 @@ return [
         'tab_name' => 'Tab Name',
         'tab_icon' => 'Tab Icon',
         'fields' => 'Fields',
+        'add_field' => 'Add Field',
         'field_label' => 'Label',
         'field_name' => 'System Key',
         'field_type' => 'Data Type',

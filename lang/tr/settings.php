@@ -13,6 +13,7 @@ return [
         'tab_name' => 'Sekme Adı',
         'tab_icon' => 'Sekme İkonu',
         'fields' => 'Alanlar',
+        'add_field' => 'Alan Ekle',
         'field_label' => 'Görünen Ad',
         'field_name' => 'Sistem Anahtarı',
         'field_type' => 'Veri Tipi',

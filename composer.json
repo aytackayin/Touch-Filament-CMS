@@ -10,7 +10,7 @@
     "license": "MIT",
     "require": {
         "php": "^8.2",
-        "aytackayin/filament-select-icon": "^1.0.2",
+        "aytackayin/filament-select-icon": "^1.0.7",
         "aytackayin/tinymce": "^1.0",
         "bezhansalleh/filament-language-switch": "^4.0",
         "bezhansalleh/filament-shield": "^4.0",
