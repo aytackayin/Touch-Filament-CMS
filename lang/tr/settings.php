@@ -12,6 +12,7 @@ return [
         'description' => 'Açıklama',
         'tab_name' => 'Sekme Adı',
         'tab_icon' => 'Sekme İkonu',
+        'add_tab' => 'Sekme Ekle',
         'fields' => 'Alanlar',
         'add_field' => 'Alan Ekle',
         'field_label' => 'Görünen Ad',

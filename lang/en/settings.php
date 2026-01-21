@@ -12,6 +12,7 @@ return [
         'description' => 'Description',
         'tab_name' => 'Tab Name',
         'tab_icon' => 'Tab Icon',
+        'add_tab' => 'Add Tab',
         'fields' => 'Fields',
         'add_field' => 'Add Field',
         'field_label' => 'Label',

@@ -127,6 +127,8 @@ class ManageSiteSettings extends SettingsPage
                     ->content(new HtmlString('<div style="font-size: 0.8rem; opacity: 0.6; line-height: 1.4;">' . __('settings.label.manage_desc') . '</div>')),
                 Repeater::make('custom_settings')
                     ->label(__('settings.label.schema_label'))
+                    ->addActionLabel(__('settings.label.add_tab'))
+                    ->addAction(fn(Action $action) => $action->color('success')->icon(Heroicon::OutlinedFolderPlus))
                     ->collapseAllAction(fn(Action $action) => $action->size('xs')->extraAttributes(['style' => 'opacity: 0.6']))
                     ->expandAllAction(fn(Action $action) => $action->size('xs')->extraAttributes(['style' => 'opacity: 0.6']))
                     ->schema([
@@ -145,6 +147,7 @@ class ManageSiteSettings extends SettingsPage
                         Repeater::make('fields')
                             ->label(__('settings.label.fields'))
                             ->addActionLabel(__('settings.label.add_field'))
+                            ->addAction(fn(Action $action) => $action->color('success')->icon(Heroicon::OutlinedBars3))
                             ->schema([
                                 TextInput::make('label')
                                     ->label(new HtmlString('<span style="opacity: 0.7; font-weight: 500;">' . __('settings.label.field_label') . '</span>'))
