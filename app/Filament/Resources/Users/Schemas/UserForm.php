@@ -14,27 +14,27 @@ class UserForm
         return $schema
             ->components([
                 TextInput::make('name')
-                    ->label(__('label.name'))
+                    ->label(__('user.label.name'))
                     ->required(),
                 TextInput::make('email')
-                    ->label(__('label.email'))
+                    ->label(__('user.label.email'))
                     ->email()
                     ->required(),
 
                 TextInput::make('password')
-                    ->label(__('label.password'))
+                    ->label(__('user.label.password'))
                     ->password()
                     ->confirmed()
                     ->dehydrated(fn($state) => filled($state))
                     ->required(fn(string $context): bool => $context === 'create'),
                 TextInput::make('password_confirmation')
-                    ->label(__('label.password_confirmation'))
+                    ->label(__('user.label.password_confirmation'))
                     ->required(fn(string $context): bool => $context === 'create')
                     ->password()
                     ->dehydrated(false),
 
                 Select::make('roles')
-                    ->label(__('label.roles'))
+                    ->label(__('filament-shield::filament-shield.column.roles'))
                     ->searchable()
                     ->preload()
                     ->required()

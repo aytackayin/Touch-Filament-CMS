@@ -26,18 +26,18 @@ class UsersTable
             ->striped()
             ->columns([
                 TextColumn::make('name')
-                    ->label(__('label.name'))
+                    ->label(__('user.label.name'))
                     ->searchable(),
                 TextColumn::make('email')
-                    ->label(__('label.email'))
+                    ->label(__('user.label.email'))
                     ->searchable(),
                 TextColumn::make('created_at')
-                    ->label(__('label.create_at'))
+                    ->label(__('user.label.created_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
-                    ->label(__('label.update_at'))
+                    ->label(__('user.label.updated_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -49,11 +49,13 @@ class UsersTable
                 EditAction::make()
                     ->icon('heroicon-o-pencil-square')
                     ->label('')
-                    ->tooltip(__('button.edit')),
+                    ->tooltip(__('filament-actions::edit.single.label')),
                 DeleteAction::make()
                     ->icon('heroicon-o-trash')
                     ->label('')
-                    ->tooltip(__('button.delete')),
+                    ->tooltip(__('filament-actions::delete.single.label'))
+                    ->modalHeading(fn(\App\Models\User $record) => __('user.delete_confirmation_title.user', ['name' => $record->name]))
+                    ->modalDescription(__('user.delete_confirmation_description')),
             ])
             ->bulkActions([
                 BulkActionGroup::make([

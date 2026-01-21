@@ -78,7 +78,7 @@ class ListBlogCategories extends ListRecords
             $actions = [
                 Action::make('up')
                     ->label('')
-                    ->tooltip(__('button.parent_category'))
+                    ->tooltip(__('blog.label.parent_category'))
                     ->color('gray')
                     ->size('xs')
                     ->translateLabel()

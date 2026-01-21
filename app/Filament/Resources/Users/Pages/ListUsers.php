@@ -10,17 +10,12 @@ class ListUsers extends ListRecords
 {
     protected static string $resource = UserResource::class;
 
-    public function getHeading(): string
-    {
-        return __('user.head.list.title');
-    }
-
     protected function getHeaderActions(): array
     {
         return [
             CreateAction::make()
                 ->label('')
-                ->tooltip(__('button.new'))
+                ->tooltip(__('filament-actions::create.single.modal.actions.create.label'))
                 ->color('success')
                 ->size('xs')
                 ->icon('heroicon-m-user-plus'),

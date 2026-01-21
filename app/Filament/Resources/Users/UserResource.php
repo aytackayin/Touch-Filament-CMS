@@ -19,12 +19,15 @@ class UserResource extends Resource
 {
     protected static ?string $model = User::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::User;
+    public static function getNavigationIcon(): string
+    {
+        return __('user.nav.icon');
+    }
 
     protected static ?string $recordTitleAttribute = 'name';
     public static function getNavigationGroup(): ?string
     {
-        return __('label.administration');
+        return __('user.nav.group');
     }
 
     public static function form(Schema $schema): Schema
@@ -38,11 +41,21 @@ class UserResource extends Resource
     }
     public static function getNavigationLabel(): string
     {
-        return __('user.menu.menubar.title');
+        return __('user.nav.label');
     }
     public static function getBreadcrumb(): string
     {
-        return __('user.menu.bread.title');
+        return __('user.nav.label');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('user.label.user');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('user.label.users');
     }
 
     public static function getRelations(): array

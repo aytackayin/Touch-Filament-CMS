@@ -33,7 +33,7 @@ return [
     |--------------------------------------------------------------------------
     */
 
-    'nav.group' => 'Genel Ayarlar',
+    'nav.group' => 'Kullanıcı Yönetimi',
     'nav.role.label' => 'Roller',
     'nav.role.icon' => 'heroicon-o-shield-check',
     'resource.label.role' => 'Rol',

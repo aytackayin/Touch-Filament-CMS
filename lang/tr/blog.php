@@ -20,6 +20,18 @@ return [
         'created_at' => 'Oluşturulma Tarihi',
         'updated_at' => 'Güncellenme Tarihi',
         'sort' => 'Sıralama',
+        'blog' => 'Blog',
+        'blogs' => 'Bloglar',
+        'blog_category' => 'Blog Kategorisi',
+        'blog_categories' => 'Blog Kategorileri',
+        'latest_blogs' => 'Son Bloglar',
+    ],
+    'nav' => [
+        'group' => 'Blog',
+        'label' => 'Bloglar',
+        'blog_categories' => 'Blog Kategorileri',
+        'icon' => 'heroicon-o-document-text',
+        'category_icon' => 'heroicon-o-folder',
     ],
     'delete_confirmation_title' => [
         'blog' => '":name" Yazısını Sil',

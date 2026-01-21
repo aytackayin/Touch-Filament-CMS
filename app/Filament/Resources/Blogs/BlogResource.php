@@ -23,8 +23,12 @@ class BlogResource extends Resource implements HasShieldPermissions
 {
     protected static ?string $model = Blog::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedDocumentText;
+    //protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedDocumentText;
 
+    public static function getNavigationIcon(): string
+    {
+        return __('blog.nav.icon');
+    }
     public static function getGloballySearchableAttributes(): array
     {
         return ['title', 'content'];
@@ -86,6 +90,24 @@ class BlogResource extends Resource implements HasShieldPermissions
     public static function getNavigationGroup(): ?string
     {
         return 'Blog';
+    }
+    public static function getNavigationLabel(): string
+    {
+        return __('blog.nav.label');
+    }
+    public static function getBreadcrumb(): string
+    {
+        return __('blog.nav.label');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('blog.label.blog');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('blog.label.blogs');
     }
     protected static ?int $navigationSort = 2;
 

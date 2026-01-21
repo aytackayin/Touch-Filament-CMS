@@ -15,7 +15,9 @@ class EditUser extends EditRecord
         return [
             DeleteAction::make()
                 ->label('')
-                ->tooltip(__('button.delete'))
+                ->tooltip(__('filament-actions::delete.single.label'))
+                ->modalHeading(fn() => __('user.delete_confirmation_title.user', ['name' => $this->record->name]))
+                ->modalDescription(__('user.delete_confirmation_description'))
                 ->color('danger')
                 ->icon('heroicon-m-trash'),
         ];

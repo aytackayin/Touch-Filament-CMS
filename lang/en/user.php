@@ -1,0 +1,27 @@
+<?php
+
+return [
+    'label' => [
+        'name' => 'Name',
+        'username' => 'Username',
+        'email' => 'Email',
+        'password' => 'Password',
+        'password_confirmation' => 'Password Confirmation',
+        'last_edited_by' => 'Last Edited By',
+        'roles' => 'Roles',
+        'permissions' => 'Permissions',
+        'created_at' => 'Created At',
+        'updated_at' => 'Updated At',
+        'user' => 'User',
+        'users' => 'Users',
+    ],
+    'nav' => [
+        'group' => 'User Management',
+        'label' => 'Users',
+        'icon' => 'heroicon-o-user-group',
+    ],
+    'delete_confirmation_title' => [
+        'user' => 'Delete User: ":name"',
+    ],
+    'delete_confirmation_description' => 'Are you sure you want to do this?',
+];

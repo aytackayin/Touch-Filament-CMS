@@ -32,6 +32,7 @@ class LatestBlogsWidget extends BaseWidget
             ->striped()
             ->columns([
                 TextColumn::make('title')
+                    ->label(__('blog.label.title'))
                     ->icon('heroicon-s-document-text')
                     ->wrap(),
                 IconColumn::make('is_published')
