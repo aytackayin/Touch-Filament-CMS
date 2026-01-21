@@ -10,6 +10,7 @@ use Filament\Tables\Columns\TextColumn;
 use App\Filament\Resources\Blogs\BlogResource;
 use Filament\Widgets\TableWidget as BaseWidget;
 use Filament\Actions\EditAction;
+use Illuminate\Support\HtmlString;
 use BezhanSalleh\FilamentShield\Traits\HasWidgetShield;
 
 class LatestBlogsWidget extends BaseWidget
@@ -36,9 +37,13 @@ class LatestBlogsWidget extends BaseWidget
             ->searchable(false)
             ->paginated(false)
             ->striped()
+            ->extraAttributes([
+                'class' => 'latest-blogs-table',
+            ])
+            ->description(new HtmlString('<style>.latest-blogs-table thead { display: none !important; }</style>'))
             ->columns([
                 TextColumn::make('title')
-                    ->label(__('blog.label.title'))
+                    ->label('')
                     ->icon('heroicon-s-document-text')
                     ->wrap(),
                 IconColumn::make('is_published')
