@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\BlogCategories\Tables;
 
-use Filament\Actions\Action;
 use Filament\Actions\EditAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\BulkActionGroup;
@@ -10,7 +9,6 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Support\Enums\IconSize;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Actions\ExportBulkAction;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -19,6 +17,8 @@ use App\Services\BlogCategoryDeletionService;
 use App\Models\BlogCategory;
 use Illuminate\Support\Str;
 use Illuminate\Support\HtmlString;
+use App\Filament\Exports\BlogCategoryExporter;
+use Filament\Actions\ExportBulkAction;
 class BlogCategoriesTable
 {
     public static function configure(Table $table): Table
@@ -29,6 +29,7 @@ class BlogCategoriesTable
             ->recordUrl(null)
             ->columns([
                 TextColumn::make('title')
+                    ->label(__('blog.label.category'))
                     ->searchable(['title', 'description'])
                     ->icon('heroicon-m-squares-2x2')
                     ->sortable()
@@ -37,25 +38,28 @@ class BlogCategoriesTable
                     ->wrap()
                     ->url(fn($record) => BlogCategoryResource::getUrl('index', ['parent_id' => $record->id])),
                 TextColumn::make('language.name')
+                    ->label(__('blog.label.language'))
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('tags')
+                    ->label(__('blog.label.tags'))
                     ->badge()
                     ->separator(',')
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('user.name')
-                    ->label('Author')
+                    ->label(__('blog.label.author'))
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('editor.name')
-                    ->label('Last Editor')
+                    ->label(__('blog.label.last_edited_by'))
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('parent.title')
-                    ->label('Parent Category')
+                    ->label(__('blog.label.parent_category'))
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 IconColumn::make('is_published')
+                    ->label(__('blog.label.is_published'))
                     ->size(IconSize::Medium)
                     ->alignCenter(true)
                     ->boolean()
@@ -66,6 +70,7 @@ class BlogCategoriesTable
                         }
                     }),
                 TextColumn::make('created_at')
+                    ->label(__('blog.label.created_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -74,18 +79,18 @@ class BlogCategoriesTable
             ->defaultSort('sort', 'asc')
             ->filters([
                 SelectFilter::make('user_id')
-                    ->label('Author')
+                    ->label(__('blog.label.author'))
                     ->relationship('user', 'name')
                     ->searchable(),
                 SelectFilter::make('edit_user_id')
-                    ->label('Last Editor')
+                    ->label(__('blog.label.last_edited_by'))
                     ->relationship('editor', 'name')
                     ->searchable(),
                 SelectFilter::make('language_id')
-                    ->label(__('label.language'))
+                    ->label(__('blog.label.language'))
                     ->relationship('language', 'name'),
                 SelectFilter::make('is_published')
-                    ->label('Publication Status')
+                    ->label(__('blog.label.is_published'))
                     ->options([
                         '1' => 'Published',
                         '0' => 'Unpublished',
@@ -94,13 +99,13 @@ class BlogCategoriesTable
             ->actions([
                 \Filament\Actions\ViewAction::make()
                     ->label('')
-                    ->tooltip(__('button.view')),
+                    ->tooltip(__('filament-actions::view.single.label')),
                 EditAction::make()
                     ->label('')
-                    ->tooltip(__('button.edit')),
+                    ->tooltip(__('filament-actions::edit.single.label')),
                 DeleteAction::make()
                     ->label('')
-                    ->tooltip(__('button.delete'))
+                    ->tooltip(__('filament-actions::delete.single.label'))
                     ->action(function ($record) {
                         $deletionService = app(BlogCategoryDeletionService::class);
                         $deletionService->delete($record);
@@ -109,7 +114,7 @@ class BlogCategoriesTable
             ->bulkActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make()
-                        ->label('Delete selected')
+                        ->label(__('filament-actions::delete.multiple.label'))
                         ->icon('heroicon-o-trash')
                         ->color('danger')
                         ->requiresConfirmation()
@@ -122,9 +127,9 @@ class BlogCategoriesTable
                             }
                         }),
                     ExportBulkAction::make()
-                        ->label(__('button.export'))
+                        ->label(__('filament-actions::export.modal.actions.export.label'))
                         ->icon(Heroicon::OutlinedArrowUpOnSquareStack)
-                        ->exporter(\App\Filament\Exports\BlogCategoryExporter::class),
+                        ->exporter(BlogCategoryExporter::class),
                 ]),
             ]);
     }

@@ -4,7 +4,6 @@ namespace App\Filament\Widgets;
 
 use App\Models\Blog;
 use Filament\Tables\Table;
-use Filament\Actions\Action;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Support\Enums\IconSize;
 use Filament\Tables\Columns\TextColumn;

@@ -23,7 +23,8 @@ class ListBlogs extends ListRecords
                 ExportAction::make()
                     ->label('')
                     ->icon(Heroicon::OutlinedArrowUpOnSquareStack)
-                    ->tooltip(__('button.export'))
+                    //->tooltip(__('filament-actions::export.label', ['label' => 'Bloglar'])) //Label ile translate örneği
+                    ->tooltip(__('filament-actions::export.modal.actions.export.label'))
                     ->color('gray')
                     ->size('xs')
                     ->exporter(BlogExporter::class)
@@ -31,14 +32,14 @@ class ListBlogs extends ListRecords
                 ImportAction::make()
                     ->label('')
                     ->icon(Heroicon::OutlinedArrowDownOnSquareStack)
-                    ->tooltip(__('button.import'))
+                    ->tooltip(__('filament-actions::import.modal.actions.import.label'))
                     ->color('gray')
                     ->size('xs')
                     ->importer(BlogImporter::class)
                     ->visible(fn() => auth()->user()->can('import', BlogResource::getModel())),
                 CreateAction::make()
                     ->label('')
-                    ->tooltip(__('button.new'))
+                    ->tooltip(__('filament-actions::create.single.modal.actions.create.label'))
                     ->color('success')
                     ->size('xs')
                     ->icon('heroicon-m-document-plus'),

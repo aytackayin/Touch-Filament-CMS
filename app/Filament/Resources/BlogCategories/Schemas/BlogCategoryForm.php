@@ -25,9 +25,10 @@ class BlogCategoryForm
             ->components([
                 Group::make()
                     ->schema([
-                        Section::make('Content')
+                        Section::make('')
                             ->schema([
                                 TextInput::make('title')
+                                    ->label(__('blog.label.title'))
                                     ->required()
                                     ->maxLength(255)
                                     ->live(onBlur: true)
@@ -39,6 +40,7 @@ class BlogCategoryForm
                                         $set('slug', $slug);
                                     }),
                                 TextInput::make('slug')
+                                    ->label(__('blog.label.slug'))
                                     ->required()
                                     ->maxLength(255)
                                     ->live(onBlur: true)
@@ -48,11 +50,14 @@ class BlogCategoryForm
                                     })
                                     ->unique(BlogCategory::class, 'slug', ignoreRecord: true),
                                 Textarea::make('description')
+                                    ->label(__('blog.label.description'))
                                     ->maxLength(65535)
                                     ->columnSpanFull(),
                                 TagsInput::make('tags')
+                                    ->label(__('blog.label.tags'))
                                     ->columnSpanFull(),
                                 FileUpload::make('attachments')
+                                    ->label(__('blog.label.attachments'))
                                     ->multiple()
                                     ->panelLayout('grid')
                                     ->disk('attachments')
@@ -71,9 +76,10 @@ class BlogCategoryForm
                     ->columnSpan(['lg' => 2]),
                 Group::make()
                     ->schema([
-                        Section::make('Settings')
+                        Section::make('')
                             ->schema([
                                 SelectTree::make('parent_id')
+                                    ->label(__('blog.label.parent_category'))
                                     ->relationship('parent', 'title', 'parent_id', function (Builder $query, ?BlogCategory $record) {
                                         if ($record) {
                                             $query->where('id', '!=', $record->id);
@@ -93,6 +99,7 @@ class BlogCategoryForm
                                         }
                                     }),
                                 Select::make('language_id')
+                                    ->label(__('blog.label.language'))
                                     ->relationship('language', 'name')
                                     ->required()
                                     // If parent_id exists (via request or state), prefer parent's language.
@@ -113,10 +120,13 @@ class BlogCategoryForm
                                         // Logic to update other fields if needed
                                     }),
                                 Toggle::make('is_published')
+                                    ->label(__('blog.label.is_published'))
                                     ->required()
                                     ->default(true),
-                                DateTimePicker::make('publish_start'),
-                                DateTimePicker::make('publish_end'),
+                                DateTimePicker::make('publish_start')
+                                    ->label(__('blog.label.publish_start')),
+                                DateTimePicker::make('publish_end')
+                                    ->label(__('blog.label.publish_end')),
                             ]),
                     ])
                     ->columnSpan(['lg' => 1]),

@@ -6,7 +6,6 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use App\Models\User;
 use Filament\Schemas\Schema;
-use Illuminate\Support\Facades\Hash;
 
 class UserForm
 {

@@ -6,6 +6,7 @@ use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TagsInput;
 use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
@@ -173,7 +174,7 @@ class TouchFileForm
                                     ->default(false)
                                     ->dehydrated(),
 
-                                \Filament\Forms\Components\TagsInput::make('tags')
+                                TagsInput::make('tags')
                                     ->columnSpanFull(),
 
                                 SelectTree::make('parent_id')

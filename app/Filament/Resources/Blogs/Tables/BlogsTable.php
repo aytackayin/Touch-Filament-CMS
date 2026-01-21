@@ -2,16 +2,15 @@
 
 namespace App\Filament\Resources\Blogs\Tables;
 
-use Filament\Actions\Action;
 use Filament\Actions\EditAction;
 use Filament\Actions\DeleteAction;
+use Filament\Actions\ViewAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Support\Enums\IconSize;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use App\Filament\Resources\Blogs\BlogResource;
 use App\Models\Blog;
 use Illuminate\Support\Str;
 use Illuminate\Support\HtmlString;
@@ -30,27 +29,31 @@ class BlogsTable
             ->recordUrl(null)
             ->columns([
                 TextColumn::make('title')
+                    ->label(__('blog.label.title'))
                     ->searchable(['title', 'content'])
                     ->icon('heroicon-s-document-text')
                     ->description(fn(Blog $record): HtmlString => $record->content ? new HtmlString('<span style="font-size: 12px; line-height: 1;" class="text-gray-500 dark:text-gray-400">' . Str::limit(strip_tags($record->content), 100) . '</span>') : new HtmlString(''))
                     ->wrap()
                     ->sortable(),
                 TextColumn::make('language.name')
+                    ->label(__('blog.label.language'))
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('user.name')
-                    ->label('Author')
+                    ->label(__('blog.label.author'))
                     ->sortable(),
                 TextColumn::make('editor.name')
-                    ->label('Last Editor')
+                    ->label(__('blog.label.last_edited_by'))
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('tags')
+                    ->label(__('blog.label.tags'))
                     ->badge()
                     ->separator(',')
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 IconColumn::make('is_published')
+                    ->label(__('blog.label.is_published'))
                     ->size(IconSize::Medium)
                     ->alignCenter(true)
                     ->boolean()
@@ -61,6 +64,7 @@ class BlogsTable
                         }
                     }),
                 TextColumn::make('created_at')
+                    ->label(__('blog.label.created_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -69,11 +73,11 @@ class BlogsTable
             ->defaultSort('sort', 'asc')
             ->filters([
                 SelectFilter::make('user_id')
-                    ->label('Author')
+                    ->label(__('blog.label.author'))
                     ->relationship('user', 'name')
                     ->searchable(),
                 SelectFilter::make('edit_user_id')
-                    ->label('Last Editor')
+                    ->label(__('blog.label.last_editor'))
                     ->relationship('editor', 'name')
                     ->searchable(),
                 SelectFilter::make('language_id')
@@ -87,26 +91,26 @@ class BlogsTable
                     ]),
             ])
             ->actions([
-                \Filament\Actions\ViewAction::make()
+                ViewAction::make()
                     ->label('')
-                    ->tooltip(__('button.view')),
+                    ->tooltip(__('filament-actions::view.single.label')),
                 EditAction::make()
                     ->label('')
-                    ->tooltip(__('button.edit')),
+                    ->tooltip(__('filament-actions::edit.single.label')),
                 DeleteAction::make()
                     ->label('')
-                    ->tooltip(__('button.delete')),
+                    ->tooltip(__('filament-actions::delete.single.label')),
             ])
             ->bulkActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make()
-                        ->label('Delete selected')
+                        ->label(__('filament-actions::delete.multiple.label'))
                         ->icon('heroicon-o-trash')
                         ->color('danger')
                         ->requiresConfirmation()
                         ->action(fn($records) => $records->filter(fn($blog) => auth()->user()->can('delete', $blog))->each->delete()),
                     ExportBulkAction::make()
-                        ->label(__('button.export'))
+                        ->label(__('filament-actions::export.modal.actions.export.label'))
                         ->icon(Heroicon::OutlinedArrowUpOnSquareStack)
                         ->exporter(BlogExporter::class),
                 ]),

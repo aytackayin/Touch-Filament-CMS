@@ -9,6 +9,11 @@ use Filament\Resources\Pages\ListRecords;
 use App\Models\BlogCategory;
 use Illuminate\Database\Eloquent\Builder;
 use App\Filament\Resources\Blogs\Widgets\RelatedItemsWidget;
+use Filament\Actions\ExportAction;
+use Filament\Actions\ImportAction;
+use App\Filament\Exports\BlogCategoryExporter;
+use App\Filament\Imports\BlogCategoryImporter;
+use Filament\Support\Icons\Heroicon;
 
 class ListBlogCategories extends ListRecords
 {
@@ -82,28 +87,28 @@ class ListBlogCategories extends ListRecords
             ];
         }
 
-        $actions[] = \Filament\Actions\ExportAction::make()
+        $actions[] = ExportAction::make()
             ->label('')
-            ->icon(\Filament\Support\Icons\Heroicon::OutlinedArrowUpOnSquareStack)
-            ->tooltip(__('button.export'))
+            ->icon(Heroicon::OutlinedArrowUpOnSquareStack)
+            ->tooltip(__('filament-actions::export.modal.actions.export.label'))
             ->color('gray')
             ->size('xs')
-            ->exporter(\App\Filament\Exports\BlogCategoryExporter::class)
+            ->exporter(BlogCategoryExporter::class)
             ->visible(fn() => auth()->user()->can('export', BlogCategoryResource::getModel()));
 
-        $actions[] = \Filament\Actions\ImportAction::make()
+        $actions[] = ImportAction::make()
             ->label('')
-            ->icon(\Filament\Support\Icons\Heroicon::OutlinedArrowDownOnSquareStack)
-            ->tooltip(__('button.import'))
+            ->icon(Heroicon::OutlinedArrowDownOnSquareStack)
+            ->tooltip(__('filament-actions::import.modal.actions.import.label'))
             ->color('gray')
             ->size('xs')
-            ->importer(\App\Filament\Imports\BlogCategoryImporter::class)
+            ->importer(BlogCategoryImporter::class)
             ->visible(fn() => auth()->user()->can('import', BlogCategoryResource::getModel()));
 
         $actions[] =
             CreateAction::make()
                 ->label('')
-                ->tooltip(__('button.new'))
+                ->tooltip(__('filament-actions::create.modal.actions.create.label'))
                 ->color('success')
                 ->size('xs')
                 ->icon('heroicon-m-squares-plus')

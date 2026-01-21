@@ -5,7 +5,6 @@ namespace App\Filament\Resources\Blogs\Schemas;
 use App\Models\Blog;
 use App\Models\BlogCategory;
 use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\RichEditor;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Group;
 use Filament\Forms\Components\Select;
@@ -29,9 +28,10 @@ class BlogForm
             ->components([
                 Group::make()
                     ->schema([
-                        Section::make('Content')
+                        Section::make()
                             ->schema([
                                 TextInput::make('title')
+                                    ->label(__('blog.label.title'))
                                     ->required()
                                     ->maxLength(255)
                                     ->live(onBlur: true)
@@ -42,6 +42,7 @@ class BlogForm
                                         $set('slug', Blog::generateUniqueSlug($state, $record?->id));
                                     }),
                                 TextInput::make('slug')
+                                    ->label(__('blog.label.slug'))
                                     ->required()
                                     ->maxLength(255)
                                     ->live(onBlur: true)
@@ -60,11 +61,14 @@ class BlogForm
                                                                     })
                                                                     ->columnSpanFull(), */
                                 TinyEditor::make('content')
+                                    ->label(__('blog.label.content'))
                                     ->columnSpanFull()
                                     ->required(),
                                 TagsInput::make('tags')
+                                    ->label(__('blog.label.tags'))
                                     ->columnSpanFull(),
                                 FileUpload::make('attachments')
+                                    ->label(__('blog.label.attachments'))
                                     ->multiple()
                                     ->panelLayout('grid')
                                     ->disk('attachments')
@@ -91,9 +95,10 @@ class BlogForm
                     ->columnSpan(['lg' => 2]),
                 Group::make()
                     ->schema([
-                        Section::make('Settings')
+                        Section::make()
                             ->schema([
                                 Select::make('language_id')
+                                    ->label(__('blog.label.language'))
                                     ->relationship('language', 'name')
                                     ->required()
                                     ->default(function () {
@@ -108,6 +113,7 @@ class BlogForm
                                     ->live()
                                     ->afterStateUpdated(fn($set) => $set('categories', [])),
                                 SelectTree::make('categories')
+                                    ->label(__('blog.label.categories'))
                                     ->relationship('categories', 'title', 'parent_id', function ($query, $get) {
                                         $languageId = $get('language_id');
                                         if ($languageId) {
@@ -137,10 +143,13 @@ class BlogForm
                                         }
                                     }),
                                 Toggle::make('is_published')
+                                    ->label(__('blog.label.is_published'))
                                     ->required()
                                     ->default(true),
-                                DateTimePicker::make('publish_start'),
-                                DateTimePicker::make('publish_end'),
+                                DateTimePicker::make('publish_start')
+                                    ->label(__('blog.label.publish_start')),
+                                DateTimePicker::make('publish_end')
+                                    ->label(__('blog.label.publish_end')),
                             ]),
                     ])
                     ->columnSpan(['lg' => 1]),
