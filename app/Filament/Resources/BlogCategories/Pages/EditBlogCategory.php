@@ -17,6 +17,12 @@ class EditBlogCategory extends EditRecord
             DeleteAction::make()
                 ->modalHeading(fn() => __('blog.delete_confirmation_title.category', ['name' => $this->record->title]))
                 ->modalDescription(__('blog.delete_confirmation_description'))
+                ->action(function (DeleteAction $action) {
+                    $deletionService = app(\App\Services\BlogCategoryDeletionService::class);
+                    $deletionService->delete($this->record);
+
+                    $action->success();
+                })
                 ->successRedirectUrl(fn() => $this->previousUrl ?? BlogCategoryResource::getUrl('index')),
         ];
     }

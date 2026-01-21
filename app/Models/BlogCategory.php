@@ -9,10 +9,12 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Support\Str;
 use App\Services\BlogCategoryDeletionService;
+use App\Traits\HasFileManagerSync;
 
 class BlogCategory extends Model
 {
     use HasFactory;
+    use HasFileManagerSync;
 
     protected $fillable = [
         'user_id',
@@ -41,8 +43,11 @@ class BlogCategory extends Model
         ];
     }
 
-    // Temporary storage for old attachments (not a database column)
-    public $oldAttachmentsForCleanup = null;
+    // Temporary storage for old attachments
+    public $oldAttachmentsForSync = null;
+
+    // Custom folder name for TouchFileManager
+    protected string $fileManagerFolder = 'blog_categories';
 
     /**
      * Relationships

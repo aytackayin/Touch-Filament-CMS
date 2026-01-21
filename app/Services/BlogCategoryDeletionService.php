@@ -7,6 +7,7 @@ use App\Models\Blog;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Collection;
+use App\Models\TouchFile;
 
 class BlogCategoryDeletionService
 {
@@ -106,8 +107,12 @@ class BlogCategoryDeletionService
      */
     protected function deleteBlog(Blog $blog): void
     {
-        // Delete blog attachments
-        if ($blog->id) {
+        // Cleanup TouchFileManager (this also deletes disk files)
+        $folder = TouchFile::where('path', "blogs/{$blog->id}")->where('is_folder', true)->first();
+        if ($folder) {
+            $folder->delete();
+        } else {
+            // Fallback disk cleanup
             Storage::disk('attachments')->deleteDirectory("blogs/{$blog->id}");
         }
 
@@ -127,11 +132,14 @@ class BlogCategoryDeletionService
      */
     protected function deleteAttachments(Collection $categories): void
     {
-        $disk = Storage::disk('attachments');
-
         foreach ($categories as $category) {
             if ($category->id) {
-                $disk->deleteDirectory("blog_categories/{$category->id}");
+                $folder = TouchFile::where('path', "blog_categories/{$category->id}")->where('is_folder', true)->first();
+                if ($folder) {
+                    $folder->delete();
+                } else {
+                    Storage::disk('attachments')->deleteDirectory("blog_categories/{$category->id}");
+                }
             }
         }
     }
