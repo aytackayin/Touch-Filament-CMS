@@ -15,7 +15,7 @@ class ListLanguages extends ListRecords
         return [
             CreateAction::make()
                 ->label('')
-                ->tooltip(__('button.new'))
+                ->tooltip(__('filament-actions::create.single.modal.actions.create.label'))
                 ->color('success')
                 ->size('xs')
                 ->icon('heroicon-m-language'),

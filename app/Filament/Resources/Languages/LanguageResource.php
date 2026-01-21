@@ -24,12 +24,27 @@ class LanguageResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return __('Genel Ayarlar');
+        return __('language.nav.group');
     }
 
     public static function getNavigationLabel(): string
     {
-        return __('Diller');
+        return __('language.nav.label');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('language.label.language');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('language.label.languages');
+    }
+
+    public static function getBreadcrumb(): string
+    {
+        return __('language.label.languages');
     }
     protected static ?int $navigationSort = 101;
 

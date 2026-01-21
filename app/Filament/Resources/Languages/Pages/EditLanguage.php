@@ -13,7 +13,8 @@ class EditLanguage extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            DeleteAction::make(),
+            DeleteAction::make()
+                ->tooltip(__('filament-actions::delete.single.label')),
         ];
     }
 

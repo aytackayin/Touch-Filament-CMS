@@ -8,6 +8,7 @@ use Filament\Actions\DeleteAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Tables\Columns\IconColumn;
+use Filament\Support\Enums\IconSize;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use App\Models\Language;
@@ -20,14 +21,21 @@ class LanguagesTable
         return $table
             ->columns([
                 TextColumn::make('name')
+                    ->label(__('language.label.name'))
                     ->searchable(),
                 TextColumn::make('code')
+                    ->label(__('language.label.code'))
                     ->searchable(),
                 TextColumn::make('charset')
+                    ->label(__('language.label.charset'))
                     ->searchable(),
                 TextColumn::make('direction')
+                    ->label(__('language.label.direction'))
                     ->badge(),
                 IconColumn::make('is_default')
+                    ->label(__('language.label.is_default'))
+                    ->size(IconSize::Medium)
+                    ->alignCenter(true)
                     ->boolean()
                     ->action(function (Language $record) {
                         if (!auth()->user()->can('update', $record)) {
@@ -61,6 +69,9 @@ class LanguagesTable
                         $record->save();
                     }),
                 IconColumn::make('is_active')
+                    ->label(__('language.label.is_active'))
+                    ->size(IconSize::Medium)
+                    ->alignCenter(true)
                     ->boolean()
                     ->action(function (Language $record) {
                         if (!auth()->user()->can('update', $record)) {
@@ -76,10 +87,12 @@ class LanguagesTable
                         $record->save();
                     }),
                 TextColumn::make('created_at')
+                    ->label(__('language.label.created_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
+                    ->label(__('language.label.updated_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -90,17 +103,17 @@ class LanguagesTable
             ->actions([
                 EditAction::make()
                     ->label('')
-                    ->tooltip('Edit'),
+                    ->tooltip(__('filament-actions::edit.single.label')),
                 DeleteAction::make()
                     ->label('')
-                    ->tooltip(__('button.delete'))
+                    ->tooltip(__('filament-actions::delete.single.label'))
                     ->hidden(fn($record) => $record->is_default)
                     ->disabled(fn($record) => $record->is_default),
             ])
             ->bulkActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make()
-                        ->label('Delete selected')
+                        ->label(__('filament-actions::delete.multiple.label'))
                         ->icon('heroicon-o-trash')
                         ->color('danger')
                         ->requiresConfirmation()
