@@ -194,12 +194,12 @@ class TouchFileManagerTable
                     ->extraImgAttributes(['class' => 'object-cover object-center rounded-lg', 'style' => 'width: 60px; height: 60px; border-radius: 10px;']),
 
                 TextColumn::make('name')
-                    ->label('Name')
+                    ->label(__('file_manager.label.name'))
                     ->searchable(['name', 'alt'])
                     ->weight('bold')
                     ->wrap()
                     ->color(fn($record) => $record?->is_folder ? 'warning' : null)
-                    ->formatStateUsing(fn(string $state, $record) => $record?->id === 0 ? 'Up' : $state)
+                    ->formatStateUsing(fn(string $state, $record) => $record?->id === 0 ? __('file_manager.label.up') : $state)
                     ->description(function ($record) {
                         if (!$record || $record->id === 0)
                             return null;
@@ -217,7 +217,7 @@ class TouchFileManagerTable
                     }),
 
                 TextColumn::make('type')
-                    ->label('Type')
+                    ->label(__('file_manager.label.type'))
                     ->badge()
                     ->color(fn(string $state): string => match ($state) {
                         'image' => 'success',
@@ -228,28 +228,29 @@ class TouchFileManagerTable
                         'presentation' => 'danger',
                         default => 'gray',
                     })
-                    ->formatStateUsing(fn(string $state, $record) => $record?->id === 0 ? '' : ucfirst($state))
+                    ->formatStateUsing(fn(string $state, $record) => $record?->id === 0 ? '' : __('file_manager.label.types.' . $state))
                     ->extraAttributes(fn($record) => $record?->id === 0 ? ['style' => 'display: none !important;'] : []),
 
                 TextColumn::make('tags')
+                    ->label(__('file_manager.label.tags'))
                     ->badge()
                     ->separator(',')
                     ->searchable()
                     ->wrap()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('user.name')
-                    ->label('Author')
+                    ->label(__('file_manager.label.author'))
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->formatStateUsing(fn($state, $record) => $record?->id === 0 ? '' : $state),
                 TextColumn::make('editor.name')
-                    ->label('Last Editor')
+                    ->label(__('file_manager.label.last_editor'))
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->formatStateUsing(fn($state, $record) => $record?->id === 0 ? '' : $state),
 
                 TextColumn::make('created_at')
-                    ->label('Date')
+                    ->label(__('file_manager.label.date'))
                     ->date()
                     ->sortable()
                     ->toggleable()
@@ -257,35 +258,35 @@ class TouchFileManagerTable
             ])
             ->filters([
                 SelectFilter::make('type')
-                    ->label('File Type')
+                    ->label(__('file_manager.label.file_type'))
                     ->options([
-                        'image' => 'Images',
-                        'video' => 'Videos',
-                        'document' => 'Documents',
-                        'archive' => 'Archives',
-                        'spreadsheet' => 'Spreadsheets',
-                        'presentation' => 'Presentations',
-                        'other' => 'Other',
+                        'image' => __('file_manager.label.plural_types.images'),
+                        'video' => __('file_manager.label.plural_types.videos'),
+                        'document' => __('file_manager.label.plural_types.documents'),
+                        'archive' => __('file_manager.label.plural_types.archives'),
+                        'spreadsheet' => __('file_manager.label.plural_types.spreadsheets'),
+                        'presentation' => __('file_manager.label.plural_types.presentations'),
+                        'other' => __('file_manager.label.plural_types.others'),
                     ])
                     ->multiple(),
 
                 SelectFilter::make('user_id')
-                    ->label('Author')
+                    ->label(__('file_manager.label.author'))
                     ->relationship('user', 'name')
                     ->searchable(),
                 SelectFilter::make('edit_user_id')
-                    ->label('Last Editor')
+                    ->label(__('file_manager.label.last_editor'))
                     ->relationship('editor', 'name')
                     ->searchable(),
                 SelectFilter::make('is_folder')
-                    ->label('Type')
+                    ->label(__('file_manager.label.type'))
                     ->options([
-                        '1' => 'Folders',
-                        '0' => 'Files',
+                        '1' => __('file_manager.label.plural_types.folders'),
+                        '0' => __('file_manager.label.plural_types.files'),
                     ]),
 
                 SelectFilter::make('parent_id')
-                    ->label('Parent Folder')
+                    ->label(__('file_manager.label.parent_folder'))
                     ->options(function () {
                         return TouchFile::where('is_folder', true)
                             ->orderBy('name')
@@ -301,7 +302,7 @@ class TouchFileManagerTable
                     ->icon('heroicon-o-arrow-down-tray')
                     ->label('')
                     ->color('success')
-                    ->tooltip('Download')
+                    ->tooltip(__('file_manager.action.download'))
                     ->hidden(fn($record) => $record && ($record->is_folder || $record->id === 0))
                     ->url(fn($record) => $record ? Storage::disk('attachments')->url($record->path) : null)
                     ->openUrlInNewTab(),
@@ -310,7 +311,7 @@ class TouchFileManagerTable
                     ->icon('heroicon-o-eye')
                     ->label('')
                     ->color('gray')
-                    ->tooltip('View')
+                    ->tooltip(__('file_manager.action.view'))
                     ->hidden(fn($record) => !$record || !in_array($record->type, ['image', 'video']) || $record->id === 0)
                     ->modalContent(fn($record) => $record ? view('filament.modals.touchfilemanager-preview', [
                         'record' => $record,
@@ -318,7 +319,7 @@ class TouchFileManagerTable
                     ]) : null)
                     ->modalWidth('5xl')
                     ->modalSubmitAction(false)
-                    ->modalCancelActionLabel('Close'),
+                    ->modalCancelActionLabel(__('filament-actions::view.single.modal.actions.close.label')),
 
                 Action::make('edit')
                     ->url(fn($record): string => TouchFileManagerResource::getUrl('edit', [
@@ -328,13 +329,13 @@ class TouchFileManagerTable
                     ]))
                     ->icon('heroicon-o-pencil-square')
                     ->label('')
-                    ->tooltip('Edit')
+                    ->tooltip(__('filament-actions::edit.single.label'))
                     ->color('warning')
                     ->hidden(fn($record) => $record?->id === 0),
 
                 Action::make('copy_url')
                     ->label('')
-                    ->tooltip('Copy Url')
+                    ->tooltip(__('file_manager.action.copy_url'))
                     ->icon('heroicon-o-clipboard')
                     ->color('info')
                     ->action(null) // ÖNEMLİ: PHP action çalışmasın
@@ -344,7 +345,7 @@ class TouchFileManagerTable
                         'x-on:click.prevent.stop' => "
             navigator.clipboard.writeText('" . e(Storage::disk('attachments')->url($record->path)) . "');
             \$dispatch('notify', {
-                title: 'URL kopyalandı',
+                title: '" . __('file_manager.action.url_copied') . "',
                 body: '" . e(Storage::disk('attachments')->url($record->path)) . "'
             });
         ",
@@ -354,28 +355,28 @@ class TouchFileManagerTable
                     ->label('')
                     ->icon('heroicon-o-trash')
                     ->color('danger')
-                    ->tooltip('Delete')
+                    ->tooltip(__('filament-actions::delete.single.label'))
                     ->requiresConfirmation()
-                    ->modalHeading(fn($record) => $record?->is_folder ? 'Delete Folder' : 'Delete File')
+                    ->modalHeading(fn($record) => $record?->is_folder ? __('file_manager.delete.folder_title') : __('file_manager.delete.file_title'))
                     ->modalDescription(fn($record) => $record?->is_folder
-                        ? 'Are you sure you want to delete this folder? All files and subfolders inside will also be deleted.'
-                        : 'Are you sure you want to delete this file?')
+                        ? __('file_manager.delete.folder_description')
+                        : __('file_manager.delete.file_description'))
                     ->action(fn($record) => $record->delete())
                     ->hidden(fn($record) => $record?->id === 0),
             ])
             ->bulkActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make()
-                        ->label('Delete selected')
+                        ->label(__('filament-actions::delete.multiple.label'))
                         ->icon('heroicon-o-trash')
                         ->color('danger')
                         ->requiresConfirmation()
-                        ->modalHeading('Delete Selected Items')
-                        ->modalDescription('Are you sure you want to delete the selected items? Folders will be deleted with all their contents.')
+                        ->modalHeading(__('file_manager.delete.bulk_title'))
+                        ->modalDescription(__('file_manager.delete.bulk_description'))
                         ->action(fn($records) => $records->filter(fn($record) => auth()->user()->can('delete', $record))->each->delete()),
 
                     BulkAction::make('download_selected')
-                        ->label('Download Selected')
+                        ->label(__('file_manager.action.download_selected'))
                         ->icon('heroicon-o-arrow-down-tray')
                         ->action(function (Collection $records) {
                             $zipName = 'files-' . now()->timestamp . '.zip';
@@ -384,7 +385,7 @@ class TouchFileManagerTable
                             $zip = new ZipArchive();
                             if ($zip->open($zipPath, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== true) {
                                 Notification::make()
-                                    ->title('Error creating ZIP file')
+                                    ->title(__('file_manager.errors.zip_error'))
                                     ->danger()
                                     ->send();
                                 return;

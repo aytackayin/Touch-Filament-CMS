@@ -24,7 +24,7 @@
             <video controls class="block max-w-full h-auto rounded-xl shadow-md border border-gray-200 dark:border-gray-700"
                 style="max-height: 70vh;">
                 <source src="{{ $url }}" type="{{ $record->mime_type }}">
-                Your browser does not support the video tag.
+                {{ __('file_manager.label.video_support_error') }}
             </video>
         </div>
     @endif
@@ -42,7 +42,8 @@
         @if($record->tags && is_array($record->tags) && count($record->tags) > 0)
             <div class="flex flex-wrap items-center gap-2 pt-1"
                 style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px;">
-                <strong class="text-sm font-bold text-gray-900 dark:text-gray-100 italic" style="margin-right: 4px;">Tags
+                <strong class="text-sm font-bold text-gray-900 dark:text-gray-100 italic"
+                    style="margin-right: 4px;">{{ __('file_manager.label.tags') }}
                     :</strong>
                 @foreach($record->tags as $tag)
                     <span
@@ -56,18 +57,26 @@
         {{-- Data Rows --}}
         <div class="space-y-1.5 pt-1">
             <p class="text-sm">
-                <strong class="font-bold text-gray-900 dark:text-gray-100 italic">Dosya adı :</strong>
+                <strong
+                    class="font-bold text-gray-900 dark:text-gray-100 italic">{{ __('file_manager.label.file_name') }}
+                    :</strong>
                 <span style="opacity: 0.7 !important; display: inline-block;">{{ $record->name }}</span>
             </p>
 
             <p class="text-sm">
-                <strong class="font-bold text-gray-900 dark:text-gray-100 italic">Type/Size :</strong>
-                <span style="opacity: 0.7 !important; display: inline-block;">{{ ucfirst($record->type) }} |
+                <strong
+                    class="font-bold text-gray-900 dark:text-gray-100 italic">{{ __('file_manager.label.type_size') }}
+                    :</strong>
+                <span
+                    style="opacity: 0.7 !important; display: inline-block;">{{ __('file_manager.label.types.' . ($record->type ?? 'other')) }}
+                    |
                     {{ $record->human_size }} {{ $resolution }}</span>
             </p>
 
             <p class="text-sm">
-                <strong class="font-bold text-gray-900 dark:text-gray-100 italic">Dosya Yolu :</strong>
+                <strong
+                    class="font-bold text-gray-900 dark:text-gray-100 italic">{{ __('file_manager.label.file_path') }}
+                    :</strong>
                 <span style="opacity: 0.7 !important; display: inline-block;">{{ $record->full_path }}</span>
             </p>
         </div>

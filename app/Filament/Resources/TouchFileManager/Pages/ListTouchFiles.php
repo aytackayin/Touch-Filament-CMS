@@ -82,7 +82,7 @@ class ListTouchFiles extends ListRecords
 
         return [
             Action::make('up')
-                ->label('Up')
+                ->label(__('file_manager.label.up'))
                 ->icon('heroicon-m-arrow-uturn-up')
                 ->color('gray')
                 ->visible((bool) $this->parent_id)
@@ -90,7 +90,7 @@ class ListTouchFiles extends ListRecords
                 ->size('xs'),
 
             Action::make('sync')
-                ->label('Sync Files')
+                ->label(__('file_manager.label.sync_files'))
                 ->icon('heroicon-o-arrow-path')
                 ->color('info')
                 ->size('xs')
@@ -215,14 +215,14 @@ class ListTouchFiles extends ListRecords
                     }
 
                     Notification::make()
-                        ->title('Sync Completed')
-                        ->body("Added {$addedCount} items. Removed {$removedCount} orphaned items.")
+                        ->title(__('file_manager.label.sync_notification.title'))
+                        ->body(__('file_manager.label.sync_notification.body', ['added' => $addedCount, 'removed' => $removedCount]))
                         ->success()
                         ->send();
                 }),
 
             Action::make('createFolder')
-                ->label('New Folder')
+                ->label(__('file_manager.label.new_folder'))
                 ->icon('heroicon-o-folder-plus')
                 ->color('warning')
                 ->size('xs')
@@ -232,15 +232,15 @@ class ListTouchFiles extends ListRecords
                     return [
                         Group::make()
                             ->schema([
-                                Section::make('Create New Folder')
+                                Section::make(__('file_manager.label.create_folder_section'))
                                     ->schema([
                                         TextInput::make('name')
-                                            ->label('Folder Name')
+                                            ->label(__('file_manager.label.folder_name'))
                                             ->required()
                                             ->maxLength(255)
                                             ->notIn(['thumbs', 'temp'])
                                             ->validationMessages([
-                                                'not_in' => 'The name ":input" is reserved and cannot be used.',
+                                                'not_in' => __('file_manager.errors.reserved_name'),
                                             ])
                                             ->extraInputAttributes([
                                                 'style' => 'text-transform: lowercase',
@@ -248,14 +248,14 @@ class ListTouchFiles extends ListRecords
                                             ])
                                             ->live(onBlur: true)
                                             ->afterStateUpdated(fn($state, callable $set) => $set('name', Str::slug($state)))
-                                            ->placeholder('e.g., Documents'),
+                                            ->placeholder(__('file_manager.label.folder_name_placeholder')),
 
                                         Hidden::make('parent_id')
                                             ->default($parentId)
                                             ->visible((bool) $parentId),
 
                                         SelectTree::make('parent_id')
-                                            ->label('Parent Folder')
+                                            ->label(__('file_manager.label.parent_folder'))
                                             ->relationship('parent', 'name', 'parent_id', function ($query) {
                                                 return $query->where('is_folder', true);
                                             }, function ($query) {
@@ -263,7 +263,7 @@ class ListTouchFiles extends ListRecords
                                             })
                                             ->enableBranchNode()
                                             ->searchable()
-                                            ->placeholder('Root (attachments)')
+                                            ->placeholder(__('file_manager.label.root'))
                                             ->visible(!$parentId),
 
                                         Hidden::make('is_folder')
@@ -299,11 +299,11 @@ class ListTouchFiles extends ListRecords
                     $data['user_id'] = auth()->id();
                     static::getResource()::getModel()::create($data);
                 })
-                ->successNotificationTitle('Folder created successfully'),
+                ->successNotificationTitle(__('file_manager.label.folder_created')),
 
             CreateAction::make()
-                ->label('Upload Files')
-                ->tooltip('Upload new files')
+                ->label(__('file_manager.label.upload_files'))
+                ->tooltip(__('file_manager.label.upload_new_files'))
                 ->color('success')
                 ->size('xs')
                 ->icon('heroicon-o-arrow-up-tray')
@@ -314,7 +314,7 @@ class ListTouchFiles extends ListRecords
                 ])),
 
             Action::make('toggleView')
-                ->label($this->view_type === 'grid' ? 'List View' : 'Grid View')
+                ->label($this->view_type === 'grid' ? __('file_manager.label.list_view') : __('file_manager.label.grid_view'))
                 ->icon($this->view_type === 'grid' ? 'heroicon-o-list-bullet' : 'heroicon-o-squares-2x2')
                 ->color('gray')
                 ->size('xs')

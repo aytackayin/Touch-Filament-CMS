@@ -5,7 +5,7 @@
 
     if ($isUp) {
         $imageUrl = url('/assets/icons/colorful-icons/grid-open-folder.svg');
-        $name = 'Up';
+        $name = __('file_manager.label.up');
         $fallbackUrl = '';
     } else {
         // Determine Image URL

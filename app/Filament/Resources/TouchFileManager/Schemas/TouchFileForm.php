@@ -24,15 +24,15 @@ class TouchFileForm
             ->components([
                 Group::make()
                     ->schema([
-                        Section::make('File/Folder Information')
+                        Section::make(__('file_manager.label.info_section'))
                             ->schema([
                                 TextInput::make('name')
-                                    ->label('Name')
+                                    ->label(__('file_manager.label.name'))
                                     ->required()
                                     ->maxLength(255)
                                     ->notIn(['thumbs', 'temp'])
                                     ->validationMessages([
-                                        'not_in' => 'The name ":input" is reserved and cannot be used.',
+                                        'not_in' => __('file_manager.errors.reserved_name'),
                                     ])
                                     ->extraInputAttributes(fn($record) => [
                                         'style' => 'text-transform: lowercase',
@@ -58,7 +58,7 @@ class TouchFileForm
 
 
                                 FileUpload::make('files')
-                                    ->label('Upload Files')
+                                    ->label(__('file_manager.label.upload_files'))
                                     ->multiple()
                                     ->panelLayout('grid')
                                     ->disk('attachments')
@@ -100,12 +100,12 @@ class TouchFileForm
                                             ->append('.' . $file->getClientOriginalExtension())
                                     )
                                     ->maxSize(102400) // 100MB
-                                    ->helperText('Supported: Images, Videos, Documents (PDF, Word, Excel, PowerPoint), Archives (ZIP, RAR, 7Z), Text files. Max: 100MB per file')
+                                    ->helperText(__('file_manager.label.upload_helper_text'))
                                     ->hidden(fn($operation) => $operation === 'edit')
                                     ->columnSpanFull(),
 
                                 FileUpload::make('path')
-                                    ->label('File')
+                                    ->label(__('file_manager.label.file'))
                                     ->disk('attachments')
                                     ->imageEditor()
                                     ->imageEditorAspectRatios([
@@ -175,10 +175,11 @@ class TouchFileForm
                                     ->dehydrated(),
 
                                 TagsInput::make('tags')
+                                    ->label(__('file_manager.label.tags'))
                                     ->columnSpanFull(),
 
                                 SelectTree::make('parent_id')
-                                    ->label('Parent Folder')
+                                    ->label(__('file_manager.label.parent_folder'))
                                     ->relationship('parent', 'name', 'parent_id', function ($query) {
                                         return $query->where('is_folder', true);
                                     }, function ($query) {
@@ -197,12 +198,11 @@ class TouchFileForm
                                         return !request()->filled('parent_id');
                                     })
                                     ->dehydrated()
-                                    ->placeholder('Root (attachments)')
-                                    ->helperText('Select a parent folder or leave empty for root directory'),
+                                    ->placeholder(__('file_manager.label.root')),
 
                                 Textarea::make('alt')
-                                    ->label('Description (Alt)')
-                                    ->placeholder('File description...')
+                                    ->label(__('file_manager.label.description_alt'))
+                                    ->placeholder(__('file_manager.label.alt_placeholder'))
                                     ->maxLength(255),
                             ])
                             ->columns(2),
@@ -216,16 +216,15 @@ class TouchFileForm
     {
         return Schema::make()
             ->components([
-                Section::make('Create New Folder')
+                Section::make(__('file_manager.label.create_folder_section'))
                     ->schema([
                         TextInput::make('name')
-                            ->label('Folder Name')
+                            ->label(__('file_manager.label.folder_name'))
                             ->required()
                             ->maxLength(255)
                             ->notIn(['thumbs', 'temp'])
                             ->validationMessages([
-                                'not_in' => 'The name ":input" is reserved and cannot be used.',
-                                'slug' => 'Only slug-friendly characters are allowed.',
+                                'not_in' => __('file_manager.errors.reserved_name'),
                             ])
                             ->extraInputAttributes([
                                 'style' => 'text-transform: lowercase',
@@ -233,10 +232,10 @@ class TouchFileForm
                             ])
                             ->live(onBlur: true)
                             ->afterStateUpdated(fn($state, callable $set) => $set('name', Str::slug($state)))
-                            ->placeholder('e.g., Documents, Images, Videos'),
+                            ->placeholder(__('file_manager.label.folder_name_placeholder')),
 
                         SelectTree::make('parent_id')
-                            ->label('Parent Folder')
+                            ->label(__('file_manager.label.parent_folder'))
                             ->relationship('parent', 'name', 'parent_id', function ($query) {
                                 return $query->where('is_folder', true);
                             }, function ($query) {
@@ -244,8 +243,7 @@ class TouchFileForm
                             })
                             ->enableBranchNode()
                             ->searchable()
-                            ->placeholder('Root (attachments)')
-                            ->helperText('Select a parent folder or leave empty for root directory'),
+                            ->placeholder(__('file_manager.label.root')),
 
                         Hidden::make('is_folder')
                             ->default(true)

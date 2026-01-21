@@ -23,13 +23,25 @@ class TouchFileManagerResource extends Resource implements HasShieldPermissions
 {
     protected static ?string $model = TouchFile::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedFolder;
+    public static function getNavigationIcon(): string
+    {
+        return __('file_manager.nav.icon');
+    }
 
-    protected static ?string $navigationLabel = 'Touch File Manager';
+    public static function getNavigationLabel(): string
+    {
+        return __('file_manager.nav.label');
+    }
 
-    protected static ?string $modelLabel = 'File/Folder';
+    public static function getModelLabel(): string
+    {
+        return __('file_manager.label.resource_label');
+    }
 
-    protected static ?string $pluralModelLabel = 'Files & Folders';
+    public static function getPluralModelLabel(): string
+    {
+        return __('file_manager.label.plural_resource_label');
+    }
 
     public static function getGloballySearchableAttributes(): array
     {
@@ -105,7 +117,7 @@ class TouchFileManagerResource extends Resource implements HasShieldPermissions
                 $details[] = new HtmlString('<span style="font-size: 12px; line-height: 1;">' . implode(', ', $record->tags) . '</span>');
             }
 
-            $details[] = new HtmlString('<span style="font-size: 12px; line-height: 1;">' . ucfirst($record->type ?? 'Unknown') . ' (' . $record->human_size . ')</span>');
+            $details[] = new HtmlString('<span style="font-size: 12px; line-height: 1;">' . __('file_manager.label.types.' . ($record->type ?? 'other')) . ' (' . $record->human_size . ')</span>');
         }
 
         if ($record->parent) {
@@ -117,7 +129,7 @@ class TouchFileManagerResource extends Resource implements HasShieldPermissions
 
     public static function getNavigationGroup(): ?string
     {
-        return 'File Management';
+        return __('file_manager.nav.group');
     }
 
     protected static ?int $navigationSort = 1;
