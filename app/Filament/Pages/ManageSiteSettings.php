@@ -43,13 +43,13 @@ class ManageSiteSettings extends SettingsPage
 
     public static function getNavigationGroup(): ?string
     {
-        return __('Genel Ayarlar');
+        return __('settings.nav.group');
     }
     protected static ?int $navigationSort = 102;
 
     public static function getNavigationLabel(): string
     {
-        return __('Site Ayarları');
+        return __('settings.nav.label');
     }
 
     public function form(Schema $schema): Schema
@@ -63,19 +63,19 @@ class ManageSiteSettings extends SettingsPage
 
         // 1. Genel Sekmesi
         $tabs[] = Tab::make('General')
-            ->label(__('Genel'))
+            ->label(__('settings.label.general'))
             ->icon(Heroicon::OutlinedCog6Tooth)
             ->schema([
                 TextInput::make('site_title')
-                    ->label(__('Site Başlığı'))
+                    ->label(__('settings.label.site_title'))
                     ->required(),
                 Textarea::make('site_description')
-                    ->label(__('Site Açıklaması'))
+                    ->label(__('settings.label.site_description'))
                     ->rows(3),
                 TagsInput::make('site_keywords')
-                    ->label(__('Anahtar Kelimeler')),
+                    ->label(__('settings.label.site_keywords')),
                 TextInput::make('attachments_path')
-                    ->label(__('Dosya Yolu (Disk Path)'))
+                    ->label(__('settings.label.attachments_path'))
                     ->default('attachments')
                     ->required()
                     ->live(onBlur: true)
@@ -95,8 +95,8 @@ class ManageSiteSettings extends SettingsPage
             foreach ($groupFields as $fIndex => $fData) {
                 // Ekranda görünen kutu. Veriyi 'tab_values' dizisinden yöneteceğiz.
                 $component = $this->getComponentByType($fData, "tab_values.{$index}.{$fIndex}")
-                    ->label($fData['label'] ?? 'Ayar')
-                    ->helperText('Sistem Anahtarı: ' . ($fData['field_name'] ?? '-'))
+                    ->label($fData['label'] ?? __('settings.label.settings'))
+                    ->helperText(__('settings.label.field_name') . ': ' . ($fData['field_name'] ?? '-'))
                     ->key("custom_input_{$index}_{$fIndex}");
 
                 $fields[] = $component;
@@ -117,60 +117,60 @@ class ManageSiteSettings extends SettingsPage
 
         // 3. Dinamik Ayar Yönetimi (Mutfak)
         $tabs[] = Tab::make('ManageSettings')
-            ->label(__('Dinamik Ayar Yönetimi'))
+            ->label(__('settings.label.manage_settings'))
             ->icon(Heroicon::OutlinedRectangleStack)
             ->schema([
                 Placeholder::make('desc')
-                    ->content('Buradan yeni sekme ve ayar yapısını oluşturun. Değerleri ise yukarıdaki ilgili sekmeden girebilirsiniz.'),
+                    ->content(__('settings.label.manage_desc')),
                 Repeater::make('custom_settings')
-                    ->label('Sekme ve Ayar Şeması')
+                    ->label(__('settings.label.schema_label'))
                     ->schema([
                         TextInput::make('tab_name')
-                            ->label('Sekme Adı')
+                            ->label(__('settings.label.tab_name'))
                             ->required(),
                         SelectIcon::make('tab_icon')
-                            ->label('Sekme İkonu'),
+                            ->label(__('settings.label.tab_icon')),
 
 
 
 
 
                         Repeater::make('fields')
-                            ->label('Ayarlar')
+                            ->label(__('settings.label.fields'))
                             ->schema([
                                 TextInput::make('label')
-                                    ->label('Görünen Ad')
+                                    ->label(__('settings.label.field_label'))
                                     ->required(),
                                 TextInput::make('field_name')
-                                    ->label('Sistem Anahtarı')
+                                    ->label(__('settings.label.field_name'))
                                     ->required(),
                                 Select::make('type')
-                                    ->label('Veri Tipi')
+                                    ->label(__('settings.label.field_type'))
                                     ->options([
-                                        'text' => 'Metin (Text)',
-                                        'email' => 'E-Posta',
-                                        'number' => 'Sayı (Number)',
-                                        'tel' => 'Telefon',
-                                        'url' => 'URL (Link)',
-                                        'password' => 'Şifre',
-                                        'textarea' => 'Geniş Metin (Textarea)',
-                                        'richtext' => 'Zengin Metin (Rich Editor)',
-                                        'select' => 'Seçim Kutusu (Select)',
-                                        'checkbox' => 'Onay Kutusu (Tek)',
-                                        'checkbox_list' => 'Onay Listesi (Çoklu)',
-                                        'radio' => 'Radyo Buton',
-                                        'color' => 'Renk Seçici (Color Picker)',
-                                        'date' => 'Tarih',
-                                        'time' => 'Saat',
-                                        'datetime' => 'Tarih ve Saat',
-                                        'tags' => 'Etiketler (Tags)',
+                                        'text' => __('settings.label.types.text'),
+                                        'email' => __('settings.label.types.email'),
+                                        'number' => __('settings.label.types.number'),
+                                        'tel' => __('settings.label.types.tel'),
+                                        'url' => __('settings.label.types.url'),
+                                        'password' => __('settings.label.types.password'),
+                                        'textarea' => __('settings.label.types.textarea'),
+                                        'richtext' => __('settings.label.types.richtext'),
+                                        'select' => __('settings.label.types.select'),
+                                        'checkbox' => __('settings.label.types.checkbox'),
+                                        'checkbox_list' => __('settings.label.types.checkbox_list'),
+                                        'radio' => __('settings.label.types.radio'),
+                                        'color' => __('settings.label.types.color'),
+                                        'date' => __('settings.label.types.date'),
+                                        'time' => __('settings.label.types.time'),
+                                        'datetime' => __('settings.label.types.datetime'),
+                                        'tags' => __('settings.label.types.tags'),
                                     ])
                                     ->default('text')
                                     ->required()
                                     ->live(),
                                 KeyValue::make('options')
-                                    ->label('Seçenekler (Key => Label)')
-                                    ->helperText('Sadece Select, Radio ve Checkbox List için gereklidir.')
+                                    ->label(__('settings.label.options'))
+                                    ->helperText(__('settings.label.options_helper'))
                                     ->visible(fn($get) => in_array($get('type'), ['select', 'radio', 'checkbox_list'])),
                                 Hidden::make('value'), // Değeri korumak için gizli alan
                             ])
