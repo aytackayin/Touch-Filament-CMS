@@ -9,6 +9,7 @@ return [
         'general' => 'General',
         'manage_settings' => 'Dynamic Settings Management',
         'settings' => 'Settings',
+        'description' => 'Description',
         'tab_name' => 'Tab Name',
         'tab_icon' => 'Tab Icon',
         'fields' => 'Fields',

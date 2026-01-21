@@ -9,6 +9,7 @@ return [
         'general' => 'Genel',
         'manage_settings' => 'Dinamik Ayar Yönetimi',
         'settings' => 'Ayarlar',
+        'description' => 'Açıklama',
         'tab_name' => 'Sekme Adı',
         'tab_icon' => 'Sekme İkonu',
         'fields' => 'Alanlar',

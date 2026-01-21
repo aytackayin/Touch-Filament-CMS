@@ -30,6 +30,8 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Log;
 use Exception;
+use Illuminate\Support\HtmlString;
+use Filament\Actions\Action;
 
 use AytacKayin\FilamentSelectIcon\Forms\Components\SelectIcon;
 
@@ -121,9 +123,12 @@ class ManageSiteSettings extends SettingsPage
             ->icon(Heroicon::OutlinedRectangleStack)
             ->schema([
                 Placeholder::make('desc')
-                    ->content(__('settings.label.manage_desc')),
+                    ->label(__('settings.label.description'))
+                    ->content(new HtmlString('<div style="font-size: 0.8rem; opacity: 0.6; line-height: 1.4;">' . __('settings.label.manage_desc') . '</div>')),
                 Repeater::make('custom_settings')
                     ->label(__('settings.label.schema_label'))
+                    ->collapseAllAction(fn(Action $action) => $action->size('xs')->extraAttributes(['style' => 'opacity: 0.6']))
+                    ->expandAllAction(fn(Action $action) => $action->size('xs')->extraAttributes(['style' => 'opacity: 0.6']))
                     ->schema([
                         TextInput::make('tab_name')
                             ->label(__('settings.label.tab_name'))
