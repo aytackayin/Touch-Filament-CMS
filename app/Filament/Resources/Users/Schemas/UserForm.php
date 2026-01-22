@@ -37,7 +37,6 @@ class UserForm
                     ->label(__('filament-shield::filament-shield.column.roles'))
                     ->searchable()
                     ->preload()
-                    ->required()
                     ->multiple()
                     ->relationship('roles', 'name', function ($query) {
                         /** @var User $authUser */

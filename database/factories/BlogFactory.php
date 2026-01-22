@@ -23,15 +23,17 @@ class BlogFactory extends Factory
     {
         return [
             'user_id' => User::first()?->id ?? User::factory(),
+            'edit_user_id' => null,
             'language_id' => Language::first()?->id ?? Language::factory(),
             'title' => fake()->sentence(),
             'slug' => fake()->unique()->slug(),
-            'content' => fake()->paragraphs(3, true),
+            'content' => fake()->paragraphs(5, true),
             'is_published' => true,
             'publish_start' => null,
             'publish_end' => null,
             'sort' => 0,
             'attachments' => null,
+            'tags' => fake()->words(3),
         ];
     }
 }

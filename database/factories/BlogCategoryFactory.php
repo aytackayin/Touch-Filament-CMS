@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use App\Models\BlogCategory;
 use App\Models\Language;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -21,6 +22,8 @@ class BlogCategoryFactory extends Factory
     public function definition(): array
     {
         return [
+            'user_id' => User::first()?->id ?? User::factory(),
+            'edit_user_id' => null,
             'language_id' => Language::first()?->id ?? Language::factory(),
             'title' => fake()->words(3, true),
             'description' => fake()->paragraph(),
@@ -30,7 +33,8 @@ class BlogCategoryFactory extends Factory
             'is_published' => true,
             'publish_start' => null,
             'publish_end' => null,
-            'sort' => 0,
+            'sort' => fake()->numberBetween(0, 100),
+            'tags' => fake()->words(2),
         ];
     }
 }

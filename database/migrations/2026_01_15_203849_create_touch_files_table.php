@@ -12,7 +12,10 @@ return new class extends Migration {
     {
         Schema::create('touch_files', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id')->nullable()->constrained('users')->onDelete('set null');
+            $table->foreignId('edit_user_id')->nullable()->constrained('users')->onDelete('set null');
             $table->string('name');
+            $table->string('alt')->nullable();
             $table->string('path')->nullable();
             $table->string('type')->nullable(); // image, video, document, archive, etc.
             $table->string('mime_type')->nullable();
@@ -20,6 +23,7 @@ return new class extends Migration {
             $table->foreignId('parent_id')->nullable()->constrained('touch_files')->onDelete('cascade');
             $table->boolean('is_folder')->default(false);
             $table->json('metadata')->nullable(); // additional metadata
+            $table->json('tags')->nullable();
             $table->timestamps();
 
             $table->index('parent_id');

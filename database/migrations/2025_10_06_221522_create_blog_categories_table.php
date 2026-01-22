@@ -12,6 +12,8 @@ return new class extends Migration {
     {
         Schema::create('blog_categories', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id')->nullable()->constrained('users')->onDelete('set null');
+            $table->foreignId('edit_user_id')->nullable()->constrained('users')->onDelete('set null');
             $table->foreignId('language_id')->constrained('languages')->onDelete('cascade');
             $table->string('title');
             $table->text('description')->nullable();
@@ -22,6 +24,7 @@ return new class extends Migration {
             $table->timestamp('publish_start')->nullable();
             $table->timestamp('publish_end')->nullable();
             $table->integer('sort')->default(0);
+            $table->json('tags')->nullable();
             $table->timestamps();
         });
     }

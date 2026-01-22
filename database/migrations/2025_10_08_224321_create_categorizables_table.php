@@ -12,7 +12,7 @@ return new class extends Migration {
     {
         Schema::create('categorizables', function (Blueprint $table) {
             $table->primary(['category_id', 'categorizable_id', 'categorizable_type']);
-            $table->unsignedBigInteger('category_id');
+            $table->foreignId('category_id')->constrained('blog_categories')->onDelete('cascade');
             $table->morphs('categorizable');
             $table->timestamps();
         });
