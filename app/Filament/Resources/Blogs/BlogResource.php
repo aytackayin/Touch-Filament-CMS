@@ -25,6 +25,31 @@ class BlogResource extends Resource implements HasShieldPermissions
     {
         return __('blog.nav.icon');
     }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return 'Blog';
+    }
+    public static function getNavigationLabel(): string
+    {
+        return __('blog.nav.label');
+    }
+    public static function getBreadcrumb(): string
+    {
+        return __('blog.nav.label');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('blog.label.blog');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('blog.label.blogs');
+    }
+    protected static ?int $navigationSort = 2;
+
     public static function getGloballySearchableAttributes(): array
     {
         return ['title', 'content'];
@@ -82,30 +107,6 @@ class BlogResource extends Resource implements HasShieldPermissions
 
         return $details;
     }
-
-    public static function getNavigationGroup(): ?string
-    {
-        return 'Blog';
-    }
-    public static function getNavigationLabel(): string
-    {
-        return __('blog.nav.label');
-    }
-    public static function getBreadcrumb(): string
-    {
-        return __('blog.nav.label');
-    }
-
-    public static function getModelLabel(): string
-    {
-        return __('blog.label.blog');
-    }
-
-    public static function getPluralModelLabel(): string
-    {
-        return __('blog.label.blogs');
-    }
-    protected static ?int $navigationSort = 2;
 
     public static function form(Schema $schema): Schema
     {

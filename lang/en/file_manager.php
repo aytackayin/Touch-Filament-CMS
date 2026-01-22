@@ -66,7 +66,7 @@ return [
     'nav' => [
         'group' => 'File Management',
         'label' => 'Touch File Manager',
-        'icon' => 'heroicon-o-folder',
+        'icon' => 'heroicon-o-server-stack',
     ],
     'action' => [
         'download' => 'Download',

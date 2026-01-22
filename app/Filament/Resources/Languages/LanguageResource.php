@@ -27,6 +27,8 @@ class LanguageResource extends Resource
         return __('language.nav.group');
     }
 
+    protected static ?int $navigationSort = 101;
+
     public static function getNavigationLabel(): string
     {
         return __('language.nav.label');
@@ -46,7 +48,6 @@ class LanguageResource extends Resource
     {
         return __('language.label.languages');
     }
-    protected static ?int $navigationSort = 101;
 
     public static function form(Schema $schema): Schema
     {

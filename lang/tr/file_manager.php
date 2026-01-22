@@ -66,7 +66,7 @@ return [
     'nav' => [
         'group' => 'Dosya Yönetimi',
         'label' => 'Touch Dosya Yöneticisi',
-        'icon' => 'heroicon-o-folder',
+        'icon' => 'heroicon-o-server-stack',
     ],
     'action' => [
         'download' => 'İndir',

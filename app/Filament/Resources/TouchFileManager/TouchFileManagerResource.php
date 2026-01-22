@@ -26,6 +26,13 @@ class TouchFileManagerResource extends Resource implements HasShieldPermissions
         return __('file_manager.nav.icon');
     }
 
+    public static function getNavigationGroup(): ?string
+    {
+        return __('file_manager.nav.group');
+    }
+
+    protected static ?int $navigationSort = 5;
+
     public static function getNavigationLabel(): string
     {
         return __('file_manager.nav.label');
@@ -124,13 +131,6 @@ class TouchFileManagerResource extends Resource implements HasShieldPermissions
 
         return $details;
     }
-
-    public static function getNavigationGroup(): ?string
-    {
-        return __('file_manager.nav.group');
-    }
-
-    protected static ?int $navigationSort = 1;
 
     public static function form(Schema $schema): Schema
     {

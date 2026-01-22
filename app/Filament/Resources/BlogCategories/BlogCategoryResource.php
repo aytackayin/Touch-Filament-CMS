@@ -27,6 +27,31 @@ class BlogCategoryResource extends Resource implements HasShieldPermissions
         return __('blog.nav.category_icon');
     }
 
+    protected static ?int $navigationSort = 1;
+
+    public static function getNavigationGroup(): ?string
+    {
+        return 'Blog';
+    }
+    public static function getNavigationLabel(): string
+    {
+        return __('blog.nav.blog_categories');
+    }
+    public static function getBreadcrumb(): string
+    {
+        return __('blog.nav.blog_categories');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('blog.label.blog_category');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('blog.label.blog_categories');
+    }
+
     public static function getGloballySearchableAttributes(): array
     {
         return ['title', 'description'];
@@ -90,30 +115,6 @@ class BlogCategoryResource extends Resource implements HasShieldPermissions
         return $details;
     }
 
-
-    public static function getNavigationGroup(): ?string
-    {
-        return 'Blog';
-    }
-    public static function getNavigationLabel(): string
-    {
-        return __('blog.nav.blog_categories');
-    }
-    public static function getBreadcrumb(): string
-    {
-        return __('blog.nav.blog_categories');
-    }
-
-    public static function getModelLabel(): string
-    {
-        return __('blog.label.blog_category');
-    }
-
-    public static function getPluralModelLabel(): string
-    {
-        return __('blog.label.blog_categories');
-    }
-    protected static ?int $navigationSort = 1;
     public static function form(Schema $schema): Schema
     {
         return BlogCategoryForm::configure($schema);
