@@ -4,6 +4,9 @@ namespace App\Filament\Resources\Users\Tables;
 
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\ExportBulkAction;
+use App\Filament\Exports\UserExporter;
+use Filament\Support\Icons\Heroicon;
 use Filament\Actions\EditAction;
 use Filament\Actions\DeleteAction;
 use Filament\Tables\Columns\TextColumn;
@@ -13,11 +16,12 @@ class UsersTable
 {
     public static function configure(Table $table): Table
     {
+        $isSuperAdmin = auth()->user()?->hasRole('super_admin');
+
         return $table
             ->modifyQueryUsing(function ($query) {
-                /** @var \App\Models\User $authUser */
                 $authUser = auth()->user();
-                if (!$authUser->hasRole('super_admin')) {
+                if (!$authUser?->hasRole('super_admin')) {
                     $query->whereDoesntHave('roles', function ($q) {
                         $q->where('name', 'super_admin');
                     });
@@ -59,7 +63,13 @@ class UsersTable
             ])
             ->bulkActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
+                    DeleteBulkAction::make()
+                        ->visible($isSuperAdmin),
+                    ExportBulkAction::make()
+                        ->label(__('filament-actions::export.modal.actions.export.label'))
+                        ->icon(Heroicon::OutlinedArrowUpOnSquareStack)
+                        ->exporter(UserExporter::class)
+                        ->visible($isSuperAdmin),
                 ]),
             ]);
     }
