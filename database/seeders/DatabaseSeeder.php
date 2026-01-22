@@ -4,8 +4,6 @@ namespace Database\Seeders;
 
 use App\Models\User;
 use App\Models\Language;
-use App\Models\Blog;
-use App\Models\BlogCategory;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
@@ -20,7 +18,7 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         // 1. Languages
-        $tr = Language::create([
+        Language::create([
             'name' => 'Türkçe',
             'code' => 'tr',
             'charset' => 'UTF-8',
@@ -123,12 +121,11 @@ class DatabaseSeeder extends Seeder
         ]);
         $writer->assignRole($panelUserRole, $blogWriterRole);
 
-        $regular = User::create([
+        User::create([
             'name' => 'Regular User',
             'email' => 'user@user.com',
             'password' => Hash::make('password'),
         ]);
-        // Regular user has no roles
 
         // 6. Settings
         DB::table('settings')->insert([
@@ -139,54 +136,11 @@ class DatabaseSeeder extends Seeder
             ['group' => 'general', 'name' => 'custom_settings', 'payload' => json_encode([]), 'created_at' => now(), 'updated_at' => now()],
         ]);
 
-        // 7. Nested Categories (Exactly 20)
-        $count = 0;
-        $topCats = BlogCategory::factory()->count(5)->create([
-            'parent_id' => null,
-            'language_id' => $tr->id,
-            'user_id' => $ayaq->id,
-        ]);
-        $count += 5;
-
-        foreach ($topCats as $topCat) {
-            if ($count >= 20)
-                break;
-            $subs = BlogCategory::factory()->count(2)->create([
-                'parent_id' => $topCat->id,
-                'language_id' => $tr->id,
-                'user_id' => $ayaq->id,
-            ]);
-            $count += 2;
-
-            foreach ($subs as $sub) {
-                if ($count >= 20)
-                    break;
-                BlogCategory::factory()->create([
-                    'parent_id' => $sub->id,
-                    'language_id' => $tr->id,
-                    'user_id' => $ayaq->id,
-                ]);
-                $count++;
-            }
-        }
-
-        if ($count < 20) {
-            BlogCategory::factory()->count(20 - $count)->create([
-                'language_id' => $tr->id,
-                'user_id' => $ayaq->id,
-            ]);
-        }
-
-        // 8. Blogs (30)
-        $categories = BlogCategory::all();
-        Blog::factory()->count(30)->create([
-            'user_id' => $writer->id,
-            'language_id' => $tr->id,
-        ])->each(function ($blog) use ($categories) {
-            $blog->categories()->attach(
-                $categories->random(rand(1, 3))->pluck('id')->toArray()
-            );
-        });
+        // Optional: Blog Data (Uncomment to seed by default)
+        // $this->call([
+        //     BlogCategorySeeder::class,
+        //     BlogSeeder::class,
+        // ]);
 
         // Clear permission cache
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
