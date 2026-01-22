@@ -9,7 +9,6 @@ use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\Artisan;
 use Filament\Support\Icons\Heroicon;
 use BackedEnum;
-use UnitEnum;
 use Illuminate\Support\HtmlString;
 
 use BezhanSalleh\FilamentShield\Traits\HasPageShield;

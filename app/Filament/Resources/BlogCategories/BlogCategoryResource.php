@@ -11,7 +11,6 @@ use App\Models\BlogCategory;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
-use Filament\Support\Icons\Heroicon;
 use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
 use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Model;
@@ -22,8 +21,6 @@ use BackedEnum;
 class BlogCategoryResource extends Resource implements HasShieldPermissions
 {
     protected static ?string $model = BlogCategory::class;
-
-    //protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedFolder;
 
     public static function getNavigationIcon(): string
     {

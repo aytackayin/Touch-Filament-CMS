@@ -34,7 +34,6 @@ class ListBlogs extends ListRecords
                 ExportAction::make()
                     ->label('')
                     ->icon(Heroicon::OutlinedArrowUpOnSquareStack)
-                    //->tooltip(__('filament-actions::export.label', ['label' => 'Bloglar'])) //Label ile translate örneği
                     ->tooltip(__('filament-actions::export.modal.actions.export.label'))
                     ->color('gray')
                     ->size('xs')

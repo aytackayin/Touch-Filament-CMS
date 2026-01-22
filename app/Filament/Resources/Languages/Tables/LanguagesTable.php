@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\Languages\Tables;
 
-use Filament\Actions\Action;
 use Filament\Actions\EditAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\BulkActionGroup;
@@ -12,7 +11,6 @@ use Filament\Support\Enums\IconSize;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use App\Models\Language;
-use App\Filament\Resources\Languages\LanguageResource;
 
 class LanguagesTable
 {

@@ -3,8 +3,6 @@
 namespace App\Observers;
 
 use App\Models\BlogCategory;
-use Illuminate\Support\Facades\Storage;
-use App\Models\TouchFile;
 
 class BlogCategoryObserver
 {
