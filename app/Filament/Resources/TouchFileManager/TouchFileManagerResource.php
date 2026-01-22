@@ -31,7 +31,10 @@ class TouchFileManagerResource extends Resource implements HasShieldPermissions
         return __('file_manager.nav.group');
     }
 
-    protected static ?int $navigationSort = 5;
+    public static function getNavigationSort(): ?int
+    {
+        return 200;
+    }
 
     public static function getNavigationLabel(): string
     {

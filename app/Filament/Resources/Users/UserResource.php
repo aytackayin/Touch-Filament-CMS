@@ -21,7 +21,10 @@ class UserResource extends Resource
         return __('user.nav.icon');
     }
 
-    protected static ?int $navigationSort = 3;
+    public static function getNavigationSort(): ?int
+    {
+        return 300;
+    }
 
     public static function getNavigationLabel(): string
     {

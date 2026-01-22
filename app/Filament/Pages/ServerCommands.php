@@ -37,7 +37,10 @@ class ServerCommands extends Page
         return __('server-commands.navigation_group');
     }
 
-    protected static ?int $navigationSort = 999;
+    public static function getNavigationSort(): ?int
+    {
+        return 999;
+    }
 
     protected function getHeaderActions(): array
     {

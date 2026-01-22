@@ -47,7 +47,10 @@ class ManageSiteSettings extends SettingsPage
     {
         return __('settings.nav.group');
     }
-    protected static ?int $navigationSort = 102;
+    public static function getNavigationSort(): ?int
+    {
+        return 401;
+    }
 
     public static function getNavigationLabel(): string
     {

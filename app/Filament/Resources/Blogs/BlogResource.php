@@ -48,7 +48,10 @@ class BlogResource extends Resource implements HasShieldPermissions
     {
         return __('blog.label.blogs');
     }
-    protected static ?int $navigationSort = 2;
+    public static function getNavigationSort(): ?int
+    {
+        return 101;
+    }
 
     public static function getGloballySearchableAttributes(): array
     {

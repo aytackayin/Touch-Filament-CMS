@@ -27,7 +27,10 @@ class BlogCategoryResource extends Resource implements HasShieldPermissions
         return __('blog.nav.category_icon');
     }
 
-    protected static ?int $navigationSort = 1;
+    public static function getNavigationSort(): ?int
+    {
+        return 100;
+    }
 
     public static function getNavigationGroup(): ?string
     {

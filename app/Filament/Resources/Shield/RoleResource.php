@@ -11,7 +11,15 @@ class RoleResource extends BaseRoleResource
 
     protected static bool $isGloballySearchable = false;
 
-    protected static ?int $navigationSort = 4;
+    public static function getNavigationSort(): ?int
+    {
+        return 301;
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return __('user.nav.group');
+    }
 
     public static function getGlobalSearchResults(string $search): Collection
     {
