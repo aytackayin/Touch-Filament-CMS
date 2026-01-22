@@ -9,6 +9,8 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Support\Enums\IconSize;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\Layout\Stack;
+use Filament\Tables\Columns\ViewColumn;
 use Filament\Tables\Table;
 use App\Models\Blog;
 use Illuminate\Support\Str;
@@ -23,11 +25,33 @@ class BlogsTable
 {
     public static function configure(Table $table): Table
     {
+        $livewire = $table->getLivewire();
+        $isGrid = ($livewire && property_exists($livewire, 'view_type'))
+            ? $livewire->view_type === 'grid'
+            : false;
+
         return $table
+            ->when(
+                $isGrid,
+                fn(Table $table) => $table
+                    ->contentGrid([
+                        'md' => 2,
+                        'xl' => 3,
+                        '2xl' => 4,
+                    ])
+                    ->extraAttributes([
+                        'class' => 'blogs-grid',
+                    ])
+            )
             ->striped()
             ->paginatedWhileReordering()
             ->recordUrl(null)
-            ->columns([
+            ->columns($isGrid ? [
+                Stack::make([
+                    ViewColumn::make('details')
+                        ->view('filament.tables.columns.blog-grid')->searchable(['title', 'content', 'tags']),
+                ])->space(0),
+            ] : [
                 TextColumn::make('title')
                     ->label(__('blog.label.title'))
                     ->searchable(['title', 'content'])

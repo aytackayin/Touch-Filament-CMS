@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Blogs\Pages;
 use App\Filament\Resources\Blogs\BlogResource;
 use App\Filament\Exports\BlogExporter;
 use App\Filament\Imports\BlogImporter;
+use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\ExportAction;
 use Filament\Actions\ImportAction;
@@ -15,6 +16,16 @@ use Filament\Support\Icons\Heroicon;
 class ListBlogs extends ListRecords
 {
     protected static string $resource = BlogResource::class;
+
+    #[\Livewire\Attributes\Url]
+    public string $view_type = 'list';
+
+    public function getTableExtraAttributes(): array
+    {
+        return [
+            'class' => 'blogs-container ' . ($this->view_type === 'grid' ? 'is-grid-view' : 'is-list-view'),
+        ];
+    }
 
     protected function getHeaderActions(): array
     {
@@ -43,7 +54,20 @@ class ListBlogs extends ListRecords
                     ->color('success')
                     ->size('xs')
                     ->icon('heroicon-m-document-plus'),
-            ])->buttonGroup()
+            ])->buttonGroup(),
+            Action::make('toggleView')
+                ->label($this->view_type === 'grid' ? __('file_manager.label.list_view') : __('file_manager.label.grid_view'))
+                ->tooltip($this->view_type === 'grid' ? __('file_manager.label.list_view') : __('file_manager.label.grid_view'))
+                ->hiddenLabel()
+                ->icon($this->view_type === 'grid' ? 'heroicon-o-list-bullet' : 'heroicon-o-squares-2x2')
+                ->color('gray')
+                ->size('xs')
+                ->action(function () {
+                    $newView = $this->view_type === 'grid' ? 'list' : 'grid';
+                    return redirect(static::getResource()::getUrl('index', [
+                        'view_type' => $newView,
+                    ]));
+                }),
         ];
     }
 }
