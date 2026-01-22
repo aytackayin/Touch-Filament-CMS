@@ -107,14 +107,14 @@ class DatabaseSeeder extends Seeder
             'email' => 'admin@admin.com',
             'password' => Hash::make('password'),
         ]);
-        $ayaq->assignRole($superAdminRole, $panelUserRole);
+        $ayaq->assignRole($superAdminRole);
 
         $adminUser = User::create([
             'name' => 'Admin User',
             'email' => 'admin_user@admin.com',
             'password' => Hash::make('password'),
         ]);
-        $adminUser->assignRole($adminRole, $panelUserRole);
+        $adminUser->assignRole($adminRole);
 
         $writer = User::create([
             'name' => 'Blog Writer',
@@ -128,7 +128,7 @@ class DatabaseSeeder extends Seeder
             'email' => 'user@user.com',
             'password' => Hash::make('password'),
         ]);
-        $regular->assignRole($panelUserRole);
+        // Regular user has no roles
 
         // 6. Settings
         DB::table('settings')->insert([
