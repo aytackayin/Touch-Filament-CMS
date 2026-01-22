@@ -37,7 +37,7 @@
         }
     }
 
-    $fallbackUrl = url('/assets/icons/colorful-icons/blog.svg');
+    $fallbackUrl = url('/assets/icons/colorful-icons/grid-blog.svg');
     if (!$imageUrl) {
         $imageUrl = $fallbackUrl;
     }
