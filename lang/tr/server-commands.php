@@ -14,6 +14,8 @@ return [
         'queue_restart' => 'Kuyruğu Yeniden Başlat',
         'system_info' => 'Sistem Bilgisi',
         'copy_to_clipboard' => 'Panoya Kopyala',
+        'clear_livewire_tmp' => 'Livewire Geçici Dosyaları Temizle',
+        'clear_filament_exports' => 'Dışa Aktarma Dosyalarını Temizle',
     ],
     'notifications' => [
         'optimize_cleared' => 'Sistem optimizasyonu temizlendi',
@@ -24,6 +26,8 @@ return [
         'storage_linked' => 'Sembolik linkler oluşturuldu',
         'queue_restarted' => 'Kuyruk işleyicileri yeniden başlatıldı',
         'system_info_title' => 'Sistem Bilgisi',
+        'livewire_tmp_cleared' => 'Livewire geçici dosyaları temizlendi',
+        'filament_exports_cleared' => 'Dışa aktarma dosyaları temizlendi',
     ],
     'categories' => [
         'cache_management' => 'Önbellek Yönetimi',
@@ -34,6 +38,8 @@ return [
         'db_migration_description' => 'Veritabanı yapısını güncellemek ve yönetmek için kullanılır.',
         'queue_schedule' => 'Kuyruk & Zamanlayıcı',
         'queue_schedule_description' => 'Arka plan işlemleri ve zamanlanmış görevlerin yönetimi.',
+        'file_cleanup' => 'Dosya Temizliği',
+        'file_cleanup_description' => 'Sistemde biriken geçici ve eski dosyaların temizlenmesi.',
     ],
     'commands' => [
         'optimize_clear_desc' => 'Uygulamanın tüm önbelleğe alınmış yapılandırmalarını, rotalarını, görünümlerini ve genel önbelleğini tek seferde temizler. Yeni değişikliklerin yansıması için en güvenli yoldur.',
@@ -53,5 +59,7 @@ return [
         'queue_restart_desc' => 'Kuyruk işleyicileri güvenli bir şekilde kapatır; genellikle kod değişikliklerinden sonra işleyicilerin yeni kodu okuması için kullanılır.',
         'schedule_run_desc' => 'Zamanlanmış tüm görevleri kontrol eder ve vaktı gelmiş olanları tek seferlik çalıştırır.',
         'schedule_list_desc' => 'Sistemde tanımlı olan tüm zamanlanmış görevlerin listesini ve ne zaman çalışacaklarını gösterir.',
+        'clear_livewire_tmp_desc' => 'storage/app/private/livewire-tmp klasöründeki eski geçici dosyaları temizler.',
+        'clear_filament_exports_desc' => 'storage/app/private/filament_exports klasöründeki eski dışa aktarma dosyalarını temizler.',
     ],
 ];

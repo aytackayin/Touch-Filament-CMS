@@ -181,7 +181,7 @@ return [
                 'import',
                 'export',
             ],
-            \BezhanSalleh\FilamentShield\Resources\Roles\RoleResource::class => [
+            \App\Filament\Resources\Shield\RoleResource::class => [
                 'viewAny',
                 'view',
                 'create',
