@@ -1,39 +1,39 @@
 @php
     $record = $getRecord();
-    $attachments = $record->attachments ?? [];
+    // Veritabanında ters sırada tutulduğu için array'i tersine çeviriyoruz
+    $attachments = is_array($record->attachments) ? array_reverse(array_values($record->attachments)) : [];
     $imageUrl = null;
     $disk = \Illuminate\Support\Facades\Storage::disk('attachments');
 
-    // Find first image or first available video thumbnail
-    if (!empty($attachments) && is_array($attachments)) {
-        foreach ($attachments as $attachment) {
-            $ext = strtolower(pathinfo($attachment, PATHINFO_EXTENSION));
+    foreach ($attachments as $attachment) {
+        if (!is_string($attachment))
+            continue;
 
-            // Case 1: It's an image
-            if (in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'])) {
-                $filename = basename($attachment);
-                $thumbPath = "blogs/{$record->id}/images/thumbs/{$filename}";
+        $ext = strtolower(pathinfo($attachment, PATHINFO_EXTENSION));
 
-                if ($disk->exists($thumbPath)) {
-                    $imageUrl = $disk->url($thumbPath);
-                } elseif ($disk->exists($attachment)) {
-                    $imageUrl = $disk->url($attachment);
-                }
+        // Durum 1: Resim ise
+        if (in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'])) {
+            $filename = basename($attachment);
+            $thumbPath = "blogs/{$record->id}/images/thumbs/{$filename}";
 
-                if ($imageUrl)
-                    break;
+            if ($disk->exists($thumbPath)) {
+                $imageUrl = $disk->url($thumbPath);
+            } elseif ($disk->exists($attachment)) {
+                $imageUrl = $disk->url($attachment);
             }
+        }
+        // Durum 2: Video ise
+        elseif (in_array($ext, ['mp4', 'mov', 'avi', 'wmv', 'flv', 'mkv', 'webm'])) {
+            $videoName = pathinfo($attachment, PATHINFO_FILENAME);
+            $videoThumbPath = "blogs/{$record->id}/videos/thumbs/{$videoName}.jpg";
 
-            // Case 2: It's a video
-            if (in_array($ext, ['mp4', 'mov', 'avi', 'wmv', 'flv', 'mkv', 'webm'])) {
-                $videoName = pathinfo($attachment, PATHINFO_FILENAME);
-                $videoThumbPath = "blogs/{$record->id}/videos/thumbs/{$videoName}.jpg";
-
-                if ($disk->exists($videoThumbPath)) {
-                    $imageUrl = $disk->url($videoThumbPath);
-                    break;
-                }
+            if ($disk->exists($videoThumbPath)) {
+                $imageUrl = $disk->url($videoThumbPath);
             }
+        }
+
+        if ($imageUrl) {
+            break;
         }
     }
 
@@ -88,7 +88,6 @@
         width: 100%;
         height: 100%;
         min-height: 200px;
-        /* ÖNEMLİ: Yükseklik buradan gelir */
     }
 
     .blog-bg {
@@ -107,7 +106,7 @@
         opacity: 0.85;
     }
 
-    /* === ALT OVERLAY === */
+    /* === ALT OVERLAY (Glassmorphism) === */
     .blog-overlay {
         position: absolute;
         bottom: 0;
@@ -116,7 +115,6 @@
         z-index: 5;
         padding: 12px;
         background-color: rgba(255, 255, 255, 0.5);
-        /* Glassmorphism start */
         backdrop-filter: blur(10px);
         -webkit-backdrop-filter: blur(10px);
     }
