@@ -83,6 +83,8 @@ class ListTouchFiles extends ListRecords
         return [
             Action::make('up')
                 ->label(__('file_manager.label.up'))
+                ->tooltip(__('file_manager.label.up'))
+                ->hiddenLabel()
                 ->icon('heroicon-m-arrow-uturn-up')
                 ->color('gray')
                 ->visible((bool) $this->parent_id)
@@ -91,6 +93,8 @@ class ListTouchFiles extends ListRecords
 
             Action::make('sync')
                 ->label(__('file_manager.label.sync_files'))
+                ->tooltip(__('file_manager.label.sync_files'))
+                ->hiddenLabel()
                 ->icon('heroicon-o-arrow-path')
                 ->color('info')
                 ->size('xs')
@@ -223,6 +227,8 @@ class ListTouchFiles extends ListRecords
 
             Action::make('createFolder')
                 ->label(__('file_manager.label.new_folder'))
+                ->tooltip(__('file_manager.label.new_folder'))
+                ->hiddenLabel()
                 ->icon('heroicon-o-folder-plus')
                 ->color('warning')
                 ->size('xs')
@@ -303,7 +309,8 @@ class ListTouchFiles extends ListRecords
 
             CreateAction::make()
                 ->label(__('file_manager.label.upload_files'))
-                ->tooltip(__('file_manager.label.upload_new_files'))
+                ->tooltip(__('file_manager.label.upload_files'))
+                ->hiddenLabel()
                 ->color('success')
                 ->size('xs')
                 ->icon('heroicon-o-arrow-up-tray')
@@ -315,6 +322,8 @@ class ListTouchFiles extends ListRecords
 
             Action::make('toggleView')
                 ->label($this->view_type === 'grid' ? __('file_manager.label.list_view') : __('file_manager.label.grid_view'))
+                ->tooltip($this->view_type === 'grid' ? __('file_manager.label.list_view') : __('file_manager.label.grid_view'))
+                ->hiddenLabel()
                 ->icon($this->view_type === 'grid' ? 'heroicon-o-list-bullet' : 'heroicon-o-squares-2x2')
                 ->color('gray')
                 ->size('xs')
