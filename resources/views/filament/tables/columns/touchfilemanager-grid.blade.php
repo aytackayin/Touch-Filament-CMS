@@ -100,17 +100,8 @@
         opacity: 0.85;
     }
 
-    /* === ALT OVERLAY === */
-    .touch-file-overlay {
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        z-index: 5;
-
-        padding: 12px;
-    }
-
+    /* === ALT OVERLAY (Glassmorphism) === */
+    .touch-file-overlay,
     .touch-file-folder {
         position: absolute;
         bottom: 0;
@@ -118,18 +109,20 @@
         right: 0;
         z-index: 5;
         padding: 12px;
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
     }
 
-    /* Aydınlık mod (Varsayılan) */
-    .touch-file-overlay {
-        background-color: #ffffff80;
-        /* Beyaz */
+    /* Aydınlık mod */
+    .touch-file-overlay,
+    .touch-file-folder {
+        background-color: rgba(255, 255, 255, 0.5);
     }
 
     /* Karanlık mod */
-    .dark .touch-file-overlay {
-        background-color: #00000081;
-        /* Siyah */
+    .dark .touch-file-overlay,
+    .dark .touch-file-folder {
+        background-color: rgba(0, 0, 0, 0.5);
     }
 
     /* === TEXT === */
@@ -145,6 +138,7 @@
     .touch-file-info {
         margin-top: 4px;
         display: flex;
+        justify-content: center;
         gap: 10px;
         font-size: 11px;
         opacity: 0.8;
@@ -165,14 +159,6 @@
         cursor: pointer !important;
     }
 
-    body .touch-file-manager-grid .fi-ta-record .fi-ta-actions .fi-text-color-900 {
-        --text: #fafafa;
-    }
-
-    body .touch-file-manager-grid .fi-ta-record .fi-ta-actions .fi-text-color-700 {
-        --text: #ff0000;
-    }
-
     /* === ACTIONS (HOVER) === */
     body .touch-file-manager-grid .fi-ta-record .fi-ta-actions {
         position: absolute !important;
@@ -187,6 +173,7 @@
 
         background: rgba(0, 0, 0, 0.35);
         backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
         border-radius: 10px;
         padding: 6px 10px;
         transition: all .3s ease;
