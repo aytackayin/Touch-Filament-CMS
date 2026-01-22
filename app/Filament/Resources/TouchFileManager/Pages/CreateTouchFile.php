@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Intervention\Image\ImageManager;
 use Intervention\Image\Drivers\Gd\Driver;
+use Exception;
 
 class CreateTouchFile extends CreateRecord
 {
@@ -147,7 +148,7 @@ class CreateTouchFile extends CreateRecord
                     $image->scale(width: 150);
                     $image->save($thumbFullPath);
 
-                } catch (\Exception $e) {
+                } catch (Exception $e) {
                     Log::error('Image thumbnail generation failed: ' . $e->getMessage());
                 }
             } elseif ($type === 'video') {
@@ -199,7 +200,7 @@ class CreateTouchFile extends CreateRecord
                                 if ($decodedImage !== false) {
                                     $disk->put($thumbPath, $decodedImage);
                                 }
-                            } catch (\Exception $e) {
+                            } catch (Exception $e) {
                                 Log::error('Video thumbnail save failed: ' . $e->getMessage());
                             }
                         }

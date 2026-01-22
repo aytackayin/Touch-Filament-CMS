@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Intervention\Image\ImageManager;
 use Intervention\Image\Drivers\Gd\Driver;
+use Exception;
 
 trait HasFileManagerSync
 {
@@ -67,7 +68,7 @@ trait HasFileManagerSync
                 // Determine sub-directory (images/videos)
                 try {
                     $mimeType = $disk->mimeType($attachment);
-                } catch (\Exception $e) {
+                } catch (Exception $e) {
                     $mimeType = '';
                 }
 
@@ -178,7 +179,7 @@ trait HasFileManagerSync
             $image = $manager->read($disk->path($path));
             $image->scale(width: 150);
             $image->save($disk->path($thumbsDir . '/' . $filename));
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             // Fail silently
         }
     }

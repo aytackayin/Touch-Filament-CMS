@@ -11,19 +11,15 @@ use App\Models\Blog;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
-use Filament\Support\Icons\Heroicon;
 use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
 use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Facades\Storage;
-use BackedEnum;
 
 class BlogResource extends Resource implements HasShieldPermissions
 {
     protected static ?string $model = Blog::class;
-
-    //protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedDocumentText;
 
     public static function getNavigationIcon(): string
     {

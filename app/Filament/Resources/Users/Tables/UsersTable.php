@@ -11,6 +11,7 @@ use Filament\Actions\EditAction;
 use Filament\Actions\DeleteAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use App\Models\User;
 
 class UsersTable
 {
@@ -58,7 +59,7 @@ class UsersTable
                     ->icon('heroicon-o-trash')
                     ->label('')
                     ->tooltip(__('filament-actions::delete.single.label'))
-                    ->modalHeading(fn(\App\Models\User $record) => __('user.delete_confirmation_title.user', ['name' => $record->name]))
+                    ->modalHeading(fn(User $record) => __('user.delete_confirmation_title.user', ['name' => $record->name]))
                     ->modalDescription(__('user.delete_confirmation_description')),
             ])
             ->bulkActions([

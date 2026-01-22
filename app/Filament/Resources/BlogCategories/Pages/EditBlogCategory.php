@@ -6,6 +6,7 @@ use App\Filament\Resources\BlogCategories\BlogCategoryResource;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Support\Facades\Storage;
+use App\Services\BlogCategoryDeletionService;
 
 class EditBlogCategory extends EditRecord
 {
@@ -18,7 +19,7 @@ class EditBlogCategory extends EditRecord
                 ->modalHeading(fn() => __('blog.delete_confirmation_title.category', ['name' => $this->record->title]))
                 ->modalDescription(__('blog.delete_confirmation_description'))
                 ->action(function (DeleteAction $action) {
-                    $deletionService = app(\App\Services\BlogCategoryDeletionService::class);
+                    $deletionService = app(BlogCategoryDeletionService::class);
                     $deletionService->delete($this->record);
 
                     $action->success();

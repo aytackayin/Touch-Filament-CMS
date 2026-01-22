@@ -25,25 +25,25 @@
                                 class="text-gray-950 dark:text-white">{{ $item['name'] }}</span>
 
                             <div class="flex items-center gap-2 mt-0.5 relative" x-data="{ 
-                                                copyText: '{{ $item['cmd'] }}',
-                                                copied: false,
-                                                copy() {
-                                                    if (!navigator.clipboard) return;
-                                                    navigator.clipboard.writeText(this.copyText).then(() => {
-                                                        this.copied = true;
-                                                        setTimeout(() => this.copied = false, 2000);
-                                                    });
-                                                }
-                                            }">
+                                                                                    copyText: '{{ $item['cmd'] }}',
+                                                                                    copied: false,
+                                                                                    copy() {
+                                                                                        if (!navigator.clipboard) return;
+                                                                                        navigator.clipboard.writeText(this.copyText).then(() => {
+                                                                                            this.copied = true;
+                                                                                            setTimeout(() => this.copied = false, 2000);
+                                                                                        });
+                                                                                    }
+                                                                                }">
                                 <span
                                     style="font-size: 12px; color: #26b5dc; font-family: monospace; font-weight: 600;">{{ $item['cmd'] }}</span>
                                 <button @click="copy()" type="button"
                                     class="group flex items-center justify-center p-1 rounded-md bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-danger-500 transition-all active:scale-95 hover:!opacity-100"
                                     style="width: 24px; height: 24px; opacity: 0.4; margin-left: 2px; position:absolute"
                                     x-tooltip="{
-                                                        content: '{{ __('server-commands.actions.copy_to_clipboard') }}',
-                                                        theme: $store.theme,
-                                                    }">
+                                                                                            content: '{{ __('server-commands.actions.copy_to_clipboard') }}',
+                                                                                            theme: $store.theme,
+                                                                                        }">
                                     <x-filament::icon icon="heroicon-o-clipboard" x-show="!copied"
                                         class="w-3.5 h-3.5 text-gray-400 group-hover:text-danger-500" />
                                     <x-filament::icon icon="heroicon-o-check" x-show="copied" style="display: none;"
@@ -51,7 +51,7 @@
                                 </button>
                             </div>
 
-                            <span style="font-size: 12px; color: #565e6aff; line-height: 1.4; opacity: 0.8;" class="mt-0.5">
+                            <span class="desc-color mt-0.5">
                                 {{ $item['desc'] }}
                             </span>
                         </div>
@@ -82,25 +82,25 @@
                                 class="text-gray-950 dark:text-white">{{ $item['name'] }}</span>
 
                             <div class="flex items-center gap-2 mt-0.5 relative" x-data="{ 
-                                                copyText: '{{ $item['cmd'] }}',
-                                                copied: false,
-                                                copy() {
-                                                    if (!navigator.clipboard) return;
-                                                    navigator.clipboard.writeText(this.copyText).then(() => {
-                                                        this.copied = true;
-                                                        setTimeout(() => this.copied = false, 2000);
-                                                    });
-                                                }
-                                            }">
+                                                                                    copyText: '{{ $item['cmd'] }}',
+                                                                                    copied: false,
+                                                                                    copy() {
+                                                                                        if (!navigator.clipboard) return;
+                                                                                        navigator.clipboard.writeText(this.copyText).then(() => {
+                                                                                            this.copied = true;
+                                                                                            setTimeout(() => this.copied = false, 2000);
+                                                                                        });
+                                                                                    }
+                                                                                }">
                                 <span
                                     style="font-size: 12px; color: #26b5dc; font-family: monospace; font-weight: 600;">{{ $item['cmd'] }}</span>
                                 <button @click="copy()" type="button"
                                     class="group flex items-center justify-center p-1 rounded-md bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-danger-500 transition-all active:scale-95 hover:!opacity-100"
                                     style="width: 24px; height: 24px; opacity: 0.4; margin-left: 2px; position:absolute"
                                     x-tooltip="{
-                                                        content: '{{ __('server-commands.actions.copy_to_clipboard') }}',
-                                                        theme: $store.theme,
-                                                    }">
+                                                                                            content: '{{ __('server-commands.actions.copy_to_clipboard') }}',
+                                                                                            theme: $store.theme,
+                                                                                        }">
                                     <x-filament::icon icon="heroicon-o-clipboard" x-show="!copied"
                                         class="w-3.5 h-3.5 text-gray-400 group-hover:text-danger-500" />
                                     <x-filament::icon icon="heroicon-o-check" x-show="copied" style="display: none;"
@@ -108,7 +108,7 @@
                                 </button>
                             </div>
 
-                            <span style="font-size: 12px; color: #565e6aff; line-height: 1.4; opacity: 0.8;" class="mt-0.5">
+                            <span class="desc-color mt-0.5">
                                 {{ $item['desc'] }}
                             </span>
                         </div>
@@ -140,25 +140,25 @@
                                 class="text-gray-950 dark:text-white">{{ $item['name'] }}</span>
 
                             <div class="flex items-center gap-2 mt-0.5 relative" x-data="{ 
-                                                copyText: '{{ $item['cmd'] }}',
-                                                copied: false,
-                                                copy() {
-                                                    if (!navigator.clipboard) return;
-                                                    navigator.clipboard.writeText(this.copyText).then(() => {
-                                                        this.copied = true;
-                                                        setTimeout(() => this.copied = false, 2000);
-                                                    });
-                                                }
-                                            }">
+                                                                                    copyText: '{{ $item['cmd'] }}',
+                                                                                    copied: false,
+                                                                                    copy() {
+                                                                                        if (!navigator.clipboard) return;
+                                                                                        navigator.clipboard.writeText(this.copyText).then(() => {
+                                                                                            this.copied = true;
+                                                                                            setTimeout(() => this.copied = false, 2000);
+                                                                                        });
+                                                                                    }
+                                                                                }">
                                 <span
                                     style="font-size: 12px; color: #26b5dc; font-family: monospace; font-weight: 600;">{{ $item['cmd'] }}</span>
                                 <button @click="copy()" type="button"
                                     class="group flex items-center justify-center p-1 rounded-md bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-danger-500 transition-all active:scale-95 hover:!opacity-100"
                                     style="width: 24px; height: 24px; opacity: 0.4; margin-left: 2px; position:absolute"
                                     x-tooltip="{
-                                                        content: '{{ __('server-commands.actions.copy_to_clipboard') }}',
-                                                        theme: $store.theme,
-                                                    }">
+                                                                                            content: '{{ __('server-commands.actions.copy_to_clipboard') }}',
+                                                                                            theme: $store.theme,
+                                                                                        }">
                                     <x-filament::icon icon="heroicon-o-clipboard" x-show="!copied"
                                         class="w-3.5 h-3.5 text-gray-400 group-hover:text-danger-500" />
                                     <x-filament::icon icon="heroicon-o-check" x-show="copied" style="display: none;"
@@ -166,7 +166,7 @@
                                 </button>
                             </div>
 
-                            <span style="font-size: 12px; color: #565e6aff; line-height: 1.4; opacity: 0.8;" class="mt-0.5">
+                            <span class="mt-0.5 desc-color">
                                 {{ $item['desc'] }}
                             </span>
                         </div>
@@ -197,25 +197,25 @@
                                 class="text-gray-950 dark:text-white">{{ $item['name'] }}</span>
 
                             <div class="flex items-center gap-2 mt-0.5 relative" x-data="{ 
-                                                copyText: '{{ $item['cmd'] }}',
-                                                copied: false,
-                                                copy() {
-                                                    if (!navigator.clipboard) return;
-                                                    navigator.clipboard.writeText(this.copyText).then(() => {
-                                                        this.copied = true;
-                                                        setTimeout(() => this.copied = false, 2000);
-                                                    });
-                                                }
-                                            }">
+                                                                                    copyText: '{{ $item['cmd'] }}',
+                                                                                    copied: false,
+                                                                                    copy() {
+                                                                                        if (!navigator.clipboard) return;
+                                                                                        navigator.clipboard.writeText(this.copyText).then(() => {
+                                                                                            this.copied = true;
+                                                                                            setTimeout(() => this.copied = false, 2000);
+                                                                                        });
+                                                                                    }
+                                                                                }">
                                 <span
                                     style="font-size: 12px; color: #26b5dc; font-family: monospace; font-weight: 600;">{{ $item['cmd'] }}</span>
                                 <button @click="copy()" type="button"
                                     class="group flex items-center justify-center p-1 rounded-md bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-danger-500 transition-all active:scale-95 hover:!opacity-100"
                                     style="width: 24px; height: 24px; opacity: 0.4; margin-left: 2px; position:absolute"
                                     x-tooltip="{
-                                                        content: '{{ __('server-commands.actions.copy_to_clipboard') }}',
-                                                        theme: $store.theme,
-                                                    }">
+                                                                                            content: '{{ __('server-commands.actions.copy_to_clipboard') }}',
+                                                                                            theme: $store.theme,
+                                                                                        }">
                                     <x-filament::icon icon="heroicon-o-clipboard" x-show="!copied"
                                         class="w-3.5 h-3.5 text-gray-400 group-hover:text-danger-500" />
                                     <x-filament::icon icon="heroicon-o-check" x-show="copied" style="display: none;"
@@ -223,7 +223,7 @@
                                 </button>
                             </div>
 
-                            <span style="font-size: 12px; color: #565e6aff; line-height: 1.4; opacity: 0.8;" class="mt-0.5">
+                            <span class="desc-color mt-0.5">
                                 {{ $item['desc'] }}
                             </span>
                         </div>
@@ -232,4 +232,16 @@
             </x-filament::section>
         </div>
     </div>
+    <style>
+        .desc-color {
+            color: #565e6aff;
+            line-height: 1.4;
+            opacity: 0.6;
+            font-size: 12px;
+        }
+
+        .dark .desc-color {
+            color: #ffffffff;
+        }
+    </style>
 </x-filament-panels::page>
