@@ -1,59 +1,114 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Advanced Laravel 12 & Filament 4 CMS
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Antigravity CMS is a professional, modern, and highly-scalable Content Management System built on the latest **Laravel 12** framework and **Filament 4** admin panel. It provides a robust architecture for managing blogs, media, and system settings with a focus on user experience and performance.
 
-## About Laravel
+## 🚀 Teck Stack
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- **Core:** Laravel 12 & PHP 8.2+
+- **Admin Panel:** Filament 4 (Premium UI/UX)
+- **Frontend Auth:** Laravel Breeze (Livewire/Volt)
+- **Admin Auth:** Filament Breezy (Custom profile pages & security)
+- **Database:** MySQL / PostgreSQL / SQLite
+- **Permissions:** Filament Shield (Advanced RBAC system)
+- **Editor:** [aytackayin/tinymce](https://github.com/aytackayin/tinymce) (Specially integrated with File Manager)
+- **UI Components:** [aytackayin/filament-select-icon](https://github.com/aytackayin/filament-select-icon)
+- **Media:** Custom File Manager with storage synchronization
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## ✨ Key Features
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### 1. Advanced Blog Management
+- **Hierarchical Categories:** Cascade-style category system with infinite nesting support.
+- **Rich Text Editor:** Custom TinyMCE integration designed to work seamlessly with the internal File Manager for media embedding.
+- **Smart Sync:** Seamless integration with the internal File Manager.
+- **Grid vs List:** Dynamic view switcher for blog listings with modern grid cards.
+- **Video Support:** Intelligent video thumbnail generation without requiring FFmpeg on the server (client-side processing).
+- **SEO Ready:** Optimized for slugs, tags, and metadata.
 
-## Learning Laravel
+### 2. Powerful File Manager
+- **Hierarchical Structure:** Folder and file management with tree-view selection.
+- **System Sync:** Ability to synchronize the database with physical storage automatically.
+- **Media Preview:** Built-in previewer for images, videos, and documents.
+- **Ownership:** Multi-user support with private/public file visibility.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+### 3. Localization & Multi-language
+- Unified language management via custom **Language Resource**.
+- Seamless integration with **Filament Language Switch**.
+- Translation-ready architecture for all resources and site components.
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### 4. Dynamic Site Settings
+- Powered by `spatie/laravel-settings`.
+- Manage site title, description, keywords, and custom configuration directly from the panel.
+- Dynamic form generation for flexible setting groups.
 
-## Laravel Sponsors
+### 5. Server Management Console
+- Dedicated **Server Commands** page for administrators.
+- Execute Artisan commands (Maintenance, Cache, Optimization) with one click.
+- Detailed descriptions and tooltips for each command to ensure safe operations.
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+### 6. Security & Roles
+- **Filament Shield:** Granular role-based access control (RBAC).
+- Pre-defined roles: `super_admin`, `admin`, `blog_writer`, and `panel_user`.
+- Permission-based visibility for widgets, actions, and navigation items.
 
-### Premium Partners
+### 7. Global Search
+- Fully customized global search experience.
+- Instant search results for Blogs, Categories, and Media with high-speed indexing.
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+## 🛠 Installation
 
-## Contributing
+Follow these steps for a clean installation:
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### 1. Clone & Install Dependencies
+```bash
+git clone https://github.com/your-repo/filament_cms.git
+cd filament_cms
+composer install
+npm install
+```
 
-## Code of Conduct
+### 2. Environment Setup
+```bash
+copy .env.example .env
+php artisan key:generate
+```
+*Don't forget to configure your database settings in the `.env` file.*
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### 3. Migrations & Seeding
+Antigravity CMS uses a modular seeding system. You can choose to install a clean system or one with sample data.
 
-## Security Vulnerabilities
+**Standard Installation (Empty CMS):**
+```bash
+php artisan migrate:fresh --seed
+```
+*This will create the database structure, roles, default languages, and settings.*
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+**Demo Data Installation (Optional):**
+```bash
+# Seed nested blog categories
+php artisan db:seed --class=BlogCategorySeeder
 
-## License
+# Seed sample blog posts
+php artisan db:seed --class=BlogSeeder
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+### 4. Storage Link
+```bash
+php artisan storage:link
+```
+
+### 5. Run the Application
+```bash
+npm run dev
+php artisan serve
+```
+
+## 🔐 Default Credentials (Local)
+- **Super Admin:** `admin@admin.com` / `password`
+- **Admin User:** `admin_user@admin.com` / `password`
+- **Blog Writer:** `writer@writer.com` / `password`
+
+## 🤝 Contribution
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+---
+*Built with ❤️ using Antigravity principles for high performance.*

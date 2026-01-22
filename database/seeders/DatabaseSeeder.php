@@ -80,10 +80,10 @@ class DatabaseSeeder extends Seeder
             }
         }
 
-        // Add Pages permissions (View:PageName)
-        $pages = ['ManageSiteSettings', 'ServerCommands', 'BreezyProfile'];
-        foreach ($pages as $page) {
-            Permission::firstOrCreate(['name' => "View:{$page}", 'guard_name' => 'web']);
+        // Add Pages & Widgets permissions (View:Name)
+        $views = ['ManageSiteSettings', 'ServerCommands', 'BreezyProfile', 'LatestBlogsWidget'];
+        foreach ($views as $view) {
+            Permission::firstOrCreate(['name' => "View:{$view}", 'guard_name' => 'web']);
         }
 
         // 4. Assign Permissions to Roles
@@ -95,7 +95,8 @@ class DatabaseSeeder extends Seeder
         $writerPermissions = Permission::where(function ($q) {
             $q->where('name', 'like', '%Blog')
                 ->orWhere('name', 'like', '%BlogCategory')
-                ->orWhere('name', 'like', '%TouchFile');
+                ->orWhere('name', 'like', '%TouchFile')
+                ->orWhere('name', 'View:LatestBlogsWidget');
         })->get();
         $blogWriterRole->givePermissionTo($writerPermissions);
 
