@@ -21,6 +21,10 @@ use App\Filament\Exports\BlogExporter;
 use Filament\Actions\ExportBulkAction;
 use Filament\Support\Icons\Heroicon;
 use App\Filament\Resources\Blogs\BlogResource;
+use CodeWithDennis\FilamentSelectTree\SelectTree;
+use App\Models\BlogCategory;
+use Filament\Tables\Filters\Filter;
+use Illuminate\Database\Eloquent\Builder;
 
 class BlogsTable
 {
@@ -60,6 +64,12 @@ class BlogsTable
                     ->description(fn(Blog $record): HtmlString => $record->content ? new HtmlString('<span style="font-size: 12px; line-height: 1;" class="text-gray-500 dark:text-gray-400">' . Str::limit(strip_tags($record->content), 100) . '</span>') : new HtmlString(''))
                     ->wrap()
                     ->sortable(),
+                TextColumn::make('categories.title')
+                    ->label(__('blog.label.categories'))
+                    ->badge()
+                    ->searchable()
+                    ->wrap()
+                    ->toggleable(),
                 TextColumn::make('language.name')
                     ->label(__('blog.label.language'))
                     ->sortable()
@@ -102,17 +112,32 @@ class BlogsTable
                     ->relationship('user', 'name')
                     ->searchable(),
                 SelectFilter::make('edit_user_id')
-                    ->label(__('blog.label.last_editor'))
+                    ->label(__('blog.label.last_edited_by'))
                     ->relationship('editor', 'name')
                     ->searchable(),
                 SelectFilter::make('language_id')
-                    ->label(__('label.language'))
+                    ->label(__('blog.label.language'))
                     ->relationship('language', 'name'),
+                Filter::make('categories')
+                    ->label(__('blog.label.categories'))
+                    ->form([
+                        SelectTree::make('categories')
+                            ->label(__('blog.label.categories'))
+                            ->relationship('categories', 'title', 'parent_id')
+                            ->enableBranchNode()
+                            ->searchable(),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query->when(
+                            $data['categories'],
+                            fn(Builder $query, $categories): Builder => $query->whereHas('categories', fn(Builder $query) => $query->whereIn('blog_categories.id', (array) $categories)),
+                        );
+                    }),
                 SelectFilter::make('is_published')
-                    ->label('Publication Status')
+                    ->label(__('blog.label.is_published'))
                     ->options([
-                        '1' => 'Published',
-                        '0' => 'Unpublished',
+                        '1' => 'Yayımlandı',
+                        '0' => 'Yayımlanmadı',
                     ]),
             ])
             ->actions([
