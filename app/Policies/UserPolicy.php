@@ -17,7 +17,7 @@ class UserPolicy
 
     public function view(AuthUser $authUser, User $model): bool
     {
-        /** @var \App\Models\User $authUser */
+        /** @var User $authUser */
         if ($model->hasRole('super_admin') && !$authUser->hasRole('super_admin')) {
             return false;
         }
@@ -31,7 +31,7 @@ class UserPolicy
 
     public function update(AuthUser $authUser, User $model): bool
     {
-        /** @var \App\Models\User $authUser */
+        /** @var User $authUser */
         // Kendini düzenleyebilir (şifre vs. için)
         if ($authUser->id === $model->id) {
             return $authUser->can('Update:User');
@@ -62,7 +62,7 @@ class UserPolicy
 
     public function delete(AuthUser $authUser, User $model): bool
     {
-        /** @var \App\Models\User $authUser */
+        /** @var User $authUser */
         // Kimse kendini silemez
         if ($authUser->id === $model->id) {
             return false;
@@ -96,7 +96,7 @@ class UserPolicy
 
     public function restore(AuthUser $authUser, User $model): bool
     {
-        /** @var \App\Models\User $authUser */
+        /** @var User $authUser */
         if ($model->hasRole('super_admin') && !$authUser->hasRole('super_admin')) {
             return false;
         }
@@ -105,7 +105,7 @@ class UserPolicy
 
     public function forceDelete(AuthUser $authUser, User $model): bool
     {
-        /** @var \App\Models\User $authUser */
+        /** @var User $authUser */
         if ($model->hasRole('super_admin') && !$authUser->hasRole('super_admin')) {
             return false;
         }
@@ -124,7 +124,7 @@ class UserPolicy
 
     public function replicate(AuthUser $authUser, User $model): bool
     {
-        /** @var \App\Models\User $authUser */
+        /** @var User $authUser */
         if ($model->hasRole('super_admin') && !$authUser->hasRole('super_admin')) {
             return false;
         }

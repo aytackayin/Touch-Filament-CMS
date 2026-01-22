@@ -6,6 +6,7 @@ namespace App\Policies;
 
 use Illuminate\Foundation\Auth\User as AuthUser;
 use Spatie\Permission\Models\Role;
+use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class RolePolicy
@@ -19,7 +20,7 @@ class RolePolicy
 
     public function view(AuthUser $authUser, Role $role): bool
     {
-        /** @var \App\Models\User $authUser */
+        /** @var User $authUser */
         if ($role->name === 'super_admin' && !$authUser->hasRole('super_admin')) {
             return false;
         }
@@ -33,7 +34,7 @@ class RolePolicy
 
     public function update(AuthUser $authUser, Role $role): bool
     {
-        /** @var \App\Models\User $authUser */
+        /** @var User $authUser */
         if ($role->name === 'super_admin' && !$authUser->hasRole('super_admin')) {
             return false;
         }
@@ -42,7 +43,7 @@ class RolePolicy
 
     public function delete(AuthUser $authUser, Role $role): bool
     {
-        /** @var \App\Models\User $authUser */
+        /** @var User $authUser */
         if ($role->name === 'super_admin') {
             return false; // Kimse super_admin rolünü silememeli
         }
@@ -71,7 +72,7 @@ class RolePolicy
 
     public function replicate(AuthUser $authUser, Role $role): bool
     {
-        /** @var \App\Models\User $authUser */
+        /** @var User $authUser */
         if ($role->name === 'super_admin' && !$authUser->hasRole('super_admin')) {
             return false;
         }

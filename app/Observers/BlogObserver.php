@@ -3,6 +3,8 @@
 namespace App\Observers;
 
 use App\Models\Blog;
+use Illuminate\Support\Facades\Storage;
+use Exception;
 
 class BlogObserver
 {
@@ -69,8 +71,8 @@ class BlogObserver
             $newPath = 'blogs/' . $blog->id . '/content-images/' . $filename;
 
             // Move file if it exists
-            if (\Illuminate\Support\Facades\Storage::disk('attachments')->exists($oldPath)) {
-                \Illuminate\Support\Facades\Storage::disk('attachments')->move($oldPath, $newPath);
+            if (Storage::disk('attachments')->exists($oldPath)) {
+                Storage::disk('attachments')->move($oldPath, $newPath);
             }
 
             // Return new relative URL (no domain)
@@ -112,8 +114,8 @@ class BlogObserver
 
             if ($path && str_starts_with($path, '/attachments/')) {
                 $relativePath = substr($path, strlen('/attachments/'));
-                if (\Illuminate\Support\Facades\Storage::disk('attachments')->exists($relativePath)) {
-                    \Illuminate\Support\Facades\Storage::disk('attachments')->delete($relativePath);
+                if (Storage::disk('attachments')->exists($relativePath)) {
+                    Storage::disk('attachments')->delete($relativePath);
                 }
             }
         }
@@ -122,7 +124,7 @@ class BlogObserver
     protected function cleanupOldLivewireTmpFiles(): void
     {
         try {
-            $disk = \Illuminate\Support\Facades\Storage::disk('local');
+            $disk = Storage::disk('local');
 
             // Check if livewire-tmp directory exists
             if (!$disk->exists('livewire-tmp')) {
@@ -142,7 +144,7 @@ class BlogObserver
                     if ($lastModified < $cutoffTime) {
                         $disk->delete($file);
                     }
-                } catch (\Exception $e) {
+                } catch (Exception $e) {
                     // Continue on error for individual files
                     continue;
                 }
@@ -155,7 +157,7 @@ class BlogObserver
                     $disk->deleteDirectory($directory);
                 }
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             // Fail silently - don't break the save operation
         }
     }

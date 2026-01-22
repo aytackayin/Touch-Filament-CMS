@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Collection;
 use App\Models\TouchFile;
+use Exception;
 
 class BlogCategoryDeletionService
 {
@@ -16,7 +17,7 @@ class BlogCategoryDeletionService
      * 
      * @param BlogCategory $category
      * @return void
-     * @throws \Exception
+     * @throws Exception
      */
     public function delete(BlogCategory $category): void
     {
