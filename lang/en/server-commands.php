@@ -13,6 +13,7 @@ return [
         'storage_link' => 'Storage Link',
         'queue_restart' => 'Queue Restart',
         'system_info' => 'System Info',
+        'copy_to_clipboard' => 'Copy to Clipboard',
     ],
     'notifications' => [
         'optimize_cleared' => 'System optimization cleared',

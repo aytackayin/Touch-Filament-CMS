@@ -13,6 +13,7 @@ return [
         'storage_link' => 'Depolama Linki',
         'queue_restart' => 'Kuyruğu Yeniden Başlat',
         'system_info' => 'Sistem Bilgisi',
+        'copy_to_clipboard' => 'Panoya Kopyala',
     ],
     'notifications' => [
         'optimize_cleared' => 'Sistem optimizasyonu temizlendi',
