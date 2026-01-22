@@ -122,6 +122,7 @@ class BlogCategoriesTable
                         ->icon('heroicon-o-trash')
                         ->color('danger')
                         ->requiresConfirmation()
+                        ->visible(fn() => auth()->user()->can('deleteAny', BlogCategory::class))
                         ->action(function ($records) {
                             $deletionService = app(BlogCategoryDeletionService::class);
                             foreach ($records as $record) {

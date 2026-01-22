@@ -136,6 +136,7 @@ class BlogsTable
                         ->icon('heroicon-o-trash')
                         ->color('danger')
                         ->requiresConfirmation()
+                        ->visible(fn() => auth()->user()->can('deleteAny', Blog::class))
                         ->action(fn($records) => $records->filter(fn($blog) => auth()->user()->can('delete', $blog))->each->delete()),
                     ExportBulkAction::make()
                         ->label(__('filament-actions::export.modal.actions.export.label'))
