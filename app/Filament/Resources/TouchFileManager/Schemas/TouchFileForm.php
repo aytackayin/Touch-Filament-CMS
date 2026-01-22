@@ -15,6 +15,7 @@ use Filament\Forms\Components\Placeholder;
 use Illuminate\Support\Str;
 use CodeWithDennis\FilamentSelectTree\SelectTree;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\TouchFile;
 
 class TouchFileForm
 {
@@ -30,7 +31,7 @@ class TouchFileForm
                                     ->label(__('file_manager.label.name'))
                                     ->required()
                                     ->maxLength(255)
-                                    ->notIn(['thumbs', 'temp'])
+                                    ->notIn(TouchFile::RESERVED_NAMES)
                                     ->validationMessages([
                                         'not_in' => __('file_manager.errors.reserved_name'),
                                     ])
@@ -222,7 +223,7 @@ class TouchFileForm
                             ->label(__('file_manager.label.folder_name'))
                             ->required()
                             ->maxLength(255)
-                            ->notIn(['thumbs', 'temp'])
+                            ->notIn(TouchFile::RESERVED_NAMES)
                             ->validationMessages([
                                 'not_in' => __('file_manager.errors.reserved_name'),
                             ])

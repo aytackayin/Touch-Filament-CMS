@@ -244,7 +244,7 @@ class ListTouchFiles extends ListRecords
                                             ->label(__('file_manager.label.folder_name'))
                                             ->required()
                                             ->maxLength(255)
-                                            ->notIn(['thumbs', 'temp'])
+                                            ->notIn(TouchFile::RESERVED_NAMES)
                                             ->validationMessages([
                                                 'not_in' => __('file_manager.errors.reserved_name'),
                                             ])
