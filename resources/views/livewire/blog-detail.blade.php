@@ -11,7 +11,7 @@ mount(fn (string $slug) =>
     $this->blog = Blog::where('slug', $slug)->where('is_published', true)->firstOrFail()
 );
 
-$attachments = computed(fn() => collect($this->blog->attachments));
+$attachments = computed(fn() => collect($this->blog->attachments ?? [])->reverse()->values());
 
 ?>
 
@@ -166,9 +166,8 @@ $attachments = computed(fn() => collect($this->blog->attachments));
             <div class="mt-24 pt-16 border-t border-slate-100 dark:border-slate-800">
                 <h3 class="text-2xl font-black mb-10 tracking-tight">Gallery & Attachments</h3>
                 <div class="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-6 gap-4">
-                    @foreach($this->attachments->reverse() as $index => $attachment)
+                    @foreach($this->attachments as $index => $attachment)
                         @php
-                            $originalIndex = $this->attachments->count() - 1 - $index;
                             $isImage = str_ends_with($attachment, '.jpg') || str_ends_with($attachment, '.png') || str_ends_with($attachment, '.webp');
                             $isVideo = str_ends_with($attachment, '.mp4') || str_ends_with($attachment, '.webm');
                             
@@ -183,7 +182,7 @@ $attachments = computed(fn() => collect($this->blog->attachments));
                                 }
                             }
                         @endphp
-                        <button @click="lightbox = true; activeThumb = {{ $originalIndex }}" 
+                        <button @click="lightbox = true; activeThumb = {{ $index }}" 
                                 class="group relative aspect-square rounded-2xl overflow-hidden bg-slate-100 dark:bg-[#2a2b3c] focus:outline-none focus:ring-4 focus:ring-indigo-500/20">
                             
                             @if($isImage)
