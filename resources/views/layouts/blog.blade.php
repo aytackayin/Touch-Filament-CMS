@@ -127,8 +127,8 @@
                     </a>
                 </div>
 
-                <!-- Right: Dashboard/Auth/Dark-Mode -->
-                <div class="flex items-center justify-end flex-1 space-x-4">
+                <!-- Right: Dark-Mode Only -->
+                <div class="flex items-center justify-end flex-1">
                     <!-- Dark Mode Toggle -->
                     <button @click="darkMode = !darkMode"
                         class="p-3 rounded-2xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 opacity-50 hover:opacity-100 hover:scale-105 hover:shadow-xl transition-all duration-300">
@@ -144,45 +144,58 @@
                             </path>
                         </svg>
                     </button>
-
-                    @auth
-                        <a href="{{ route('dashboard') }}"
-                            class="px-5 py-2.5 rounded-2xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-sm font-bold tracking-tight opacity-50 hover:opacity-100 hover:scale-105 hover:shadow-xl transition-all duration-300">
-                            Dashboard
-                        </a>
-                    @else
-                        <a href="{{ route('login') }}"
-                            class="text-sm font-bold tracking-widest uppercase hover:text-indigo-600 transition-colors">
-                            Login
-                        </a>
-                    @endauth
                 </div>
             </div>
         </div>
     </nav>
 
-    <!-- Mobile Menu -->
-    <div x-data="{ open: false }" @toggle-mobile-menu.window="open = !open" x-show="open"
-        x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 -translate-y-full"
-        x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-200"
-        x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 -translate-y-full"
-        class="fixed inset-0 z-[60] glass-nav flex flex-col justify-center items-center space-y-8" x-cloak>
-        <button @click="open = false" class="absolute top-8 right-8 p-2 text-slate-400 hover:text-white">
+    <!-- Overlay Menu -->
+    <div x-data="{ open: false }" 
+        @toggle-mobile-menu.window="open = !open" 
+        x-init="$watch('open', value => value ? document.body.classList.add('overflow-hidden') : document.body.classList.remove('overflow-hidden'))"
+        x-show="open"
+        x-transition:enter="transition ease-out duration-500" x-transition:enter-start="opacity-0 translate-x-full"
+        x-transition:enter-end="opacity-100 translate-x-0" x-transition:leave="transition ease-in duration-300"
+        x-transition:leave-start="opacity-100 translate-x-0" x-transition:leave-end="opacity-0 translate-x-full"
+        class="fixed inset-0 z-[100] bg-slate-50/95 dark:bg-slate-950/95 backdrop-blur-xl flex flex-col justify-center items-center" x-cloak>
+        
+        <button @click="open = false" class="absolute top-8 right-8 p-4 rounded-full bg-white/10 hover:bg-white/20 text-slate-900 dark:text-white transition-all hover:rotate-90 duration-300">
             <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
             </svg>
         </button>
-        <a href="{{ route('home') }}"
-            class="text-4xl font-bold tracking-widest uppercase hover:text-indigo-500">Home</a>
-        <a href="{{ route('blog.index') }}"
-            class="text-4xl font-bold tracking-widest uppercase hover:text-indigo-500">Blog</a>
-        @auth
-            <a href="{{ route('dashboard') }}"
-                class="text-4xl font-bold tracking-widest uppercase hover:text-indigo-500">Dashboard</a>
-        @else
-            <a href="{{ route('login') }}"
-                class="text-4xl font-bold tracking-widest uppercase hover:text-indigo-500">Login</a>
-        @endauth
+
+        <div class="flex flex-col items-center space-y-8 w-full max-w-sm px-6 text-center">
+            
+            <!-- Navigation Links -->
+            <a href="{{ route('home') }}" class="group relative inline-block">
+                <span class="text-4xl md:text-5xl font-black tracking-tighter uppercase text-slate-900 dark:text-white group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-indigo-500 group-hover:to-purple-500 transition-all duration-300">Home</span>
+                <span class="absolute -bottom-2 left-1/2 w-0 h-1 bg-indigo-500 group-hover:w-full group-hover:left-0 transition-all duration-300"></span>
+            </a>
+
+            <a href="{{ route('blog.index') }}" class="group relative inline-block">
+                <span class="text-4xl md:text-5xl font-black tracking-tighter uppercase text-slate-900 dark:text-white group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-indigo-500 group-hover:to-purple-500 transition-all duration-300">Blog</span>
+                <span class="absolute -bottom-2 left-1/2 w-0 h-1 bg-indigo-500 group-hover:w-full group-hover:left-0 transition-all duration-300"></span>
+            </a>
+            
+            <div class="w-24 h-px bg-slate-200 dark:bg-slate-800 my-8"></div>
+
+            @auth
+                <a href="{{ route('dashboard') }}" class="text-2xl font-bold tracking-widest uppercase text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors">Dashboard</a>
+                
+                <form method="POST" action="{{ route('logout') }}">
+                    @csrf
+                    <button type="submit" class="text-xl font-bold tracking-widest uppercase text-red-500/70 hover:text-red-500 transition-colors mt-4">
+                        Log Out
+                    </button>
+                </form>
+            @else
+                <a href="{{ route('login') }}" class="text-3xl font-bold tracking-widest uppercase text-slate-900 dark:text-white hover:text-indigo-500 transition-colors">Login</a>
+                @if (Route::has('register'))
+                    <a href="{{ route('register') }}" class="text-xl font-bold tracking-widest uppercase text-slate-400 hover:text-indigo-500 transition-colors">Register</a>
+                @endif
+            @endauth
+        </div>
     </div>
 
     <!-- Page Content -->
