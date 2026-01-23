@@ -18,7 +18,8 @@ $blogs = computed(function () {
     if ($this->search) {
         $query->where(function ($q) {
             $q->where('title', 'like', '%' . $this->search . '%')
-                ->orWhere('content', 'like', '%' . $this->search . '%');
+                ->orWhere('content', 'like', '%' . $this->search . '%')
+                ->orWhere('tags', 'like', '%' . $this->search . '%');
         });
     }
 

@@ -82,24 +82,22 @@ $attachments = computed(fn() => collect($this->blog->attachments));
         </div>
     </template>
 
-    <article class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+    <article class="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-16">
         <!-- Main Media -->
-        <div class="mb-16 rounded-[40px] overflow-hidden shadow-2xl aspect-[16/9] bg-slate-100 dark:bg-slate-900">
-            @php
-                $mainImage = collect($blog->attachments)->filter(fn($a) => str_ends_with($a, '.jpg') || str_ends_with($a, '.png') || str_ends_with($a, '.webp'))->first();
-                $mainVideo = collect($blog->attachments)->filter(fn($a) => str_ends_with($a, '.mp4') || str_ends_with($a, '.webm'))->first();
-            @endphp
+        @php
+            $mainImage = collect($blog->attachments)->filter(fn($a) => str_ends_with($a, '.jpg') || str_ends_with($a, '.png') || str_ends_with($a, '.webp'))->first();
+            $mainVideo = collect($blog->attachments)->filter(fn($a) => str_ends_with($a, '.mp4') || str_ends_with($a, '.webm'))->first();
+        @endphp
 
-            @if($mainVideo)
-                <video src="{{ Storage::disk('attachments')->url($mainVideo) }}" controls class="w-full h-full object-cover"></video>
-            @elseif($mainImage)
-                <img src="{{ Storage::disk('attachments')->url($mainImage) }}" class="w-full h-full object-cover" alt="{{ $blog->title }}">
-            @else
-                 <div class="w-full h-full flex items-center justify-center">
-                    <svg class="w-20 h-20 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                 </div>
-            @endif
-        </div>
+        @if($mainVideo || $mainImage)
+            <div class="mb-16 rounded-[40px] overflow-hidden shadow-2xl aspect-[16/9] bg-slate-100 dark:bg-slate-900">
+                @if($mainVideo)
+                    <video src="{{ Storage::disk('attachments')->url($mainVideo) }}" controls class="w-full h-full object-cover"></video>
+                @elseif($mainImage)
+                    <img src="{{ Storage::disk('attachments')->url($mainImage) }}" class="w-full h-full object-cover" alt="{{ $blog->title }}">
+                @endif
+            </div>
+        @endif
 
         <!-- Meta -->
         <div class="mb-12">
@@ -139,7 +137,7 @@ $attachments = computed(fn() => collect($this->blog->attachments));
         @if($this->attachments->count() > 0)
             <div class="mt-24 pt-16 border-t border-slate-100 dark:border-slate-800">
                 <h3 class="text-2xl font-black mb-10 tracking-tight">Gallery & Attachments</h3>
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-6 gap-4">
                     @foreach($this->attachments as $index => $attachment)
                         @php
                             $isImage = str_ends_with($attachment, '.jpg') || str_ends_with($attachment, '.png') || str_ends_with($attachment, '.webp');
