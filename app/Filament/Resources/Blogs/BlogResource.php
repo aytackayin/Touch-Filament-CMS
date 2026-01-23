@@ -72,11 +72,21 @@ class BlogResource extends Resource implements HasShieldPermissions
         $attachments = $record->attachments;
 
         if (is_array($attachments) && count($attachments) > 0) {
-            foreach ($attachments as $attachment) {
+            foreach (array_reverse($attachments) as $attachment) {
                 // Check if it's an image
-                if (preg_match('/\.(jpg|jpeg|png|gif|webp|bmp|svg)$/i', $attachment)) {
+                if ($record->isImage($attachment)) {
                     $filename = basename($attachment);
                     $thumbPath = "blogs/{$record->id}/images/thumbs/{$filename}";
+                    if (Storage::disk('attachments')->exists($thumbPath)) {
+                        $imageUrl = Storage::disk('attachments')->url($thumbPath);
+                        break;
+                    }
+                }
+
+                // Check if it's a video
+                if ($record->isVideo($attachment)) {
+                    $slugName = Str::slug(pathinfo($attachment, PATHINFO_FILENAME));
+                    $thumbPath = "blogs/{$record->id}/videos/thumbs/{$slugName}.jpg";
                     if (Storage::disk('attachments')->exists($thumbPath)) {
                         $imageUrl = Storage::disk('attachments')->url($thumbPath);
                         break;

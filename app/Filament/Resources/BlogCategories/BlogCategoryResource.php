@@ -79,7 +79,7 @@ class BlogCategoryResource extends Resource implements HasShieldPermissions
         $attachments = $record->attachments;
 
         if (is_array($attachments) && count($attachments) > 0) {
-            foreach ($attachments as $attachment) {
+            foreach (array_reverse($attachments) as $attachment) {
                 // Check if it's an image
                 if (preg_match('/\.(jpg|jpeg|png|gif|webp|bmp|svg)$/i', $attachment)) {
                     $filename = basename($attachment);
