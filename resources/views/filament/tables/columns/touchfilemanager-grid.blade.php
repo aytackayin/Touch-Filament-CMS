@@ -164,12 +164,28 @@
         right: 12px !important;
         left: auto !important;
         bottom: auto !important;
-        z-index: 10 !important;
+        z-index: 20 !important;
         width: 20px !important;
         height: 20px !important;
         border-radius: 6px !important;
         margin: 0 !important;
         cursor: pointer !important;
+        border: 1px solid white !important;
+        box-shadow: 0 0 8px rgba(0, 0, 0, 0.2) !important;
+        background-color: white !important;
+        transition: all 0.2s ease !important;
+    }
+
+    /* Karanlık Modda Checkbox Görünürlüğü */
+    .dark body .touch-file-manager-grid .fi-ta-record>input[type="checkbox"] {
+        border-color: #727272ff !important;
+        background-color: #1e1e2d !important;
+        box-shadow: 0 0 12px rgba(0, 0, 0, 0.6) !important;
+    }
+
+    body .touch-file-manager-grid .fi-ta-record>input[type="checkbox"]:checked {
+        background-color: #4f46e5 !important;
+        border-color: #4f46e5 !important;
     }
 
     /* === ACTIONS (HOVER) === */
