@@ -35,10 +35,7 @@ class BlogForm
                                     ->required()
                                     ->maxLength(255)
                                     ->live(onBlur: true)
-                                    ->afterStateUpdated(function (string $operation, $state, $set, $record) {
-                                        if ($operation !== 'create') {
-                                            return;
-                                        }
+                                    ->afterStateUpdated(function ($state, $set, $record) {
                                         $set('slug', Blog::generateUniqueSlug($state, $record?->id));
                                     }),
                                 TextInput::make('slug')

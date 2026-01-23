@@ -189,6 +189,83 @@ class Blog extends Model
         });
     }
 
+    public function getCoverMediaAttribute()
+    {
+        if (empty($this->attachments)) {
+            return null;
+        }
+        return collect($this->attachments)->last();
+    }
+
+    public function getSlideMediaAttribute()
+    {
+        return $this->cover_media;
+    }
+
+    public function getDetailHeaderMediaAttribute()
+    {
+        $cover = $this->cover_media;
+        if (!$cover)
+            return null;
+
+        if ($this->isImage($cover)) {
+            return $cover;
+        }
+
+        // Cover is a video, check for any image in attachments
+        $firstImage = collect($this->attachments)->filter(fn($a) => $this->isImage($a))->first();
+
+        if ($firstImage) {
+            return $firstImage;
+        }
+
+        // No image found at all, return the video (cover)
+        return $cover;
+    }
+
+    public function isVideo($path): bool
+    {
+        if (!$path)
+            return false;
+        return str_ends_with(strtolower($path), '.mp4') || str_ends_with(strtolower($path), '.webm');
+    }
+
+    public function isImage($path): bool
+    {
+        if (!$path)
+            return false;
+        return str_ends_with(strtolower($path), '.jpg') || str_ends_with(strtolower($path), '.jpeg') || str_ends_with(strtolower($path), '.png') || str_ends_with(strtolower($path), '.webp');
+    }
+
+    public function getThumbnailUrl($path = null)
+    {
+        $path = $path ?? $this->cover_media;
+
+        if (!$path) {
+            return 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?auto=format&fit=crop&q=80&w=2070';
+        }
+
+        if ($this->isVideo($path)) {
+            $slugName = Str::slug(pathinfo($path, PATHINFO_FILENAME));
+            $thumbPath = "blogs/{$this->id}/videos/thumbs/{$slugName}.jpg";
+            if (Storage::disk('attachments')->exists($thumbPath)) {
+                return Storage::disk('attachments')->url($thumbPath);
+            }
+            return null;
+        }
+
+        return Storage::disk('attachments')->url($path);
+    }
+
+    public function getMediaUrl($path = null)
+    {
+        $path = $path ?? $this->slide_media;
+        if (!$path) {
+            return 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?auto=format&fit=crop&q=80&w=2070';
+        }
+        return Storage::disk('attachments')->url($path);
+    }
+
     public static function generateUniqueSlug($title, $ignoreId = null)
     {
         $slug = Str::slug($title);

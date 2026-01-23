@@ -25,6 +25,7 @@
     <meta charset="{{ config('lang.charset', 'UTF-8') }}">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
 
     <title>{{ config('app.name', 'Filament CMS') }}</title>
 
@@ -84,7 +85,7 @@
         }
 
         .dark .glass-card {
-            background: rgba(0, 0, 0, 0.2);
+            background: #2a2b3c;
             border: 1px solid rgba(255, 255, 255, 0.05);
         }
 

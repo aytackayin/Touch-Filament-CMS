@@ -48,14 +48,36 @@ $sliderBlogs = computed(fn () =>
                      x-transition:leave-end="opacity-0 scale-90"
                      class="absolute inset-0 z-0">
                     <div class="absolute inset-0 bg-black/40 z-10"></div>
+                    
                     @php
-                        $image = collect($blog->attachments)->filter(fn($a) => str_ends_with($a, '.jpg') || str_ends_with($a, '.png') || str_ends_with($a, '.webp'))->first();
+                        $slideMedia = $blog->slide_media;
+                        $isVideo = $blog->isVideo($slideMedia);
                     @endphp
-                    <img src="{{ $image ? Storage::disk('attachments')->url($image) : 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?auto=format&fit=crop&q=80&w=2070' }}" 
-                         class="w-full h-full object-cover" alt="{{ $blog->title }}">
+
+                    @if($isVideo)
+                        <video x-ref="video{{ $index }}"
+                               src="{{ $blog->getMediaUrl($slideMedia) }}" 
+                               class="w-full h-full object-cover" 
+                               autoplay loop muted playsinline>
+                        </video>
+                        <script>
+                            document.addEventListener('alpine:init', () => {
+                                Alpine.activeVideo = null;
+                            });
+                        </script>
+                    @else
+                        <img src="{{ $blog->getMediaUrl($slideMedia) }}" 
+                             class="w-full h-full object-cover" alt="{{ $blog->title }}">
+                    @endif
                     
                     <div class="absolute inset-0 z-20 flex flex-col items-center justify-center text-center px-4">
-                        <div class="max-w-4xl" x-intersect="active === {{ $index }}">
+                        <div class="max-w-4xl" 
+                             x-intersect="
+                                active === {{ $index }};
+                                if (active === {{ $index }} && $refs.video{{ $index }}) {
+                                    $refs.video{{ $index }}.play();
+                                }
+                             ">
                             <span class="inline-block px-4 py-1.5 mb-6 text-xs font-bold tracking-widest uppercase bg-indigo-600 text-white rounded-full">Featured Story</span>
                             <h1 class="text-5xl md:text-7xl font-black text-white mb-8 tracking-tight leading-tight">
                                 {{ $blog->title }}
@@ -97,7 +119,7 @@ $sliderBlogs = computed(fn () =>
     </section>
 
     <!-- Content Section -->
-    <section class="py-24 bg-slate-50 dark:bg-slate-950">
+    <section class="py-24 bg-slate-50 dark:bg-[#222330]">
         <div class="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-16">
             <div class="flex items-end justify-between mb-16">
                 <div>
@@ -113,31 +135,24 @@ $sliderBlogs = computed(fn () =>
             <!-- Blog Grid -->
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-8">
                 @foreach($this->latestBlogs as $blog)
-                    <a href="{{ route('blog.show', $blog->slug) }}" class="group">
-                        <article class="flex flex-col h-full bg-white dark:bg-slate-900 rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 border border-slate-100 dark:border-slate-800">
-                            <div class="relative h-64 overflow-hidden">
+                    <a href="{{ route('blog.show', $blog->slug) }}" class="group block">
+                        <article class="flex flex-col h-full bg-white dark:bg-[#2a2b3c] rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl dark:hover:shadow-[0_0_40px_-5px_rgba(79,70,229,0.3)] transition-all duration-500 transform hover:-translate-y-2 border border-slate-100 dark:border-[#404258]/30 dark:hover:border-indigo-500/50 transform-gpu isolate [backface-visibility:hidden] [transform-style:preserve-3d] will-change-transform">
+                            <div class="relative h-64 overflow-hidden rounded-t-3xl [mask-image:-webkit-radial-gradient(white,black)]">
                                 @php
-                                    $image = collect($blog->attachments)->filter(fn($a) => str_ends_with($a, '.jpg') || str_ends_with($a, '.png') || str_ends_with($a, '.webp'))->first();
-                                    $video = collect($blog->attachments)->filter(fn($a) => str_ends_with($a, '.mp4') || str_ends_with($a, '.webm'))->first();
-                                    
-                                    // Handle video thumbnail if exists
-                                    $hasVideoThumb = false;
-                                    if ($video) {
-                                        $slugName = Str::slug(pathinfo($video, PATHINFO_FILENAME));
-                                        $thumbPath = "blogs/{$blog->id}/videos/thumbs/{$slugName}.jpg";
-                                        $hasVideoThumb = Storage::disk('attachments')->exists($thumbPath);
-                                    }
+                                    $coverMedia = $blog->cover_media;
+                                    $thumbUrl = $blog->getThumbnailUrl($coverMedia);
+                                    $isVideo = $blog->isVideo($coverMedia);
                                 @endphp
                                 
-                                @if($hasVideoThumb)
-                                    <img src="{{ Storage::disk('attachments')->url($thumbPath) }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt="{{ $blog->title }}">
-                                    <div class="absolute inset-0 bg-black/20 flex items-center justify-center">
-                                        <div class="w-12 h-12 bg-white/30 backdrop-blur-md rounded-full flex items-center justify-center">
-                                            <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"></path></svg>
+                                @if($thumbUrl)
+                                    <img src="{{ $thumbUrl }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt="{{ $blog->title }}">
+                                    @if($isVideo)
+                                        <div class="absolute inset-0 bg-black/20 flex items-center justify-center">
+                                            <div class="w-12 h-12 bg-white/30 backdrop-blur-md rounded-full flex items-center justify-center">
+                                                <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"></path></svg>
+                                            </div>
                                         </div>
-                                    </div>
-                                @elseif($image)
-                                    <img src="{{ Storage::disk('attachments')->url($image) }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt="{{ $blog->title }}">
+                                    @endif
                                 @else
                                     <div class="w-full h-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center">
                                         <svg class="w-12 h-12 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
@@ -146,20 +161,26 @@ $sliderBlogs = computed(fn () =>
                                 
                                 <div class="absolute top-6 left-6">
                                     @foreach($blog->categories->take(1) as $category)
-                                        <span class="px-3 py-1 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md rounded-full text-[10px] font-bold uppercase tracking-widest text-slate-900 dark:text-white">{{ $category->title }}</span>
+                                        <span class="px-3 py-1 bg-white/90 dark:bg-[#2a2b3c]/90 backdrop-blur-md rounded-full text-[10px] font-bold uppercase tracking-widest text-slate-900 dark:text-white">{{ $category->title }}</span>
                                     @endforeach
                                 </div>
                             </div>
                             
                             <div class="p-8 flex-1 flex flex-col">
-                                <div class="flex items-center space-x-4 mb-4 text-xs font-semibold text-slate-400 uppercase tracking-widest">
-                                    <span>{{ $blog->created_at->format('M d, Y') }}</span>
-                                    <span>•</span>
-                                    <span>{{ $blog->user->name }}</span>
-                                </div>
-                                <h3 class="text-2xl font-bold mb-4 group-hover:text-indigo-600 transition-colors line-clamp-2 leading-tight">
+                                <h3 class="text-2xl font-bold mb-3 group-hover:text-indigo-600 transition-colors line-clamp-2 leading-tight">
                                     {{ $blog->title }}
                                 </h3>
+                                <div class="flex items-center gap-3 mb-4 text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">
+                                    <div class="flex items-center gap-1">
+                                        <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                        <span>{{ $blog->created_at->format('M d, Y') }}</span>
+                                    </div>
+                                    <span class="w-1 h-1 rounded-full bg-slate-200 dark:bg-slate-800"></span>
+                                    <div class="flex items-center gap-1">
+                                        <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                                        <span>{{ $blog->user->name }}</span>
+                                    </div>
+                                </div>
                                 <p class="text-slate-500 dark:text-slate-400 text-sm line-clamp-3 leading-relaxed mb-6">
                                     {{ Str::limit(strip_tags($blog->content), 120) }}
                                 </p>

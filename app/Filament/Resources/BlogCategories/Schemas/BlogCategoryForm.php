@@ -32,10 +32,7 @@ class BlogCategoryForm
                                     ->required()
                                     ->maxLength(255)
                                     ->live(onBlur: true)
-                                    ->afterStateUpdated(function (string $operation, $state, $set, $record) {
-                                        if ($operation !== 'create') {
-                                            return;
-                                        }
+                                    ->afterStateUpdated(function ($state, $set, $record) {
                                         $slug = BlogCategory::generateUniqueSlug($state, $record?->id);
                                         $set('slug', $slug);
                                     }),

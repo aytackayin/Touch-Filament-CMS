@@ -67,6 +67,11 @@ class BlogCategory extends Model
         return $this->hasMany(BlogCategory::class, 'parent_id');
     }
 
+    public function allChildren(): HasMany
+    {
+        return $this->children()->with('allChildren');
+    }
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
@@ -113,6 +118,17 @@ class BlogCategory extends Model
             // Return false to prevent the default delete since service handles it
             return false;
         });
+    }
+
+    public function getTotalBlogsCountAttribute(): int
+    {
+        $count = $this->blogs()->count();
+
+        foreach ($this->allChildren as $child) {
+            $count += $child->total_blogs_count;
+        }
+
+        return $count;
     }
 
     /**
