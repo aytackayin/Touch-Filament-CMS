@@ -2,7 +2,7 @@
 
 Antigravity CMS is a professional, modern, and highly-scalable Content Management System built on the latest **Laravel 12** framework and **Filament 4** admin panel. It provides a robust architecture for managing blogs, media, and system settings with a focus on user experience and performance.
 
-> **v1.0.1 Update:** Test amaçlı frontend eklendi. (Public Frontend added for testing purposes).
+> **v1.0.1 Update:** Public Frontend added for testing purposes.
 
 ## 🚀 Teck Stack
 
