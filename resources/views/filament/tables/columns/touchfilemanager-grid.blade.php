@@ -44,6 +44,19 @@
     <img src="{{ $imageUrl }}" alt="{{ $name }}" class="touch-file-bg {{ $isUp ? 'is-icon' : '' }}"
         onerror="this.src='{{ $fallbackUrl }}'; this.classList.add('is-icon')">
 
+    @if(!$isUp && (str_contains($record->type ?? '', 'video') || str_contains($record->mime_type ?? '', 'video')))
+        <div
+            style="position: absolute !important; inset: 0 !important; display: flex !important; align-items: center !important; justify-content: center !important; z-index: 1 !important; pointer-events: none !important;">
+            <div
+                style="width: 48px !important; height: 48px !important; background: rgba(255, 255, 255, 0.3) !important; backdrop-filter: blur(8px) !important; -webkit-backdrop-filter: blur(8px) !important; border-radius: 9999px !important; display: flex !important; align-items: center !important; justify-content: center !important; border: 1px solid rgba(255, 255, 255, 0.2) !important; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1) !important;">
+                <svg width="24" height="24" fill="white" viewBox="0 0 24 24"
+                    style="margin-left: 2px !important; display: block !important;">
+                    <path d="M8 5v14l11-7z"></path>
+                </svg>
+            </div>
+        </div>
+    @endif
+
     <div class="touch-file-{{ $isFolder ? 'folder' : 'overlay bg-white dark:bg-black' }}">
         <div class="touch-file-name" title="{{ $name }}">
             {{ $name }}

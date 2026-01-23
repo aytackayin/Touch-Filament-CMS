@@ -14,15 +14,18 @@
     @endphp
 
     {{-- Media Section --}}
+    {{-- Media Section --}}
     @if($record->type === 'image')
-        <div class="w-full flex justify-start" style="margin-bottom: 16px;">
+        <div class="w-full"
+            style="margin-bottom: 20px; display: flex !important; justify-content: center !important; align-items: center !important;">
             <img src="{{ $url }}" alt="{{ $record->name }}"
-                class="block max-w-full h-auto rounded-xl shadow-md border border-gray-200 dark:border-gray-700">
+                style="display: block !important; margin: 0 auto !important; max-width: 100%; height: auto; border-radius: 12px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);">
         </div>
     @elseif($record->type === 'video')
-        <div class="w-full" style="margin-bottom: 16px;">
-            <video controls class="block max-w-full h-auto rounded-xl shadow-md border border-gray-200 dark:border-gray-700"
-                style="max-height: 70vh;">
+        <div class="w-full"
+            style="margin-bottom: 20px; display: flex !important; justify-content: center !important; align-items: center !important;">
+            <video controls
+                style="display: block !important; margin: 0 auto !important; max-width: 100%; max-height: 70vh; border-radius: 12px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);">
                 <source src="{{ $url }}" type="{{ $record->mime_type }}">
                 {{ __('file_manager.label.video_support_error') }}
             </video>
