@@ -22,7 +22,6 @@ use Filament\Actions\ExportBulkAction;
 use Filament\Support\Icons\Heroicon;
 use App\Filament\Resources\Blogs\BlogResource;
 use CodeWithDennis\FilamentSelectTree\SelectTree;
-use App\Models\BlogCategory;
 use Filament\Tables\Filters\Filter;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -67,7 +66,9 @@ class BlogsTable
                 TextColumn::make('categories.title')
                     ->label(__('blog.label.categories'))
                     ->badge()
+                    ->icon('heroicon-s-folder')
                     ->searchable()
+                    ->sortable()
                     ->wrap()
                     ->toggleable(),
                 TextColumn::make('language.name')
@@ -84,6 +85,7 @@ class BlogsTable
                 TextColumn::make('tags')
                     ->label(__('blog.label.tags'))
                     ->badge()
+                    ->icon('heroicon-s-tag')
                     ->separator(',')
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -91,6 +93,7 @@ class BlogsTable
                     ->label(__('blog.label.is_published'))
                     ->size(IconSize::Medium)
                     ->alignCenter(true)
+                    ->sortable()
                     ->boolean()
                     ->action(function ($record) {
                         if (auth()->user()->can('update', $record)) {
@@ -105,7 +108,7 @@ class BlogsTable
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->reorderable('sort')
-            ->defaultSort('sort', 'asc')
+            ->defaultSort(column: 'created_at', direction: 'desc')
             ->filters([
                 SelectFilter::make('user_id')
                     ->label(__('blog.label.author'))
