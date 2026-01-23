@@ -83,6 +83,14 @@ class AppServiceProvider extends ServiceProvider
                 config(['mail.from.address' => $settings->contact_email]);
             }
 
+            // Livewire Force HTTPS / URL Fix
+            if (str_starts_with(config('app.url'), 'https')) {
+                \Illuminate\Support\Facades\URL::forceScheme('https');
+            }
+
+            config(['livewire.asset_base_url' => config('app.url')]);
+            config(['livewire.app_url' => config('app.url')]);
+
         } catch (\Throwable $e) {
             // Settings might not be migrated yet
         }
