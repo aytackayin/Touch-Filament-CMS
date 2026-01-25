@@ -163,8 +163,7 @@ trait HasFileManagerSync
 
         // FORCE DATABASE UPDATE IF PATHS CHANGED (e.g. temp -> permanent)
         if ($changed) {
-            // Bypass Eloquent and update directly to resolve sticky temp paths
-            $this->attachments = $finalPaths; // Update local model instance too
+            $this->attachments = $finalPaths;
 
             \Illuminate\Support\Facades\DB::table($this->getTable())
                 ->where($this->getKeyName(), $this->getKey())
