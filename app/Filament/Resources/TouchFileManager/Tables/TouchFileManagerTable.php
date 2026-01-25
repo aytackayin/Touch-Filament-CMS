@@ -118,20 +118,23 @@ class TouchFileManagerTable
                         'image' => 'success', 'video' => 'info', 'document' => 'primary', 'archive' => 'warning', 'spreadsheet' => 'success', 'presentation' => 'danger', default => 'gray',
                     })
                     ->formatStateUsing(fn(string $state, $record) => $record?->id === 0 ? '' : __('file_manager.label.types.' . $state))
-                    ->toggleable(isToggledHiddenByDefault: fn($livewire) => !in_array('type', $livewire->visibleColumns ?? []))
+                    ->hidden(fn($livewire) => !in_array('type', $livewire->visibleColumns ?? []) || $livewire->view_type === 'grid') // Also hide type in grid if needed, or just handle visibility. Wait, grid view uses Stack and ViewColumn. These columns are for List view.
+                    // The 'columns' array definition has logic for $isGrid. If isGrid, it uses Stack. If not, it uses these columns. 
+                    // So we only need to check visibleColumns.
+                    ->hidden(fn($livewire) => !in_array('type', $livewire->visibleColumns ?? []))
                     ->extraAttributes(fn($record) => $record?->id === 0 ? ['style' => 'display: none !important;'] : []),
 
                 TextColumn::make('size')->label(__('file_manager.label.size'))
                     ->formatStateUsing(fn($state, $record) => $record?->id === 0 ? '' : $record->human_size)
-                    ->toggleable(isToggledHiddenByDefault: fn($livewire) => !in_array('size', $livewire->visibleColumns ?? [])),
+                    ->hidden(fn($livewire) => !in_array('size', $livewire->visibleColumns ?? [])),
 
-                TextColumn::make('tags')->label(__('file_manager.label.tags'))->badge()->separator(',')->searchable()->wrap()->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('tags')->label(__('file_manager.label.tags'))->badge()->separator(',')->searchable()->wrap()->hidden(fn($livewire) => !in_array('tags', $livewire->visibleColumns ?? [])),
                 TextColumn::make('user.name')->label(__('file_manager.label.author'))->sortable()
-                    ->toggleable(isToggledHiddenByDefault: fn($livewire) => !in_array('user', $livewire->visibleColumns ?? []))
+                    ->hidden(fn($livewire) => !in_array('user', $livewire->visibleColumns ?? []))
                     ->formatStateUsing(fn($state, $record) => $record?->id === 0 ? '' : $state),
-                TextColumn::make('editor.name')->label(__('file_manager.label.last_editor'))->sortable()->toggleable(isToggledHiddenByDefault: true)->formatStateUsing(fn($state, $record) => $record?->id === 0 ? '' : $state),
+                TextColumn::make('editor.name')->label(__('file_manager.label.last_editor'))->sortable()->hidden(fn($livewire) => !in_array('editor', $livewire->visibleColumns ?? []))->formatStateUsing(fn($state, $record) => $record?->id === 0 ? '' : $state),
                 TextColumn::make('created_at')->label(__('file_manager.label.date'))->date()->sortable()
-                    ->toggleable(isToggledHiddenByDefault: fn($livewire) => !in_array('updated_at', $livewire->visibleColumns ?? []))
+                    ->hidden(fn($livewire) => !in_array('created_at', $livewire->visibleColumns ?? []))
                     ->placeholder(''),
             ])
             ->filters([

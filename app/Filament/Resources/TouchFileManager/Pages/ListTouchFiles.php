@@ -12,6 +12,7 @@ use Filament\Schemas\Components\Section;
 use Filament\Notifications\Notification;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Hidden;
+use App\Traits\HasTableSettings;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 use CodeWithDennis\FilamentSelectTree\SelectTree;
@@ -20,6 +21,8 @@ use Filament\Forms\Components\CheckboxList;
 
 class ListTouchFiles extends ListRecords
 {
+    use HasTableSettings;
+
     protected static string $resource = TouchFileManagerResource::class;
 
     public function getTableExtraAttributes(): array
@@ -43,23 +46,58 @@ class ListTouchFiles extends ListRecords
     public function mount(): void
     {
         parent::mount();
+        $this->mountHasTableSettings();
+    }
 
-        // Priority: 1. Cookie (browser-specific), 2. User Preference (user-specific), 3. Default
-        if (request()->query('view_type') === null) {
-            $cookieView = request()->cookie('touchfile_view_type');
-            if ($cookieView && in_array($cookieView, ['grid', 'list'])) {
-                $this->view_type = $cookieView;
-            } else {
-                $userPrefs = \App\Models\UserPreference::getTableSettings('touchfile_list');
-                if ($userPrefs && isset($userPrefs['view_type'])) {
-                    $this->view_type = $userPrefs['view_type'];
-                }
-            }
+    protected function getTableSettingsKey(): string
+    {
+        return 'touchfile_list';
+    }
+
+    protected function getDefaultVisibleColumns(): array
+    {
+        return ['type', 'size', 'created_at', 'user']; // 4 default columns
+    }
+
+    protected function getTableColumnOptions(): array
+    {
+        return [
+            'type' => __('file_manager.label.type'),
+            'size' => __('file_manager.label.size'),
+            'tags' => __('file_manager.label.tags'),
+            'user' => __('file_manager.label.author'),
+            'editor' => __('file_manager.label.last_editor'),
+            'created_at' => __('file_manager.label.date'),
+        ];
+    }
+
+    protected function applySettings(array $settings): void
+    {
+        $this->visibleColumns = $settings['visible_columns'] ?? [];
+        if (isset($settings['view_type']) && in_array($settings['view_type'], ['grid', 'list'])) {
+            $this->view_type = $settings['view_type'];
         }
+    }
 
-        // Load visible columns from user preferences
-        $userPrefs = \App\Models\UserPreference::getTableSettings('touchfile_list');
-        $this->visibleColumns = $userPrefs['visible_columns'] ?? ['type', 'size', 'user'];
+    protected function getTableSettingsFormSchema(): array
+    {
+        return [
+            Radio::make('view_type')
+                ->label(__('file_manager.label.default_view')) // Or some translation
+                ->options([
+                    'list' => __('file_manager.label.list_view'),
+                    'grid' => __('file_manager.label.grid_view'),
+                ])
+                ->default($this->view_type)
+                ->inline()
+                ->required(),
+            CheckboxList::make('visible_columns')
+                ->label(__('table_settings.columns'))
+                ->options($this->getTableColumnOptions())
+                ->default($this->visibleColumns)
+                ->required()
+                ->columns(2),
+        ];
     }
 
     public function getBreadcrumbs(): array
@@ -382,50 +420,7 @@ class ListTouchFiles extends ListRecords
                     'iframe' => $this->iframe,
                 ])),
 
-            Action::make('tableSettings')
-                ->label(__('file_manager.label.settings'))
-                ->tooltip(__('file_manager.label.settings'))
-                ->hiddenLabel()
-                ->icon('heroicon-o-cog-6-tooth')
-                ->color('gray')
-                ->size('xs')
-                ->form([
-                    Section::make(__('file_manager.label.settings'))
-                        ->schema([
-                            Radio::make('view_type')
-                                ->label(__('blog.label.default_view'))
-                                ->options([
-                                    'list' => __('file_manager.label.list_view'),
-                                    'grid' => __('file_manager.label.grid_view'),
-                                ])
-                                ->default(fn() => \App\Models\UserPreference::getTableSettings('touchfile_list')['view_type'] ?? 'grid')
-                                ->inline()
-                                ->required(),
-                            CheckboxList::make('visible_columns')
-                                ->label(__('blog.label.visible_columns'))
-                                ->options([
-                                    'type' => __('file_manager.label.type'),
-                                    'size' => __('file_manager.label.size'),
-                                    'user' => __('file_manager.label.uploaded_by'),
-                                    'updated_at' => __('file_manager.label.updated_at'),
-                                ])
-                                ->default(fn() => \App\Models\UserPreference::getTableSettings('touchfile_list')['visible_columns'] ?? ['type', 'size', 'user'])
-                                ->columns(2),
-                        ]),
-                ])
-                ->action(function (array $data) {
-                    \App\Models\UserPreference::setTableSettings('touchfile_list', $data);
-
-                    \Filament\Notifications\Notification::make()
-                        ->title(__('blog.label.settings_saved'))
-                        ->success()
-                        ->send();
-
-                    return redirect(static::getResource()::getUrl('index', [
-                        'parent_id' => $this->parent_id,
-                        'iframe' => $this->iframe,
-                    ]));
-                }),
+            $this->getTableSettingsAction(),
 
             Action::make('toggleView')
                 ->label($this->view_type === 'grid' ? __('file_manager.label.list_view') : __('file_manager.label.grid_view'))
@@ -436,10 +431,11 @@ class ListTouchFiles extends ListRecords
                 ->size('xs')
                 ->action(function () {
                     $newView = $this->view_type === 'grid' ? 'list' : 'grid';
-
-                    // Store preferred view in cookie for 1 year
-                    cookie()->queue(cookie()->forever('touchfile_view_type', $newView));
-
+                    // Save via trait method to ensure consistency
+                    $this->saveTableSettings(array_merge(
+                        ['visible_columns' => $this->visibleColumns],
+                        ['view_type' => $newView]
+                    ));
                     return redirect(static::getResource()::getUrl('index', [
                         'parent_id' => $this->parent_id,
                         'view_type' => $newView,

@@ -78,33 +78,35 @@ class BlogsTable
                     ->searchable()
                     ->sortable()
                     ->wrap()
-                    ->toggleable(isToggledHiddenByDefault: fn($livewire) => !in_array('categories', $livewire->visibleColumns ?? [])),
+                    ->toggleable(isToggledHiddenByDefault: true) // Kept toggleable metadata if needed for export, but visibility controlled below? No, toggleable enables UI.
+                    // We want to hide it if not in visibleColumns.
+                    ->hidden(fn($livewire) => !in_array('categories', $livewire->visibleColumns ?? [])),
                 TextColumn::make('language.name')
                     ->label(__('blog.label.language'))
                     ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: fn($livewire) => !in_array('language', $livewire->visibleColumns ?? [])),
+                    ->hidden(fn($livewire) => !in_array('language', $livewire->visibleColumns ?? [])),
                 TextColumn::make('user.name')
                     ->label(__('blog.label.author'))
                     ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: fn($livewire) => !in_array('user', $livewire->visibleColumns ?? [])),
+                    ->hidden(fn($livewire) => !in_array('user', $livewire->visibleColumns ?? [])),
                 TextColumn::make('editor.name')
                     ->label(__('blog.label.last_edited_by'))
                     ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: fn($livewire) => !in_array('editor', $livewire->visibleColumns ?? [])),
+                    ->hidden(fn($livewire) => !in_array('editor', $livewire->visibleColumns ?? [])),
                 TextColumn::make('tags')
                     ->label(__('blog.label.tags'))
                     ->badge()
                     ->icon('heroicon-s-tag')
                     ->separator(',')
                     ->searchable()
-                    ->toggleable(isToggledHiddenByDefault: fn($livewire) => !in_array('tags', $livewire->visibleColumns ?? [])),
+                    ->hidden(fn($livewire) => !in_array('tags', $livewire->visibleColumns ?? [])),
                 IconColumn::make('is_published')
                     ->label(__('blog.label.is_published'))
                     ->size(IconSize::Medium)
                     ->alignCenter(true)
                     ->sortable()
                     ->boolean()
-                    ->toggleable(isToggledHiddenByDefault: fn($livewire) => !in_array('is_published', $livewire->visibleColumns ?? []))
+                    ->hidden(fn($livewire) => !in_array('is_published', $livewire->visibleColumns ?? []))
                     ->action(function ($record) {
                         if (auth()->user()->can('update', $record)) {
                             $record->is_published = !$record->is_published;
@@ -115,7 +117,7 @@ class BlogsTable
                     ->label(__('blog.label.created_at'))
                     ->dateTime()
                     ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: fn($livewire) => !in_array('created_at', $livewire->visibleColumns ?? [])),
+                    ->hidden(fn($livewire) => !in_array('created_at', $livewire->visibleColumns ?? [])),
             ])
             ->reorderable('sort')
             ->defaultSort(column: 'created_at', direction: 'desc')

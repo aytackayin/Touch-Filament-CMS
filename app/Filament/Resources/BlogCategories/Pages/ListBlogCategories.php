@@ -16,9 +16,11 @@ use App\Filament\Imports\BlogCategoryImporter;
 use Filament\Support\Icons\Heroicon;
 use Filament\Schemas\Components\Section;
 use Filament\Forms\Components\CheckboxList;
+use App\Traits\HasTableSettings;
 
 class ListBlogCategories extends ListRecords
 {
+    use HasTableSettings;
     protected static string $resource = BlogCategoryResource::class;
 
     public ?int $parent_id = null;
@@ -29,10 +31,29 @@ class ListBlogCategories extends ListRecords
         parent::mount();
 
         $this->parent_id = request()->query('parent_id') ? (int) request()->query('parent_id') : null;
+        $this->mountHasTableSettings();
+    }
 
-        // Load visible columns from user preferences
-        $userPrefs = \App\Models\UserPreference::getTableSettings('blog_category_list');
-        $this->visibleColumns = $userPrefs['visible_columns'] ?? ['tags', 'user', 'is_published'];
+    protected function getTableSettingsKey(): string
+    {
+        return 'blog_category_list';
+    }
+
+    protected function getDefaultVisibleColumns(): array
+    {
+        return ['tags', 'user', 'is_published', 'created_at'];
+    }
+
+    protected function getTableColumnOptions(): array
+    {
+        return [
+            'tags' => __('blog.label.tags'),
+            'user' => __('blog.label.author'),
+            'editor' => __('blog.label.last_edited_by'),
+            'parent' => __('blog.label.parent_category'),
+            'is_published' => __('blog.label.is_published'),
+            'created_at' => __('blog.label.created_at'),
+        ];
     }
 
     protected function getTableQuery(): ?Builder
@@ -113,40 +134,7 @@ class ListBlogCategories extends ListRecords
             ->importer(BlogCategoryImporter::class)
             ->visible(fn() => auth()->user()->can('import', BlogCategoryResource::getModel()));
 
-        $actions[] = Action::make('tableSettings')
-            ->label(__('blog.label.table_settings'))
-            ->tooltip(__('blog.label.table_settings'))
-            ->hiddenLabel()
-            ->icon('heroicon-o-cog-6-tooth')
-            ->color('gray')
-            ->size('xs')
-            ->form([
-                Section::make(__('blog.label.table_settings'))
-                    ->schema([
-                        CheckboxList::make('visible_columns')
-                            ->label(__('blog.label.visible_columns'))
-                            ->options([
-                                'tags' => __('blog.label.tags'),
-                                'user' => __('blog.label.author'),
-                                'editor' => __('blog.label.last_edited_by'),
-                                'parent' => __('blog.label.parent_category'),
-                                'is_published' => __('blog.label.is_published'),
-                                'created_at' => __('blog.label.created_at'),
-                            ])
-                            ->default(fn() => \App\Models\UserPreference::getTableSettings('blog_category_list')['visible_columns'] ?? ['tags', 'user', 'is_published'])
-                            ->columns(2),
-                    ]),
-            ])
-            ->action(function (array $data) {
-                \App\Models\UserPreference::setTableSettings('blog_category_list', $data);
-
-                \Filament\Notifications\Notification::make()
-                    ->title(__('blog.label.settings_saved'))
-                    ->success()
-                    ->send();
-
-                return redirect(static::getResource()::getUrl('index', $this->parent_id ? ['parent_id' => $this->parent_id] : []));
-            });
+        $actions[] = $this->getTableSettingsAction();
 
         $actions[] =
             CreateAction::make()
