@@ -70,7 +70,22 @@ class BlogForm
                                     ->panelLayout('grid')
                                     ->disk('attachments')
                                     ->directory(Blog::getStorageFolder() . '/temp')
-                                    ->acceptedFileTypes(['image/*', 'video/*'])
+                                    ->acceptedFileTypes([
+                                        'image/*',
+                                        'video/*',
+                                        'application/pdf',
+                                        'application/msword',
+                                        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                                        'application/vnd.ms-excel',
+                                        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                                        'application/vnd.ms-powerpoint',
+                                        'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+                                        'application/zip',
+                                        'application/x-zip-compressed',
+                                        'application/x-rar-compressed',
+                                        'application/x-7z-compressed',
+                                        'text/plain'
+                                    ])
                                     ->imageEditor()
                                     ->enableReordering()
                                     ->preserveFilenames()

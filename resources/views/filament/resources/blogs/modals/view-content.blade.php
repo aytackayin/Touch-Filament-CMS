@@ -317,6 +317,29 @@
                         $isVideo = $record->isVideo($attachment);
                         $thumb = $record->getThumbnailUrl($attachment);
                         $fileName = basename($attachment);
+                        $extension = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
+
+                        $iconMap = [
+                            'pdf' => 'pdf.svg',
+                            'doc' => 'doc.svg',
+                            'docx' => 'docx.svg',
+                            'xls' => 'xls.svg',
+                            'xlsx' => 'xlsx.svg',
+                            'ppt' => 'ppt.svg',
+                            'pptx' => 'pptx.svg',
+                            'zip' => 'zip.svg',
+                            'rar' => 'rar.svg',
+                            '7z' => '7z.svg',
+                            'txt' => 'txt.svg',
+                            'mp3' => 'mp3.svg',
+                            'json' => 'json.svg',
+                            'js' => 'code.svg',
+                            'php' => 'code.svg',
+                            'css' => 'code.svg',
+                            'html' => 'code.svg',
+                        ];
+
+                        $fileIcon = $iconMap[$extension] ?? 'file.svg';
                     @endphp
                     <a href="{{ $record->getMediaUrl($attachment) }}" target="_blank" class="attachment-card">
                         <div class="attachment-thumb-wrap">
@@ -324,7 +347,7 @@
                                 <img src="{{ $thumb }}"
                                     style="width: 100% !important; height: 100% !important; object-fit: cover !important;">
                             @else
-                                <img src="{{ asset('assets/icons/colorful-icons/file.svg') }}"
+                                <img src="{{ asset('assets/icons/colorful-icons/' . $fileIcon) }}"
                                     style="width: 32px !important; height: 32px !important;">
                             @endif
                         </div>
