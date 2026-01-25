@@ -264,9 +264,8 @@ class TouchFile extends Model
 
             $disk = Storage::disk('attachments');
 
-            // 📂 CASE 1: FOLDER RENAME / MOVE
+            // Handle folder rename or relocation
             if ($model->is_folder && ($model->isDirty('name') || $model->isDirty('parent_id'))) {
-                // 1. Calculate Old Path
                 $oldParentId = $model->getOriginal('parent_id');
                 $oldName = $model->getOriginal('name');
 
@@ -278,7 +277,6 @@ class TouchFile extends Model
                     }
                 }
 
-                // 2. Calculate New Path
                 $newParentId = $model->parent_id;
                 $newName = $model->name;
 
@@ -290,28 +288,23 @@ class TouchFile extends Model
                     }
                 }
 
-                // 3. Move Directory on Disk
                 if ($oldPath !== $newPath && $disk->exists($oldPath)) {
                     $disk->move($oldPath, $newPath);
                 }
 
-                // 4. Update Database Paths for ALL Children (Recursive)
-                // Since path column is stored as string, we need to update all records starting with oldPath
-                // We add a slash to ensure we match directory boundaries (e.g. avoid matching "Folder 2" when renaming "Folder")
+                // Update database paths for all child records recursively
                 $allChildren = static::where('path', 'like', $oldPath . '/%')->get();
 
                 foreach ($allChildren as $child) {
-                    // Replace the start of the path with the new path
                     $child->path = preg_replace('/^' . preg_quote($oldPath, '/') . '/', $newPath, $child->path, 1);
                     $child->saveQuietly();
                 }
             }
 
-            // 📄 CASE 2: FILE RENAME / MOVE
+            // Handle file rename or relocation
             elseif (!$model->is_folder && ($model->isDirty('name') || $model->isDirty('parent_id'))) {
                 $oldPath = $model->getOriginal('path');
 
-                // Calculate New Path Manually
                 $parentPath = '';
                 if ($model->parent_id) {
                     $parent = static::find($model->parent_id);
@@ -321,11 +314,10 @@ class TouchFile extends Model
                 }
                 $newPath = $parentPath . $model->name;
 
-                // Move File on Disk
                 if ($oldPath && $oldPath !== $newPath && $disk->exists($oldPath)) {
                     $disk->move($oldPath, $newPath);
 
-                    // Also Move Thumbnail if exists
+                    // Sync thumbnails
                     $thumbsDir = dirname($oldPath) . '/thumbs';
                     if ($thumbsDir === './thumbs')
                         $thumbsDir = 'thumbs';
@@ -334,19 +326,17 @@ class TouchFile extends Model
                     if ($newThumbsDir === './thumbs')
                         $newThumbsDir = 'thumbs';
 
-                    // Check for image thumbnail
                     $oldThumbPath = $thumbsDir . '/' . basename($oldPath);
                     $newThumbPath = $newThumbsDir . '/' . $model->name;
 
                     if ($disk->exists($oldThumbPath)) {
-                        // Ensure new thumb dir exists
                         if (!$disk->exists($newThumbsDir)) {
                             $disk->makeDirectory($newThumbsDir);
                         }
                         $disk->move($oldThumbPath, $newThumbPath);
                     }
 
-                    // Check for video thumbnail
+                    // Sync video thumbnails
                     $oldNameNoExt = pathinfo(basename($oldPath), PATHINFO_FILENAME);
                     $newNameNoExt = pathinfo($model->name, PATHINFO_FILENAME);
 
@@ -361,36 +351,31 @@ class TouchFile extends Model
                     }
                 }
 
-                // Update Path in Model
                 $model->path = $newPath;
             }
         });
 
         static::deleting(function ($file) {
             if ($file->is_folder) {
-                // Delete all children recursively
+                // Cascading delete for child records
                 foreach ($file->children as $child) {
                     $child->delete();
                 }
 
-                // Also delete the directory itself from storage
+                // Delete physical directory
                 $disk = Storage::disk('attachments');
-                // Calculate folder path
-                // We can't rely on 'path' column as it might be null for folders ideally, 
-                // but we can calculate it from full_path
                 $folderPath = $file->full_path;
 
                 if ($disk->exists($folderPath)) {
                     $disk->deleteDirectory($folderPath);
                 }
             } else {
-                // Delete the actual file from storage
-                if (Storage::disk('attachments')->exists($file->path)) {
-                    Storage::disk('attachments')->delete($file->path);
+                // Delete physical file and its thumbnails
+                $disk = Storage::disk('attachments');
+                if ($disk->exists($file->path)) {
+                    $disk->delete($file->path);
                 }
 
-                // Also delete thumbnails
-                $disk = Storage::disk('attachments');
                 $thumbsDir = dirname($file->path) . '/thumbs';
                 if ($thumbsDir === './thumbs')
                     $thumbsDir = 'thumbs';
@@ -400,7 +385,6 @@ class TouchFile extends Model
                     $disk->delete($thumbPath);
                 }
 
-                // Video thumb
                 $nameNoExt = pathinfo(basename($file->path), PATHINFO_FILENAME);
                 $videoThumb = $thumbsDir . '/' . $nameNoExt . '.jpg';
                 if ($disk->exists($videoThumb)) {

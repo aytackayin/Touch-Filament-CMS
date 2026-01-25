@@ -43,7 +43,6 @@ class Blog extends Model
         ];
     }
 
-    // Temporary storage for old attachments (not a database column)
     // Temporary storage for old attachments
     public $oldAttachmentsForSync = null;
 

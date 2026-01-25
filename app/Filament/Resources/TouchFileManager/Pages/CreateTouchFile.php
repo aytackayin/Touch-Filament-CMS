@@ -91,49 +91,38 @@ class CreateTouchFile extends CreateRecord
         $uploadedFiles = [];
         $disk = Storage::disk('attachments');
 
-        // Initialize Intervention Image Manager
         $manager = null;
         if (class_exists(ImageManager::class)) {
             $manager = new ImageManager(new Driver());
         }
 
         foreach ($files as $file) {
-            // Get file information
             $fileName = basename($file);
-            $filePath = $file; // This is the temp path
+            $filePath = $file;
 
-            // Move from temp to permanent location
             $permanentPath = ($parentId ? $this->getParentPath($parentId) . '/' : '') . $fileName;
 
-            // Ensure directory exists
+            // Ensure destination directory exists
             $permPathNormalized = str_replace('\\', '/', $permanentPath);
             $dir = pathinfo($permPathNormalized, PATHINFO_DIRNAME);
 
-            // Only create directory if it's not root and doesn't exist
             if ($dir !== '.' && !$disk->exists($dir)) {
                 $disk->makeDirectory($dir);
             }
 
-            // Move the file
             $disk->move($filePath, $permanentPath);
 
-            // Get file info
             $mimeType = $disk->mimeType($permanentPath);
             $size = $disk->size($permanentPath);
             $type = TouchFile::determineFileType($mimeType);
 
-            // Handle Thumbnails
+            // Handle image thumbnails
             if ($type === 'image' && $manager) {
                 try {
-                    // Create thumbs directory if root, or ensure it exists if nested
                     $permPathNormalized = str_replace('\\', '/', $permanentPath);
                     $dir = pathinfo($permPathNormalized, PATHINFO_DIRNAME);
 
-                    if ($dir === '.') {
-                        $thumbsDir = 'thumbs';
-                    } else {
-                        $thumbsDir = $dir . '/thumbs';
-                    }
+                    $thumbsDir = $dir === '.' ? 'thumbs' : $dir . '/thumbs';
 
                     if (!$disk->exists($thumbsDir)) {
                         $disk->makeDirectory($thumbsDir);
@@ -143,44 +132,29 @@ class CreateTouchFile extends CreateRecord
                     $fullPath = $disk->path($permanentPath);
                     $thumbFullPath = $disk->path($thumbPath);
 
-                    // Generate thumbnail
                     $image = $manager->read($fullPath);
                     $image->scale(width: 150);
                     $image->save($thumbFullPath);
 
                 } catch (Exception $e) {
-                    Log::error('Image thumbnail generation failed: ' . $e->getMessage());
+                    Log::error('Thumbnail generation failed: ' . $e->getMessage());
                 }
             } elseif ($type === 'video') {
-                // Find matching video thumbnail
-                $originalName = $fileName; // Since preserveFilenames() is true, this should match up mostly
-
-                // We need to look up in the videoThumbnailsData for matching filename
-                // video-thumbnail-handler JS uses file.name which is client side name.
-                // Filament sanitizer slugifies the name. 
-                // We will try to match loosely or use the logic from Blog model
-
+                // Match video thumbnail from stored data
                 foreach ($videoThumbnailsData as $thumbData) {
                     $thumbFilename = $thumbData['filename'] ?? '';
-                    // Check if our current file matches this thumbnail's source file
-                    // We slugify the thumbFilename extensionless part to match Filament's naming
                     $nameNoExt = pathinfo($thumbFilename, PATHINFO_FILENAME);
                     $ext = pathinfo($thumbFilename, PATHINFO_EXTENSION);
                     $slugged = Str::slug($nameNoExt) . '.' . $ext;
 
                     if ($slugged === $fileName) {
-                        // Found match
                         $base64Data = $thumbData['thumbnail'] ?? null;
                         if ($base64Data) {
                             try {
                                 $permPathNormalized = str_replace('\\', '/', $permanentPath);
                                 $dir = pathinfo($permPathNormalized, PATHINFO_DIRNAME);
 
-                                if ($dir === '.') {
-                                    $thumbsDir = 'thumbs';
-                                } else {
-                                    $thumbsDir = $dir . '/thumbs';
-                                }
+                                $thumbsDir = $dir === '.' ? 'thumbs' : $dir . '/thumbs';
 
                                 if (!$disk->exists($thumbsDir)) {
                                     $disk->makeDirectory($thumbsDir);
@@ -189,7 +163,6 @@ class CreateTouchFile extends CreateRecord
                                 $thumbName = pathinfo($fileName, PATHINFO_FILENAME) . '.jpg';
                                 $thumbPath = $thumbsDir . '/' . $thumbName;
 
-                                // Clean base64
                                 $imageData = $base64Data;
                                 if (str_contains($imageData, 'data:image')) {
                                     $imageData = preg_replace('/^data:image\/\w+;base64,/', '', $imageData);
@@ -209,7 +182,7 @@ class CreateTouchFile extends CreateRecord
                 }
             }
 
-            // Create database record
+            // Create model record
             $uploadedFiles[] = TouchFile::create([
                 'user_id' => auth()->id(),
                 'name' => $fileName,

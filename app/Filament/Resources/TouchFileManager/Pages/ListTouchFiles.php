@@ -127,7 +127,7 @@ class ListTouchFiles extends ListRecords
                     $addedCount = 0;
                     $removedCount = 0;
 
-                    // 1. Process Directories (Add Missing & Validate Models)
+                    // 1. Sync Directories & Validate Model Storage
                     usort($allDirectories, function ($a, $b) {
                         return strlen($a) - strlen($b);
                     });
@@ -136,7 +136,7 @@ class ListTouchFiles extends ListRecords
                         if ($isExcluded($dirPath))
                             continue;
 
-                        // STICKY SYNC: Validate folder if it's inside a model directory
+                        // Validate if directory is allowed according to model associations
                         if (!$this->isAuthorizedPath($dirPath)) {
                             $disk->deleteDirectory($dirPath);
                             $removedCount++;
@@ -171,12 +171,12 @@ class ListTouchFiles extends ListRecords
                         }
                     }
 
-                    // 2. Process Files (Add Missing & Validate Models)
+                    // 2. Sync Files & Validate Model Storage
                     foreach ($allFiles as $filePath) {
                         if ($isExcluded($filePath))
                             continue;
 
-                        // STICKY SYNC: Validate file if it's inside a model directory
+                        // Validate if file is allowed according to model associations
                         if (!$this->isAuthorizedPath($filePath)) {
                             $disk->delete($filePath);
                             $removedCount++;
@@ -218,7 +218,7 @@ class ListTouchFiles extends ListRecords
                         }
                     }
 
-                    // 3. Cleanup Orphaned Records
+                    // 3. Cleanup orphaned records
                     $query = TouchFile::query();
                     if ($basePath) {
                         $query->where(function ($q) use ($basePath) {
@@ -227,25 +227,20 @@ class ListTouchFiles extends ListRecords
                         });
                     }
 
-                    // Check Files First
-                    $files = (clone $query)->where('is_folder', false)->get();
-                    foreach ($files as $file) {
+                    foreach ((clone $query)->where('is_folder', false)->get() as $file) {
                         if (!$disk->exists($file->path)) {
                             $file->delete();
                             $removedCount++;
                         }
                     }
 
-                    // Check Folders Next
-                    $folders = (clone $query)->where('is_folder', true)->get();
-                    foreach ($folders as $folder) {
-                        // Skip if already deleted (by parent recursive delete)
+                    foreach ((clone $query)->where('is_folder', true)->get() as $folder) {
                         if (TouchFile::where('id', $folder->id)->doesntExist()) {
                             continue;
                         }
 
                         if (!$disk->exists($folder->path)) {
-                            $folder->delete(); // This triggers recursive delete of children if any remain
+                            $folder->delete();
                             $removedCount++;
                         }
                     }

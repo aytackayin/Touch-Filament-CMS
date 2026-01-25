@@ -1,6 +1,6 @@
 @php
     $record = $getRecord();
-    // Veritabanında ters sırada tutulduğu için array'i tersine çeviriyoruz
+    // Reverse attachments array as they are stored in reverse order
     $attachments = is_array($record->attachments) ? array_reverse(array_values($record->attachments)) : [];
     $imageUrl = null;
     $disk = \Illuminate\Support\Facades\Storage::disk('attachments');
@@ -11,7 +11,7 @@
 
         $ext = strtolower(pathinfo($attachment, PATHINFO_EXTENSION));
 
-        // Durum 1: Resim ise
+        // Case 1: Image attachment
         if (in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'])) {
             $filename = basename($attachment);
             $thumbPath = $record->getStorageFolder() . "/{$record->id}/images/thumbs/{$filename}";
@@ -22,7 +22,7 @@
                 $imageUrl = $disk->url($attachment);
             }
         }
-        // Durum 2: Video ise
+        // Case 2: Video attachment
         elseif (in_array($ext, ['mp4', 'mov', 'avi', 'wmv', 'flv', 'mkv', 'webm'])) {
             $videoName = pathinfo($attachment, PATHINFO_FILENAME);
             $videoThumbPath = $record->getStorageFolder() . "/{$record->id}/videos/thumbs/{$videoName}.jpg";
@@ -68,7 +68,7 @@
 </div>
 
 <style>
-    /* === KART ANA TAŞIYICI === */
+    /* Card Main Container */
     body .blogs-grid .fi-ta-record {
         position: relative !important;
         padding: 0 !important;
@@ -76,13 +76,13 @@
         border-radius: 14px !important;
     }
 
-    /* Filament iç paddingleri tamamen kapat */
+    /* Reset Padding */
     body .blogs-grid .fi-ta-record-content-ctn,
     body .blogs-grid .fi-ta-record-content {
         padding: 0 !important;
     }
 
-    /* === BACKGROUND IMAGE === */
+    /* Background Styles */
     .blog-card {
         position: relative;
         width: 100%;
@@ -99,14 +99,14 @@
         z-index: 1;
     }
 
-    /* ikon fallback */
+    /* Icon Fallback */
     .blog-bg.is-icon {
         object-fit: contain;
         padding: 40px;
         opacity: 0.85;
     }
 
-    /* === ALT OVERLAY (Glassmorphism) === */
+    /* Content Overlay (Glassmorphism) */
     .blog-overlay {
         position: absolute;
         bottom: 0;
@@ -123,7 +123,7 @@
         background-color: rgba(0, 0, 0, 0.5);
     }
 
-    /* === TEXT === */
+    /* Typography */
     .blog-name {
         font-size: 13px;
         font-weight: 500;
@@ -155,7 +155,7 @@
         color: white;
     }
 
-    /* === CHECKBOX === */
+    /* Checkbox Alignment */
     body .blogs-grid .fi-ta-record>input[type="checkbox"] {
         position: absolute !important;
         top: 12px !important;
@@ -170,7 +170,7 @@
         cursor: pointer !important;
     }
 
-    /* === ACTIONS (HOVER) === */
+    /* Actions Overlay */
     body .blogs-grid .fi-ta-record .fi-ta-actions {
         position: absolute !important;
         bottom: 12px !important;
