@@ -152,13 +152,19 @@ class TouchFile extends Model
         $sizes = $this->getThumbnailSizes();
         rsort($sizes); // Prioritize larger/better quality
 
+        // Clear stat cache before checking existence
+        if (function_exists('clearstatcache')) {
+            clearstatcache(true, $disk->path($path));
+        }
+
         if ($this->type === 'video') {
             $slugName = Str::slug($nameOnly);
             foreach ($sizes as $size) {
                 // Check slugged with size
                 $thumbPath = "{$thumbsDir}/{$slugName}_{$size}.jpg";
-                if ($disk->exists($thumbPath))
+                if ($disk->exists($thumbPath)) {
                     return $thumbPath;
+                }
 
                 // Also check non-slugged with size for compatibility
                 $thumbPathNonSlug = "{$thumbsDir}/{$nameOnly}_{$size}.jpg";
@@ -174,11 +180,26 @@ class TouchFile extends Model
             $legacyThumb = "{$thumbsDir}/{$nameOnly}.jpg";
             if ($disk->exists($legacyThumb))
                 return $legacyThumb;
-        } else {
+        } else { // This is the 'image' or 'other' type block
             foreach ($sizes as $size) {
                 $thumbPath = "{$thumbsDir}/{$nameOnly}_{$size}.{$extension}";
                 if ($disk->exists($thumbPath))
                     return $thumbPath;
+            }
+
+            // If we are here and still no thumb, try to force generate it NOW
+            if ($this->type === 'image' && strtolower($extension) !== 'svg') {
+                $this->generateThumbnails();
+                // Clear stat cache again after generation
+                if (function_exists('clearstatcache')) {
+                    clearstatcache(true, $disk->path($path));
+                }
+                // Check one more time after generation
+                foreach ($sizes as $size) {
+                    $thumbPath = "{$thumbsDir}/{$nameOnly}_{$size}.{$extension}";
+                    if ($disk->exists($thumbPath))
+                        return $thumbPath;
+                }
             }
 
             // Legacy/Fallback
@@ -187,7 +208,19 @@ class TouchFile extends Model
                 return $legacyThumb;
         }
 
+        // Return original if it's an image, or null if it's something else we can't thumb
         return ($this->type === 'image') ? $this->path : null;
+    }
+
+    public function getThumbnailUrl($path = null): ?string
+    {
+        $thumbPath = $this->getThumbnailPathAttribute(); // Call the accessor
+
+        if ($thumbPath) {
+            return \Illuminate\Support\Facades\Storage::disk('attachments')->url($thumbPath);
+        }
+
+        return null;
     }
 
     public function getExtensionAttribute(): string
@@ -198,7 +231,7 @@ class TouchFile extends Model
     public static function determineFileType(string $mimeType, ?string $path = null): string
     {
         $mimeType = strtolower($mimeType);
-        if (str_starts_with($mimeType, 'image/'))
+        if (str_starts_with($mimeType, 'image/') || $mimeType === 'image/svg+xml')
             return 'image';
         if (str_starts_with($mimeType, 'video/'))
             return 'video';
@@ -224,8 +257,18 @@ class TouchFile extends Model
     {
         $disk = Storage::disk('attachments');
         $path = str_replace('\\', '/', $path);
-        if (!$disk->exists($path))
-            return;
+
+        // Use a more robust check for immediate availability after move
+        if (function_exists('clearstatcache')) {
+            clearstatcache(true, $disk->path($path));
+        }
+
+        if (!$disk->exists($path)) {
+            // Tiny sleep and retry for slow file systems
+            usleep(100000); // 100ms
+            if (!$disk->exists($path))
+                return;
+        }
 
         $existing = static::where('path', $path)->where('is_folder', false)->first();
         if ($existing) {
@@ -250,7 +293,12 @@ class TouchFile extends Model
             $parentId = $folder->id;
         }
 
-        $mimeType = $disk->mimeType($path) ?? '';
+        try {
+            $mimeType = $disk->mimeType($path) ?? '';
+        } catch (Exception $e) {
+            $mimeType = '';
+        }
+
         static::create([
             'name' => $fileName,
             'path' => $path,
@@ -276,8 +324,19 @@ class TouchFile extends Model
             return;
 
         $disk = Storage::disk('attachments');
+
+        // Clear stat cache before checking existence
+        if (function_exists('clearstatcache')) {
+            clearstatcache(true, $disk->path($this->path));
+        }
+
         if (!$disk->exists($this->path))
             return;
+
+        // Skip SVGs for thumbnail generation
+        if (strtolower(pathinfo($this->path, PATHINFO_EXTENSION)) === 'svg') {
+            return;
+        }
 
         try {
             $manager = new ImageManager(new Driver());
@@ -291,12 +350,10 @@ class TouchFile extends Model
                 $disk->makeDirectory($thumbsDir, 0755, true);
             }
 
-            // CLEANUP: Delete all existing thumbs for this specific file before generating new ones
-            // This handles cases where settings (sizes) have changed
+            // CLEANUP
             $allThumbFiles = $disk->files($thumbsDir);
             foreach ($allThumbFiles as $fullThumbPath) {
                 $tFile = basename($fullThumbPath);
-                // Matches filename.ext OR filename_150.ext OR filename_150.jpg
                 if ($tFile === $this->name || str_starts_with($tFile, $nameOnly . '_')) {
                     $disk->delete($fullThumbPath);
                 }
@@ -309,6 +366,7 @@ class TouchFile extends Model
                 $image->save($disk->path($target));
             }
         } catch (Exception $e) {
+            \Illuminate\Support\Facades\Log::warning("Thumbnail generation failed for {$this->path}: " . $e->getMessage());
         }
     }
 
