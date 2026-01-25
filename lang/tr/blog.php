@@ -9,7 +9,6 @@ return [
         'description' => 'Açıklama',
         'tags' => 'Etiketler',
         'attachments' => 'Eklentiler',
-        'view_file' => 'Dosyayı Görüntüle',
         'author' => 'Yazar',
         'last_edited_by' => 'Son Düzenleyen',
         'language' => 'Dil',

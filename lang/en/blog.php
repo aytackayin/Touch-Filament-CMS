@@ -9,7 +9,6 @@ return [
         'description' => 'Description',
         'tags' => 'Tags',
         'attachments' => 'Attachments',
-        'view_file' => 'View File',
         'author' => 'Author',
         'last_edited_by' => 'Last Edited By',
         'language' => 'Language',
