@@ -68,7 +68,6 @@ class BlogsTable
                 TextColumn::make('title')
                     ->label(__('blog.label.title'))
                     ->searchable(['title', 'content'])
-                    ->icon('heroicon-s-document-text')
                     ->description(fn(Blog $record): HtmlString => $record->content ? new HtmlString('<span style="font-size: 12px; line-height: 1;" class="text-gray-500 dark:text-gray-400">' . Str::limit(strip_tags($record->content), 100) . '</span>') : new HtmlString(''))
                     ->wrap()
                     ->sortable(),

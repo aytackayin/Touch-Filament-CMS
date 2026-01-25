@@ -5,6 +5,7 @@ namespace App\Filament\Widgets;
 use App\Models\Blog;
 use Filament\Tables\Table;
 use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\ImageColumn;
 use Filament\Support\Enums\IconSize;
 use Filament\Tables\Columns\TextColumn;
 use App\Filament\Resources\Blogs\BlogResource;
@@ -42,9 +43,16 @@ class LatestBlogsWidget extends BaseWidget
             ])
             ->description(new HtmlString('<style>.latest-blogs-table thead { display: none !important; }</style>'))
             ->columns([
+                ImageColumn::make('cover_thumbnail')
+                    ->label('')
+                    ->disk('attachments')
+                    ->state(fn(Blog $record) => $record->getThumbnailPath())
+                    ->defaultImageUrl(fn(Blog $record) => url(config('blog.icon_paths.base') . config('blog.icon_paths.file')))
+                    ->square()
+                    ->extraImgAttributes(['style' => 'border-radius: 8px !important; object-fit: cover;'])
+                    ->size(40),
                 TextColumn::make('title')
                     ->label('')
-                    ->icon('heroicon-s-document-text')
                     ->wrap(),
                 IconColumn::make('is_published')
                     ->label('')

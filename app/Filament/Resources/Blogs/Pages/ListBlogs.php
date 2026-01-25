@@ -20,6 +20,19 @@ class ListBlogs extends ListRecords
     #[\Livewire\Attributes\Url]
     public string $view_type = 'list';
 
+    public function mount(): void
+    {
+        parent::mount();
+
+        // If URL param is not present, try to load from cookie
+        if (request()->query('view_type') === null) {
+            $savedView = request()->cookie('blog_view_type');
+            if ($savedView && in_array($savedView, ['grid', 'list'])) {
+                $this->view_type = $savedView;
+            }
+        }
+    }
+
     public function getTableExtraAttributes(): array
     {
         return [
@@ -63,6 +76,10 @@ class ListBlogs extends ListRecords
                 ->size('xs')
                 ->action(function () {
                     $newView = $this->view_type === 'grid' ? 'list' : 'grid';
+
+                    // Store preferred view in cookie for 1 year
+                    cookie()->queue(cookie()->forever('blog_view_type', $newView));
+
                     return redirect(static::getResource()::getUrl('index', [
                         'view_type' => $newView,
                     ]));

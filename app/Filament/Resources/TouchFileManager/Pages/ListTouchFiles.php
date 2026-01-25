@@ -36,6 +36,19 @@ class ListTouchFiles extends ListRecords
     #[\Livewire\Attributes\Url]
     public ?string $iframe = null;
 
+    public function mount(): void
+    {
+        parent::mount();
+
+        // If URL param is not present or default, try to load from cookie
+        if (request()->query('view_type') === null) {
+            $savedView = request()->cookie('touchfile_view_type');
+            if ($savedView && in_array($savedView, ['grid', 'list'])) {
+                $this->view_type = $savedView;
+            }
+        }
+    }
+
     public function getBreadcrumbs(): array
     {
         $breadcrumbs = [
@@ -365,6 +378,9 @@ class ListTouchFiles extends ListRecords
                 ->size('xs')
                 ->action(function () {
                     $newView = $this->view_type === 'grid' ? 'list' : 'grid';
+
+                    // Store preferred view in cookie for 1 year
+                    cookie()->queue(cookie()->forever('touchfile_view_type', $newView));
 
                     return redirect(static::getResource()::getUrl('index', [
                         'parent_id' => $this->parent_id,
