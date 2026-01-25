@@ -82,4 +82,18 @@ return [
         'livewire',
         'assets'
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Icon Assets Path
+    |--------------------------------------------------------------------------
+    |
+    | Define the base path for colorful file and folder icons.
+    |
+    */
+    'icon_paths' => [
+        'base' => '/assets/icons/colorful-icons/',
+        'folder' => 'folder.svg',
+        'file' => 'file.svg',
+    ],
 ];

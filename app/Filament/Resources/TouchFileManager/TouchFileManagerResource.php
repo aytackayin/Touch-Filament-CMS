@@ -74,10 +74,14 @@ class TouchFileManagerResource extends Resource implements HasShieldPermissions
     {
         $details = [];
 
-        // 1. Thumbnail or Icon + Name (Side-by-side)
+        $iconConfig = config('touch-file-manager.icon_paths');
+        $basePath = $iconConfig['base'] ?? '/assets/icons/colorful-icons/';
+        $folderIcon = $basePath . ($iconConfig['folder'] ?? 'folder.svg');
+        $defaultFileIcon = $basePath . ($iconConfig['file'] ?? 'file.svg');
+
         $imageUrl = '';
         if ($record->is_folder) {
-            $imageUrl = url('/assets/icons/colorful-icons/folder.svg');
+            $imageUrl = url($folderIcon);
         } else {
             if ($record->thumbnail_path) {
                 $imageUrl = Storage::disk('attachments')->url($record->thumbnail_path);
@@ -86,12 +90,12 @@ class TouchFileManagerResource extends Resource implements HasShieldPermissions
                     || Str::startsWith($record->mime_type ?? '', 'audio/');
 
                 if ($isMedia) {
-                    $imageUrl = url('/assets/icons/colorful-icons/file.svg');
+                    $imageUrl = url($defaultFileIcon);
                 } else {
                     $ext = strtolower($record->extension);
                     $imageUrl = $ext
-                        ? url("/assets/icons/colorful-icons/{$ext}.svg")
-                        : url('/assets/icons/colorful-icons/file.svg');
+                        ? url($basePath . "{$ext}.svg")
+                        : url($defaultFileIcon);
                 }
             }
         }

@@ -3,8 +3,13 @@
     $isFolder = $record->is_folder;
     $isUp = $record->id === 0;
 
+    $iconConfig = config('touch-file-manager.icon_paths');
+    $basePath = $iconConfig['base'] ?? '/assets/icons/colorful-icons/';
+    $folderIcon = $basePath . 'grid-' . ($iconConfig['folder'] ?? 'folder.svg');
+    $fileIcon = $basePath . 'grid-' . ($iconConfig['file'] ?? 'file.svg');
+
     if ($isUp) {
-        $imageUrl = url('/assets/icons/colorful-icons/grid-open-folder.svg');
+        $imageUrl = url($basePath . 'grid-open-folder.svg');
         $name = __('file_manager.label.up');
         $fallbackUrl = '';
     } else {
@@ -13,19 +18,19 @@
             $imageUrl = \Illuminate\Support\Facades\Storage::disk('attachments')->url($record->thumbnail_path);
         } else {
             if ($isFolder) {
-                $imageUrl = url('/assets/icons/colorful-icons/grid-folder.svg');
+                $imageUrl = url($folderIcon);
             } else {
                 // Check exclusions: Image, Video, Audio
                 $isMedia = in_array($record->type, ['image', 'video'])
                     || \Illuminate\Support\Str::startsWith($record->mime_type ?? '', 'audio/');
 
                 if ($isMedia) {
-                    $imageUrl = url('/assets/icons/colorful-icons/grid-file.svg');
+                    $imageUrl = url($fileIcon);
                 } else {
                     $ext = strtolower($record->extension);
                     $imageUrl = $ext
-                        ? url("/assets/icons/colorful-icons/grid-{$ext}.svg")
-                        : url('/assets/icons/colorful-icons/grid-file.svg');
+                        ? url($basePath . "grid-{$ext}.svg")
+                        : url($fileIcon);
                 }
             }
         }
@@ -34,9 +39,7 @@
         $name = (!empty($record->alt)) ? $record->alt : $record->name;
 
         // Determine Fallback URL for Error
-        $fallbackUrl = $isFolder
-            ? url('/assets/icons/colorful-icons/grid-folder.svg')
-            : url('/assets/icons/colorful-icons/grid-file.svg');
+        $fallbackUrl = $isFolder ? url($folderIcon) : url($fileIcon);
     }
 @endphp
 
