@@ -85,7 +85,8 @@ class BlogsTable
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('user.name')
                     ->label(__('blog.label.author'))
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(),
                 TextColumn::make('editor.name')
                     ->label(__('blog.label.last_edited_by'))
                     ->sortable()
@@ -103,6 +104,7 @@ class BlogsTable
                     ->alignCenter(true)
                     ->sortable()
                     ->boolean()
+                    ->toggleable()
                     ->action(function ($record) {
                         if (auth()->user()->can('update', $record)) {
                             $record->is_published = !$record->is_published;
