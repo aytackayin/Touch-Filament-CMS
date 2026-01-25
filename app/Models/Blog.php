@@ -221,14 +221,14 @@ class Blog extends Model
         $path = $path ?? $this->cover_media;
 
         if (!$path) {
-            return 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?auto=format&fit=crop&q=80&w=2070';
+            return null;
         }
 
         $path = str_replace('\\', '/', $path);
         $disk = Storage::disk('attachments');
 
         if (!$disk->exists($path)) {
-            return 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?auto=format&fit=crop&q=80&w=2070';
+            return null;
         }
 
         $dir = dirname($path);
@@ -278,7 +278,7 @@ class Blog extends Model
     {
         $path = $path ?? $this->slide_media;
         if (!$path) {
-            return 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?auto=format&fit=crop&q=80&w=2070';
+            return null;
         }
         return Storage::disk('attachments')->url($path);
     }

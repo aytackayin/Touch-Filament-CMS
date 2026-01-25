@@ -164,14 +164,14 @@ class BlogCategory extends Model
         $path = $path ?? $this->cover_media;
 
         if (!$path) {
-            return url('/assets/icons/colorful-icons/blog-category.svg');
+            return null;
         }
 
         $path = str_replace('\\', '/', $path);
         $disk = Storage::disk('attachments');
 
         if (!$disk->exists($path)) {
-            return url('/assets/icons/colorful-icons/blog-category.svg');
+            return null;
         }
 
         $dir = dirname($path);

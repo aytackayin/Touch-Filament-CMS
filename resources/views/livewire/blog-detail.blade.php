@@ -85,12 +85,12 @@ $attachments = computed(fn() => collect($this->blog->attachments ?? [])->reverse
     @php
         $headerMedia = $blog->detail_header_media;
         $isVideo = $blog->isVideo($headerMedia);
-        $mediaUrl = $blog->getMediaUrl($headerMedia);
+        $mediaUrl = $blog->getMediaUrl($headerMedia) ?? $blog->getDefaultMediaUrl();
     @endphp
 
-    @if($headerMedia)
+    @if($mediaUrl)
         <div class="w-full h-[250px] lg:h-[400px] relative overflow-hidden bg-slate-900 border-b border-white/10 shadow-2xl">
-            @if($isVideo)
+            @if($isVideo && $headerMedia)
                 <video src="{{ $mediaUrl }}" class="w-full h-full object-cover" autoplay loop muted playsinline></video>
             @else
                 <img src="{{ $mediaUrl }}" class="w-full h-full object-cover" alt="{{ $blog->title }}">

@@ -150,8 +150,8 @@ $selectCategory = function ($id) {
                                         $isVideo = $blog->isVideo($coverMedia);
                                     @endphp
 
-                                    @if($thumbUrl)
-                                        <img src="{{ $thumbUrl }}"
+                                    @if($thumbUrl || $blog->getDefaultMediaUrl())
+                                        <img src="{{ $thumbUrl ?? $blog->getDefaultMediaUrl() }}"
                                             class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                                             alt="{{ $blog->title }}">
                                         @if($isVideo)

@@ -60,13 +60,8 @@ $sliderBlogs = computed(fn () =>
                                class="w-full h-full object-cover" 
                                autoplay loop muted playsinline>
                         </video>
-                        <script>
-                            document.addEventListener('alpine:init', () => {
-                                Alpine.activeVideo = null;
-                            });
-                        </script>
                     @else
-                        <img src="{{ $blog->getMediaUrl($slideMedia) }}" 
+                        <img src="{{ $blog->getMediaUrl($slideMedia) ?? $blog->getDefaultMediaUrl() }}" 
                              class="w-full h-full object-cover" alt="{{ $blog->title }}">
                     @endif
                     
@@ -98,7 +93,7 @@ $sliderBlogs = computed(fn () =>
             <!-- Fallback Slider if no blogs yet -->
             <div class="absolute inset-0 bg-slate-950">
                 <div class="absolute inset-0 bg-black/50 z-10"></div>
-                <img src="https://images.unsplash.com/photo-1499750310107-5fef28a66643?auto=format&fit=crop&q=80&w=2070" class="w-full h-full object-cover">
+                <img src="{{ config('blog.default_media.path') ? url(config('blog.default_media.path')) : config('blog.default_media.url') }}" class="w-full h-full object-cover">
                 <div class="absolute inset-0 z-20 flex flex-col items-center justify-center text-center px-4">
                     <h1 class="text-5xl md:text-7xl font-black text-white mb-8 tracking-tight leading-tight">Welcome to Our Blog</h1>
                     <p class="text-xl text-slate-300 max-w-2xl mx-auto">Discover stories, insights, and inspirations from our writers.</p>
@@ -144,8 +139,8 @@ $sliderBlogs = computed(fn () =>
                                     $isVideo = $blog->isVideo($coverMedia);
                                 @endphp
                                 
-                                @if($thumbUrl)
-                                    <img src="{{ $thumbUrl }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt="{{ $blog->title }}">
+                                @if($thumbUrl || $blog->getDefaultMediaUrl())
+                                    <img src="{{ $thumbUrl ?? $blog->getDefaultMediaUrl() }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt="{{ $blog->title }}">
                                     @if($isVideo)
                                         <div class="absolute inset-0 bg-black/20 flex items-center justify-center">
                                             <div class="w-12 h-12 bg-white/30 backdrop-blur-md rounded-full flex items-center justify-center">

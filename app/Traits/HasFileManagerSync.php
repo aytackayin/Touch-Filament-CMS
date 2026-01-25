@@ -164,6 +164,22 @@ trait HasFileManagerSync
 
         return config('touch-file-manager.thumb_sizes', [150]);
     }
+
+    public function getDefaultMediaUrl(): ?string
+    {
+        $folder = $this->getFileManagerFolderName();
+        $config = config("{$folder}.default_media");
+
+        if (!$config) {
+            return null;
+        }
+
+        if (!empty($config['path'])) {
+            return url($config['path']);
+        }
+
+        return $config['url'] ?? null;
+    }
     public function isVideo($path): bool
     {
         if (!$path)
