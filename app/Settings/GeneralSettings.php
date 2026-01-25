@@ -10,6 +10,7 @@ class GeneralSettings extends Settings
     public ?string $site_description = null;
     public array $site_keywords = [];
     public string $attachments_path = 'attachments';
+    public array $thumbnail_sizes = ['150'];
     public array $custom_settings = [];
 
     public function getCustomSetting(string $key, mixed $default = null): mixed

@@ -7,6 +7,9 @@ return [
         'site_keywords' => 'Keywords',
         'attachments_path' => 'File Path (Disk Path)',
         'general' => 'General',
+        'upload_settings' => 'Upload Settings',
+        'thumbnail_sizes' => 'Thumbnail Sizes (Width)',
+        'thumbnail_sizes_helper' => 'You can enter multiple sizes separated by commas (e.g., 150, 250, 500).',
         'manage_settings' => 'Dynamic Settings Management',
         'settings' => 'Settings',
         'description' => 'Description',
@@ -41,6 +44,9 @@ return [
             'datetime' => 'Date and Time',
             'tags' => 'Tags',
         ],
+    ],
+    'errors' => [
+        'thumbnail_size_range' => 'Thumbnail size must be between 10 and 1000 pixels.',
     ],
     'nav' => [
         'group' => 'General Settings',

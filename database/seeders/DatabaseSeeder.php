@@ -134,6 +134,7 @@ class DatabaseSeeder extends Seeder
             ['group' => 'general', 'name' => 'site_description', 'payload' => json_encode('Filament v4 tabanlı gelişmiş içerik yönetim sistemi.'), 'created_at' => now(), 'updated_at' => now()],
             ['group' => 'general', 'name' => 'site_keywords', 'payload' => json_encode(['laravel', 'filament', 'cms', 'antigravity']), 'created_at' => now(), 'updated_at' => now()],
             ['group' => 'general', 'name' => 'attachments_path', 'payload' => json_encode('attachments'), 'created_at' => now(), 'updated_at' => now()],
+            ['group' => 'general', 'name' => 'thumbnail_sizes', 'payload' => json_encode(['150']), 'created_at' => now(), 'updated_at' => now()],
             ['group' => 'general', 'name' => 'custom_settings', 'payload' => json_encode([]), 'created_at' => now(), 'updated_at' => now()],
         ]);
 

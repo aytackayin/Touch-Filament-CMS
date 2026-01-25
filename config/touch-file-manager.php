@@ -3,6 +3,20 @@
 return [
     /*
     |--------------------------------------------------------------------------
+    | Icon Assets Path
+    |--------------------------------------------------------------------------
+    |
+    | Define the base path for colorful file and folder icons.
+    |
+    */
+    'icon_paths' => [
+        'base' => '/assets/icons/colorful-icons/',
+        'folder' => 'folder.svg',
+        'file' => 'file.svg',
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Reserved Folder Names
     |--------------------------------------------------------------------------
     |
@@ -85,15 +99,12 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Icon Assets Path
+    | Default Thumbnail Sizes
     |--------------------------------------------------------------------------
     |
-    | Define the base path for colorful file and folder icons.
+    | If no sizes are defined in model config or site settings,
+    | these default sizes will be used.
     |
     */
-    'icon_paths' => [
-        'base' => '/assets/icons/colorful-icons/',
-        'folder' => 'folder.svg',
-        'file' => 'file.svg',
-    ],
+    'thumb_sizes' => [150, 250, 500],
 ];

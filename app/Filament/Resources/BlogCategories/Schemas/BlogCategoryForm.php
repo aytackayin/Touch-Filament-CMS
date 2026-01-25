@@ -16,6 +16,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Filament\Schemas\Components\Group;
 use App\Models\Language;
 use CodeWithDennis\FilamentSelectTree\SelectTree;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
 class BlogCategoryForm
 {
@@ -58,15 +59,18 @@ class BlogCategoryForm
                                     ->multiple()
                                     ->panelLayout('grid')
                                     ->disk('attachments')
-                                    ->directory(function ($record) {
-                                        if ($record) {
-                                            return BlogCategory::getStorageFolder() . '/' . $record->id . '/images';
-                                        }
-                                        return BlogCategory::getStorageFolder() . '/temp';
-                                    })
+                                    ->directory(BlogCategory::getStorageFolder() . '/temp')
                                     ->image()
                                     ->imageEditor()
                                     ->enableReordering()
+                                    ->preserveFilenames()
+                                    ->getUploadedFileNameForStorageUsing(
+                                        fn(TemporaryUploadedFile $file): string =>
+                                        (string) str($file->getClientOriginalName())
+                                            ->beforeLast('.')
+                                            ->slug()
+                                            ->append('.' . $file->getClientOriginalExtension())
+                                    )
                                     ->columnSpanFull(),
                             ])->columns(2),
                     ])

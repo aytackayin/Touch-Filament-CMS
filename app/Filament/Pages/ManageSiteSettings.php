@@ -79,12 +79,34 @@ class ManageSiteSettings extends SettingsPage
                     ->rows(3),
                 TagsInput::make('site_keywords')
                     ->label(__('settings.label.site_keywords')),
+            ]);
+
+        // 2. Upload Settings Sekmesi
+        $tabs[] = Tab::make('UploadSettings')
+            ->label(__('settings.label.upload_settings'))
+            ->icon(Heroicon::OutlinedArrowUpTray)
+            ->schema([
                 TextInput::make('attachments_path')
                     ->label(__('settings.label.attachments_path'))
                     ->default('attachments')
                     ->required()
                     ->live(onBlur: true)
                     ->afterStateUpdated(fn($state, callable $set) => $set('attachments_path', Str::slug($state))),
+                TagsInput::make('thumbnail_sizes')
+                    ->label(__('settings.label.thumbnail_sizes'))
+                    ->placeholder('e.g. 150, 250')
+                    ->default(['150'])
+                    ->rules([
+                        'array',
+                        fn() => function (string $attribute, $value, $fail) {
+                            foreach ($value as $tag) {
+                                if (!is_numeric($tag) || (int) $tag < 10 || (int) $tag > 1000) {
+                                    $fail(__('settings.errors.thumbnail_size_range'));
+                                }
+                            }
+                        },
+                    ])
+                    ->extraAttributes(['style' => 'max-width: 400px;']),
             ]);
 
         // 2. Dinamik sekmeler (Sadece değer düzenleme - Refresh yapmaz)

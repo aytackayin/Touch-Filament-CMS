@@ -11,6 +11,7 @@ use Illuminate\Support\Str;
 use Intervention\Image\ImageManager;
 use Intervention\Image\Drivers\Gd\Driver;
 use Exception;
+use App\Settings\GeneralSettings;
 
 class CreateTouchFile extends CreateRecord
 {
@@ -119,28 +120,26 @@ class CreateTouchFile extends CreateRecord
             // Handle image thumbnails
             if ($type === 'image' && $manager) {
                 try {
-                    $permPathNormalized = str_replace('\\', '/', $permanentPath);
-                    $dir = pathinfo($permPathNormalized, PATHINFO_DIRNAME);
-
+                    $nameOnly = pathinfo($fileName, PATHINFO_FILENAME);
+                    $extension = pathinfo($fileName, PATHINFO_EXTENSION);
+                    $dir = pathinfo(str_replace('\\', '/', $permanentPath), PATHINFO_DIRNAME);
                     $thumbsDir = $dir === '.' ? 'thumbs' : $dir . '/thumbs';
 
                     if (!$disk->exists($thumbsDir)) {
                         $disk->makeDirectory($thumbsDir);
                     }
 
-                    $thumbPath = $thumbsDir . '/' . $fileName;
-                    $fullPath = $disk->path($permanentPath);
-                    $thumbFullPath = $disk->path($thumbPath);
-
-                    $image = $manager->read($fullPath);
-                    $image->scale(width: 150);
-                    $image->save($thumbFullPath);
-
+                    $sizes = $this->getThumbnailSizes($parentId);
+                    foreach ($sizes as $size) {
+                        $thumbPath = $thumbsDir . '/' . $nameOnly . '_' . $size . '.' . $extension;
+                        $image = $manager->read($disk->path($permanentPath));
+                        $image->scale(width: (int) $size);
+                        $image->save($disk->path($thumbPath));
+                    }
                 } catch (Exception $e) {
                     Log::error('Thumbnail generation failed: ' . $e->getMessage());
                 }
             } elseif ($type === 'video') {
-                // Match video thumbnail from stored data
                 foreach ($videoThumbnailsData as $thumbData) {
                     $thumbFilename = $thumbData['filename'] ?? '';
                     $nameNoExt = pathinfo($thumbFilename, PATHINFO_FILENAME);
@@ -149,20 +148,16 @@ class CreateTouchFile extends CreateRecord
 
                     if ($slugged === $fileName) {
                         $base64Data = $thumbData['thumbnail'] ?? null;
-                        if ($base64Data) {
+                        if ($base64Data && $manager) {
                             try {
-                                $permPathNormalized = str_replace('\\', '/', $permanentPath);
-                                $dir = pathinfo($permPathNormalized, PATHINFO_DIRNAME);
-
+                                $dir = pathinfo(str_replace('\\', '/', $permanentPath), PATHINFO_DIRNAME);
                                 $thumbsDir = $dir === '.' ? 'thumbs' : $dir . '/thumbs';
 
                                 if (!$disk->exists($thumbsDir)) {
                                     $disk->makeDirectory($thumbsDir);
                                 }
 
-                                $thumbName = pathinfo($fileName, PATHINFO_FILENAME) . '.jpg';
-                                $thumbPath = $thumbsDir . '/' . $thumbName;
-
+                                $nameOnly = pathinfo($fileName, PATHINFO_FILENAME);
                                 $imageData = $base64Data;
                                 if (str_contains($imageData, 'data:image')) {
                                     $imageData = preg_replace('/^data:image\/\w+;base64,/', '', $imageData);
@@ -171,7 +166,13 @@ class CreateTouchFile extends CreateRecord
                                 $decodedImage = base64_decode($imageData);
 
                                 if ($decodedImage !== false) {
-                                    $disk->put($thumbPath, $decodedImage);
+                                    $sizes = $this->getThumbnailSizes($parentId);
+                                    foreach ($sizes as $size) {
+                                        $thumbPath = $thumbsDir . '/' . $nameOnly . '_' . $size . '.jpg';
+                                        $image = $manager->read($decodedImage);
+                                        $image->scale(width: (int) $size);
+                                        $disk->put($thumbPath, $image->toJpeg()->toString());
+                                    }
                                 }
                             } catch (Exception $e) {
                                 Log::error('Video thumbnail save failed: ' . $e->getMessage());
@@ -198,6 +199,42 @@ class CreateTouchFile extends CreateRecord
         }
 
         return $uploadedFiles;
+    }
+
+    protected function getThumbnailSizes(?string $parentId): array
+    {
+        $rootFolder = null;
+
+        if ($parentId) {
+            $parent = TouchFile::find($parentId);
+            if ($parent) {
+                $path = str_replace('\\', '/', $parent->full_path);
+                $parts = explode('/', $path);
+                $rootFolder = $parts[0] ?? null;
+            }
+        }
+
+        // 1. Check Model Specific Config (e.g., blog.php)
+        if ($rootFolder) {
+            $modelSizes = config("{$rootFolder}.thumb_sizes");
+            if (is_array($modelSizes) && !empty($modelSizes)) {
+                return $modelSizes;
+            }
+        }
+
+        // 2. Check Global Site Settings (Panel)
+        $globalSettings = app(GeneralSettings::class)->thumbnail_sizes;
+        if (is_array($globalSettings) && !empty($globalSettings)) {
+            return $globalSettings;
+        }
+
+        // 3. Check FileManager Default Config
+        $defaultConfig = config('touch-file-manager.thumb_sizes');
+        if (is_array($defaultConfig) && !empty($defaultConfig)) {
+            return $defaultConfig;
+        }
+
+        return [150];
     }
 
     protected function getParentPath(?int $parentId): string

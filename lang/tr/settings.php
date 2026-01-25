@@ -7,6 +7,9 @@ return [
         'site_keywords' => 'Anahtar Kelimeler',
         'attachments_path' => 'Dosya Yolu (Disk Path)',
         'general' => 'Genel',
+        'upload_settings' => 'Yükleme Ayarları',
+        'thumbnail_sizes' => 'Thumbnail Boyutları (Genişlik)',
+        'thumbnail_sizes_helper' => 'Virgül ile ayırarak birden fazla boyut girebilirsiniz (örn: 150, 250, 500).',
         'manage_settings' => 'Dinamik Ayar Yönetimi',
         'settings' => 'Ayarlar',
         'description' => 'Açıklama',
@@ -41,6 +44,9 @@ return [
             'datetime' => 'Tarih ve Saat',
             'tags' => 'Etiketler',
         ],
+    ],
+    'errors' => [
+        'thumbnail_size_range' => 'Thumbnail boyutu 10 ile 1000 piksel arasında olmalıdır.',
     ],
     'nav' => [
         'group' => 'Genel Ayarlar',

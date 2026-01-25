@@ -7,10 +7,15 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Str;
+use Exception;
+use App\Settings\GeneralSettings;
+use Intervention\Image\ImageManager;
+use Intervention\Image\Drivers\Gd\Driver;
 
 class TouchFile extends Model
 {
     use HasFactory;
+
     /**
      * Get names of all models in the App\Models namespace
      */
@@ -41,7 +46,6 @@ class TouchFile extends Model
                     $className = 'App\\Models\\' . substr($file, 0, -4);
                     if (class_exists($className)) {
                         $traits = class_uses_recursive($className);
-                        // Sadece senkronizasyon gerektiren modeller (ID bazlı klasör kontrolü için)
                         if (isset($traits['App\\Traits\\HasFileManagerSync'])) {
                             if (method_exists($className, 'getStorageFolder')) {
                                 $associations[$className::getStorageFolder()] = $className;
@@ -87,381 +91,126 @@ class TouchFile extends Model
         'tags' => 'array',
     ];
 
-    /**
-     * Get the parent folder
-     */
     public function parent(): BelongsTo
     {
         return $this->belongsTo(TouchFile::class, 'parent_id');
     }
 
-    /**
-     * Get the user who created the file
-     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    /**
-     * Get the user who last edited the file
-     */
     public function editor(): BelongsTo
     {
         return $this->belongsTo(User::class, 'edit_user_id');
     }
 
-    /**
-     * Get all children (files and folders)
-     */
     public function children()
     {
         return $this->hasMany(TouchFile::class, 'parent_id');
     }
 
-    /**
-     * Get only folder children
-     */
-    public function folders()
-    {
-        return $this->hasMany(TouchFile::class, 'parent_id')->where('is_folder', true);
-    }
-
-    /**
-     * Get only file children
-     */
-    public function files()
-    {
-        return $this->hasMany(TouchFile::class, 'parent_id')->where('is_folder', false);
-    }
-
-    /**
-     * Get full path including parent folders
-     */
-    public function getFullPathAttribute(): string
-    {
-        if ($this->parent) {
-            return $this->parent->full_path . '/' . $this->name;
-        }
-        return $this->name;
-    }
-
-    /**
-     * Get file URL if it's a file
-     */
     public function getUrlAttribute(): ?string
     {
-        if ($this->is_folder) {
+        if ($this->is_folder || !$this->path)
             return null;
-        }
         return Storage::disk('attachments')->url($this->path);
     }
 
-    /**
-     * Get human readable file size
-     */
-    public function getHumanSizeAttribute(): string
+    public function getThumbnailSizes(): array
     {
-        if ($this->is_folder) {
-            return '-';
+        $path = str_replace('\\', '/', $this->path);
+        $parts = explode('/', $path);
+        $rootFolder = $parts[0] ?? null;
+
+        if ($rootFolder) {
+            $modelSizes = config("{$rootFolder}.thumb_sizes");
+            if (is_array($modelSizes) && !empty($modelSizes))
+                return $modelSizes;
         }
 
-        $bytes = $this->size;
-        $units = ['B', 'KB', 'MB', 'GB', 'TB'];
+        $globalSettings = app(GeneralSettings::class)->thumbnail_sizes;
+        if (is_array($globalSettings) && !empty($globalSettings))
+            return $globalSettings;
 
-        for ($i = 0; $bytes > 1024; $i++) {
-            $bytes /= 1024;
-        }
-
-        return round($bytes, 2) . ' ' . $units[$i];
+        return config('touch-file-manager.thumb_sizes', [150]);
     }
 
-    /**
-     * Get file icon based on type
-     */
-    public function getIconAttribute(): string
-    {
-        if ($this->is_folder) {
-            return 'heroicon-o-folder';
-        }
-
-        return match ($this->type) {
-            'image' => 'heroicon-o-photo',
-            'video' => 'heroicon-o-film',
-            'document' => 'heroicon-o-document-text',
-            'archive' => 'heroicon-o-archive-box',
-            'spreadsheet' => 'heroicon-o-table-cells',
-            'presentation' => 'heroicon-o-presentation-chart-bar',
-            default => 'heroicon-o-document',
-        };
-    }
-
-    /**
-     * Get thumbnail path relative to disk root
-     */
     public function getThumbnailPathAttribute(): ?string
     {
-        if ($this->is_folder) {
+        if ($this->is_folder || !$this->path)
             return null;
-        }
 
         $disk = Storage::disk('attachments');
-
-        // Handle root directory case properly and normalize separators
         $path = str_replace('\\', '/', $this->path);
         $dir = pathinfo($path, PATHINFO_DIRNAME);
+        $nameOnly = pathinfo($path, PATHINFO_FILENAME);
+        $extension = pathinfo($path, PATHINFO_EXTENSION);
 
-        if ($dir === '.') {
-            $thumbsDir = 'thumbs';
-        } else {
-            $thumbsDir = $dir . '/thumbs';
-        }
+        $thumbsDir = ($dir === '.' || $dir === '') ? 'thumbs' : "{$dir}/thumbs";
+        $sizes = $this->getThumbnailSizes();
+        sort($sizes);
 
-        // Check for image thumbnail (same name)
-        $thumbPath = $thumbsDir . '/' . basename($path);
+        foreach ($sizes as $size) {
+            $thumbFile = ($this->type === 'video') ? "{$nameOnly}_{$size}.jpg" : "{$nameOnly}_{$size}.{$extension}";
+            $thumbPath = "{$thumbsDir}/{$thumbFile}";
 
-        // Check for video thumbnail (.jpg extension)
-        if ($this->type === 'video') {
-            $thumbName = pathinfo($this->path, PATHINFO_FILENAME) . '.jpg';
-            $thumbPath = $thumbsDir . '/' . $thumbName;
-            if ($disk->exists($thumbPath)) {
+            if ($disk->exists($thumbPath))
                 return $thumbPath;
-            }
         }
 
-        // Check for image thumbnail
-        if ($this->type === 'image') {
-            if ($disk->exists($thumbPath)) {
-                return $thumbPath;
-            }
-            // Fallback to original image if no thumb
-            return $this->path;
-        }
+        // Legacy/Fallback
+        $legacyThumb = "{$thumbsDir}/" . ($this->type === 'video' ? "{$nameOnly}.jpg" : basename($path));
+        if ($disk->exists($legacyThumb))
+            return $legacyThumb;
 
-        return null;
+        return ($this->type === 'image') ? $this->path : null;
     }
 
     public function getExtensionAttribute(): string
     {
-        return pathinfo($this->path, PATHINFO_EXTENSION);
+        return pathinfo($this->path ?? '', PATHINFO_EXTENSION);
     }
 
-    /**
-     * Delete file from storage when model is deleted
-     */
-    protected static function booted()
+    public static function determineFileType(string $mimeType, ?string $path = null): string
     {
-        static::creating(function ($model) {
-            if (auth()->check() && empty($model->user_id)) {
-                $model->user_id = auth()->id();
-            }
-        });
-
-        static::updating(function ($model) {
-            if (auth()->check()) {
-                $model->edit_user_id = auth()->id();
-            }
-
-            $disk = Storage::disk('attachments');
-
-            // Handle folder rename or relocation
-            if ($model->is_folder && ($model->isDirty('name') || $model->isDirty('parent_id'))) {
-                $oldParentId = $model->getOriginal('parent_id');
-                $oldName = $model->getOriginal('name');
-
-                $oldPath = $oldName;
-                if ($oldParentId) {
-                    $oldParent = static::find($oldParentId);
-                    if ($oldParent) {
-                        $oldPath = $oldParent->full_path . '/' . $oldName;
-                    }
-                }
-
-                $newParentId = $model->parent_id;
-                $newName = $model->name;
-
-                $newPath = $newName;
-                if ($newParentId) {
-                    $newParent = static::find($newParentId);
-                    if ($newParent) {
-                        $newPath = $newParent->full_path . '/' . $newName;
-                    }
-                }
-
-                if ($oldPath !== $newPath && $disk->exists($oldPath)) {
-                    $disk->move($oldPath, $newPath);
-                }
-
-                // Update database paths for all child records recursively
-                $allChildren = static::where('path', 'like', $oldPath . '/%')->get();
-
-                foreach ($allChildren as $child) {
-                    $child->path = preg_replace('/^' . preg_quote($oldPath, '/') . '/', $newPath, $child->path, 1);
-                    $child->saveQuietly();
-                }
-            }
-
-            // Handle file rename or relocation
-            elseif (!$model->is_folder && ($model->isDirty('name') || $model->isDirty('parent_id'))) {
-                $oldPath = $model->getOriginal('path');
-
-                $parentPath = '';
-                if ($model->parent_id) {
-                    $parent = static::find($model->parent_id);
-                    if ($parent) {
-                        $parentPath = $parent->full_path . '/';
-                    }
-                }
-                $newPath = $parentPath . $model->name;
-
-                if ($oldPath && $oldPath !== $newPath && $disk->exists($oldPath)) {
-                    $disk->move($oldPath, $newPath);
-
-                    // Sync thumbnails
-                    $thumbsDir = dirname($oldPath) . '/thumbs';
-                    if ($thumbsDir === './thumbs')
-                        $thumbsDir = 'thumbs';
-
-                    $newThumbsDir = dirname($newPath) . '/thumbs';
-                    if ($newThumbsDir === './thumbs')
-                        $newThumbsDir = 'thumbs';
-
-                    $oldThumbPath = $thumbsDir . '/' . basename($oldPath);
-                    $newThumbPath = $newThumbsDir . '/' . $model->name;
-
-                    if ($disk->exists($oldThumbPath)) {
-                        if (!$disk->exists($newThumbsDir)) {
-                            $disk->makeDirectory($newThumbsDir);
-                        }
-                        $disk->move($oldThumbPath, $newThumbPath);
-                    }
-
-                    // Sync video thumbnails
-                    $oldNameNoExt = pathinfo(basename($oldPath), PATHINFO_FILENAME);
-                    $newNameNoExt = pathinfo($model->name, PATHINFO_FILENAME);
-
-                    $oldVideoThumb = $thumbsDir . '/' . $oldNameNoExt . '.jpg';
-                    $newVideoThumb = $newThumbsDir . '/' . $newNameNoExt . '.jpg';
-
-                    if ($disk->exists($oldVideoThumb)) {
-                        if (!$disk->exists($newThumbsDir)) {
-                            $disk->makeDirectory($newThumbsDir);
-                        }
-                        $disk->move($oldVideoThumb, $newVideoThumb);
-                    }
-                }
-
-                $model->path = $newPath;
-            }
-        });
-
-        static::deleting(function ($file) {
-            if ($file->is_folder) {
-                // Cascading delete for child records
-                foreach ($file->children as $child) {
-                    $child->delete();
-                }
-
-                // Delete physical directory
-                $disk = Storage::disk('attachments');
-                $folderPath = $file->full_path;
-
-                if ($disk->exists($folderPath)) {
-                    $disk->deleteDirectory($folderPath);
-                }
-            } else {
-                // Delete physical file and its thumbnails
-                $disk = Storage::disk('attachments');
-                if ($disk->exists($file->path)) {
-                    $disk->delete($file->path);
-                }
-
-                $thumbsDir = dirname($file->path) . '/thumbs';
-                if ($thumbsDir === './thumbs')
-                    $thumbsDir = 'thumbs';
-
-                $thumbPath = $thumbsDir . '/' . basename($file->path);
-                if ($disk->exists($thumbPath)) {
-                    $disk->delete($thumbPath);
-                }
-
-                $nameNoExt = pathinfo(basename($file->path), PATHINFO_FILENAME);
-                $videoThumb = $thumbsDir . '/' . $nameNoExt . '.jpg';
-                if ($disk->exists($videoThumb)) {
-                    $disk->delete($videoThumb);
-                }
-            }
-        });
-    }
-
-    /**
-     * Determine file type based on mime type
-     */
-    public static function determineFileType(string $mimeType): string
-    {
-        if (str_starts_with($mimeType, 'image/')) {
+        $mimeType = strtolower($mimeType);
+        if (str_starts_with($mimeType, 'image/'))
             return 'image';
-        }
-
-        if (str_starts_with($mimeType, 'video/')) {
+        if (str_starts_with($mimeType, 'video/'))
             return 'video';
-        }
 
-        $documentTypes = [
-            'application/pdf',
-            'application/msword',
-            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-            'text/plain',
-        ];
-
-        if (in_array($mimeType, $documentTypes)) {
-            return 'document';
-        }
-
-        $spreadsheetTypes = [
-            'application/vnd.ms-excel',
-            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        ];
-
-        if (in_array($mimeType, $spreadsheetTypes)) {
-            return 'spreadsheet';
-        }
-
-        $presentationTypes = [
-            'application/vnd.ms-powerpoint',
-            'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-        ];
-
-        if (in_array($mimeType, $presentationTypes)) {
-            return 'presentation';
-        }
-
-        $archiveTypes = [
-            'application/zip',
-            'application/x-rar-compressed',
-            'application/x-7z-compressed',
-            'application/x-tar',
-            'application/gzip',
-        ];
-
-        if (in_array($mimeType, $archiveTypes)) {
-            return 'archive';
+        if ($path) {
+            $ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+            if (in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'svg']))
+                return 'image';
+            if (in_array($ext, ['mp4', 'mov', 'avi', 'wmv', 'flv', 'webm', 'mpeg']))
+                return 'video';
+            if (in_array($ext, ['pdf', 'doc', 'docx', 'txt', 'rtf']))
+                return 'document';
+            if (in_array($ext, ['xls', 'xlsx', 'csv']))
+                return 'spreadsheet';
+            if (in_array($ext, ['zip', 'rar', '7z', 'tar', 'gz']))
+                return 'archive';
         }
 
         return 'other';
     }
-    /**
-     * Sync file to TouchFileManager (Create/Update)
-     */
+
     public static function registerFile(string $path): void
     {
         $disk = Storage::disk('attachments');
-        if (!$disk->exists($path)) {
+        $path = str_replace('\\', '/', $path);
+        if (!$disk->exists($path))
             return;
-        }
 
-        // Check if already exists
-        if (static::where('path', $path)->exists()) {
+        $existing = static::where('path', $path)->where('is_folder', false)->first();
+        if ($existing) {
+            $newSize = $disk->size($path);
+            if ($existing->size !== $newSize) {
+                $existing->update(['size' => $newSize]);
+            }
             return;
         }
 
@@ -470,29 +219,16 @@ class TouchFile extends Model
         $currentPath = '';
         $parentId = null;
 
-        // 1. Ensure Folder Structure Exists
         foreach ($parts as $part) {
-            $currentPath = $currentPath ? $currentPath . '/' . $part : $part;
-
-            $folder = static::where('is_folder', true)
-                ->where('path', $currentPath)
-                ->first();
-
-            if (!$folder) {
-                $folder = static::create([
-                    'name' => $part,
-                    'path' => $currentPath,
-                    'is_folder' => true,
-                    'parent_id' => $parentId,
-                ]);
-            }
-
+            $currentPath = $currentPath ? "{$currentPath}/{$part}" : $part;
+            $folder = static::firstOrCreate(
+                ['path' => $currentPath, 'is_folder' => true],
+                ['name' => $part, 'parent_id' => $parentId]
+            );
             $parentId = $folder->id;
         }
 
-        // 2. Create File Record
-        $mimeType = $disk->mimeType($path);
-
+        $mimeType = $disk->mimeType($path) ?? '';
         static::create([
             'name' => $fileName,
             'path' => $path,
@@ -500,18 +236,97 @@ class TouchFile extends Model
             'parent_id' => $parentId,
             'mime_type' => $mimeType,
             'size' => $disk->size($path),
-            'type' => static::determineFileType($mimeType ?? ''),
+            'type' => static::determineFileType($mimeType, $path),
         ]);
     }
 
-    /**
-     * Remove file from TouchFileManager
-     */
     public static function unregisterFile(string $path): void
     {
+        $path = str_replace('\\', '/', $path);
         $file = static::where('path', $path)->where('is_folder', false)->first();
-        if ($file) {
+        if ($file)
             $file->delete();
+    }
+
+    public function generateThumbnails(): void
+    {
+        if ($this->is_folder || $this->type !== 'image' || !$this->path)
+            return;
+
+        $disk = Storage::disk('attachments');
+        if (!$disk->exists($this->path))
+            return;
+
+        try {
+            $manager = new ImageManager(new Driver());
+            $path = str_replace('\\', '/', $this->path);
+            $dir = pathinfo($path, PATHINFO_DIRNAME);
+            $nameOnly = pathinfo($path, PATHINFO_FILENAME);
+            $extension = pathinfo($path, PATHINFO_EXTENSION);
+            $thumbsDir = ($dir === '.' || $dir === '') ? 'thumbs' : "{$dir}/thumbs";
+
+            if (!$disk->exists($thumbsDir)) {
+                $disk->makeDirectory($thumbsDir, 0755, true);
+            }
+
+            // CLEANUP: Delete all existing thumbs for this specific file before generating new ones
+            // This handles cases where settings (sizes) have changed
+            $allThumbFiles = $disk->files($thumbsDir);
+            foreach ($allThumbFiles as $fullThumbPath) {
+                $tFile = basename($fullThumbPath);
+                // Matches filename.ext OR filename_150.ext OR filename_150.jpg
+                if ($tFile === $this->name || str_starts_with($tFile, $nameOnly . '_')) {
+                    $disk->delete($fullThumbPath);
+                }
+            }
+
+            foreach ($this->getThumbnailSizes() as $size) {
+                $target = "{$thumbsDir}/{$nameOnly}_{$size}.{$extension}";
+                $image = $manager->read($disk->path($this->path));
+                $image->scale(width: (int) $size);
+                $image->save($disk->path($target));
+            }
+        } catch (Exception $e) {
         }
+    }
+
+    protected static function booted()
+    {
+        static::saved(function ($model) {
+            if (!$model->is_folder && $model->type === 'image') {
+                $model->generateThumbnails();
+            }
+        });
+
+        static::deleting(function ($file) {
+            $disk = Storage::disk('attachments');
+            $path = str_replace('\\', '/', $file->path);
+
+            if ($file->is_folder) {
+                foreach ($file->children as $child)
+                    $child->delete();
+                if ($disk->exists($path))
+                    $disk->deleteDirectory($path);
+            } else {
+                if ($disk->exists($path))
+                    $disk->delete($path);
+
+                $dir = dirname($path);
+                $thumbsDir = ($dir === '.' || $dir === '') ? 'thumbs' : "{$dir}/thumbs";
+
+                if ($disk->exists($thumbsDir)) {
+                    $nameOnly = pathinfo($file->name, PATHINFO_FILENAME);
+                    $ext = pathinfo($file->name, PATHINFO_EXTENSION);
+                    $sizes = $file->getThumbnailSizes();
+
+                    foreach ($sizes as $size) {
+                        $disk->delete("{$thumbsDir}/{$nameOnly}_{$size}.{$ext}");
+                        $disk->delete("{$thumbsDir}/{$nameOnly}_{$size}.jpg");
+                    }
+                    $disk->delete("{$thumbsDir}/{$file->name}");
+                    $disk->delete("{$thumbsDir}/{$nameOnly}.jpg");
+                }
+            }
+        });
     }
 }

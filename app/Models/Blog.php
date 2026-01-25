@@ -10,6 +10,9 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 use App\Traits\HasFileManagerSync;
 use Illuminate\Support\Facades\Log;
+use Intervention\Image\ImageManager;
+use Intervention\Image\Drivers\Gd\Driver;
+use Exception;
 
 class Blog extends Model
 {
@@ -100,47 +103,40 @@ class Blog extends Model
 
         static::saved(function ($model) {
             $disk = Storage::disk('attachments');
-
-            // Process video thumbnails
-            // Try getting from temp property (set via Mutator)
             $thumbnailsData = $model->video_thumbnails_store_temp;
 
-            // Fallback to request input
             if (empty($thumbnailsData)) {
                 $thumbnailsData = request()->input('data.video_thumbnails_store') ?? request()->input('video_thumbnails_store');
             }
-            // Fallback for CreateBlog/EditBlog page mutation
+
             if (empty($thumbnailsData) && isset($model->attributes['_video_thumbnails'])) {
                 $thumbnailsData = $model->attributes['_video_thumbnails'];
-                unset($model->attributes['_video_thumbnails']); // Clean up
+                unset($model->attributes['_video_thumbnails']);
             }
 
             if (!empty($thumbnailsData)) {
                 $thumbnails = is_string($thumbnailsData) ? json_decode($thumbnailsData, true) : $thumbnailsData;
+                $manager = class_exists(ImageManager::class) ? new ImageManager(new Driver()) : null;
 
                 if (is_array($thumbnails) && !empty($thumbnails)) {
-                    $thumbsDir = static::getStorageFolder() . "/{$model->id}/videos/thumbs";
+                    $thumbsDir = $model->getFileManagerFolderName() . "/{$model->id}/videos/thumbs";
 
-                    // Ensure thumbs directory exists
                     if (!$disk->exists($thumbsDir)) {
                         $disk->makeDirectory($thumbsDir, 0755, true);
                     }
+
+                    $sizes = $model->getThumbnailSizes();
 
                     foreach ($thumbnails as $thumbnail) {
                         $filename = $thumbnail['filename'] ?? null;
                         $base64Data = $thumbnail['thumbnail'] ?? null;
 
                         if ($filename && $base64Data) {
-                            // 1. Slugify the incoming filename to match storage strategy in BlogForm
-                            $originalNameWithoutExt = pathinfo($filename, PATHINFO_FILENAME);
+                            $nameNoExt = pathinfo($filename, PATHINFO_FILENAME);
                             $extension = pathinfo($filename, PATHINFO_EXTENSION);
-
-                            $sluggedName = Str::slug($originalNameWithoutExt);
+                            $sluggedName = Str::slug($nameNoExt);
                             $expectedVideoName = $sluggedName . '.' . $extension;
-                            $thumbFilename = $sluggedName . '.jpg';
 
-                            // 2. Check if corresponding video exists in current attachments
-                            // We need to check against basename of attachments
                             $videoExists = false;
                             if (is_array($model->attachments)) {
                                 foreach ($model->attachments as $att) {
@@ -151,10 +147,7 @@ class Blog extends Model
                                 }
                             }
 
-                            if ($videoExists) {
-                                $thumbPath = "{$thumbsDir}/{$thumbFilename}";
-
-                                // Decode base64 image
+                            if ($videoExists && $manager) {
                                 $imageData = $base64Data;
                                 if (str_contains($imageData, 'data:image')) {
                                     $imageData = preg_replace('/^data:image\/\w+;base64,/', '', $imageData);
@@ -163,22 +156,21 @@ class Blog extends Model
                                 $decodedImage = base64_decode($imageData);
 
                                 if ($decodedImage !== false) {
-                                    // Save thumbnail using Storage disk
-                                    $disk->put($thumbPath, $decodedImage);
-                                    Log::info("Video thumbnail saved: {$thumbPath}");
-                                } else {
-                                    Log::error("Failed to decode base64 for thumbnail");
+                                    foreach ($sizes as $size) {
+                                        $thumbPath = "{$thumbsDir}/{$sluggedName}_{$size}.jpg";
+                                        try {
+                                            $image = $manager->read($decodedImage);
+                                            $image->scale(width: (int) $size);
+                                            $disk->put($thumbPath, $image->toJpeg()->toString());
+                                        } catch (Exception $e) {
+                                            Log::error("Failed to generate video thumbnail ({$size}px): " . $e->getMessage());
+                                        }
+                                    }
                                 }
-                            } else {
-                                Log::info("Skipping thumbnail for deleted/missing video: {$expectedVideoName}");
                             }
                         }
                     }
-                } else {
-                    Log::debug('Video Thumbnails - Not an array or empty');
                 }
-            } else {
-                Log::debug('Video Thumbnails - No data received');
             }
         });
 

@@ -8,12 +8,10 @@ use Illuminate\Support\Str;
 use Intervention\Image\ImageManager;
 use Intervention\Image\Drivers\Gd\Driver;
 use Exception;
+use App\Settings\GeneralSettings;
 
 trait HasFileManagerSync
 {
-    /**
-     * Initialize filesystem synchronization hooks
-     */
     protected static function bootHasFileManagerSync(): void
     {
         static::updating(function ($model) {
@@ -31,16 +29,14 @@ trait HasFileManagerSync
         });
     }
 
-    /**
-     * Sync attachments with TouchFileManager
-     */
     public function syncAttachmentsWithFileManager(): void
     {
         $disk = Storage::disk('attachments');
         $resourceType = $this->getFileManagerFolderName();
         $recordId = $this->id;
+        $expectedFolder = "{$resourceType}/{$recordId}/";
 
-        // 1. Cleanup deleted files
+        // 1. Cleanup actually removed files
         if (isset($this->oldAttachmentsForSync) && is_array($this->oldAttachmentsForSync)) {
             $newAttachments = $this->attachments ?? [];
             $deletedFiles = array_diff($this->oldAttachmentsForSync, $newAttachments);
@@ -53,87 +49,102 @@ trait HasFileManagerSync
 
         $attachments = $this->attachments;
         if (empty($attachments) || !is_array($attachments)) {
-            // If no attachments left, try to cleanup empty folder
             $this->cleanupEmptyFolder($resourceType, $recordId);
             return;
         }
 
-        // 2. Process current attachments
         $manager = class_exists(ImageManager::class) ? new ImageManager(new Driver()) : null;
-        $finalAttachments = [];
-        $hasChanges = false;
+        $finalPaths = [];
+        $changed = false;
 
         foreach ($attachments as $attachment) {
-            if (str_contains($attachment, '/temp/')) {
-                // Determine sub-directory (images/videos)
+            $attachment = str_replace('\\', '/', $attachment);
+
+            // DETECT FILAMENT VERSIONING (-v1, -v2, etc.)
+            $filename = basename($attachment);
+            $cleanFilename = $filename;
+            if (preg_match('/^(.+)-v\d+\.(.+)$/i', $filename, $matches)) {
+                $cleanFilename = $matches[1] . '.' . $matches[2];
+            }
+
+            $isInCorrectPlace = str_starts_with($attachment, $expectedFolder);
+            $needsRenaming = ($filename !== $cleanFilename);
+
+            // If not in correct place OR renamed (e.g. crop versioned it), handle it
+            if ((!$isInCorrectPlace && $disk->exists($attachment)) || ($isInCorrectPlace && $needsRenaming)) {
+
+                // Determine sub-directory
                 try {
-                    $mimeType = $disk->mimeType($attachment);
+                    $mime = $disk->mimeType($attachment) ?? '';
                 } catch (Exception $e) {
-                    $mimeType = '';
+                    $mime = '';
                 }
 
-                $isImage = str_starts_with($mimeType, 'image/');
-                $subDir = $isImage ? 'images' : 'videos';
-                $filename = basename($attachment);
-                $newPath = "{$resourceType}/{$recordId}/{$subDir}/{$filename}";
+                $type = TouchFile::determineFileType($mime, $attachment);
+                $isImage = ($type === 'image');
+                $subDir = ($type === 'video') ? 'videos' : ($isImage ? 'images' : 'files');
 
-                if ($disk->exists($attachment)) {
-                    // Ensure directory exists
-                    if (!$disk->exists(dirname($newPath))) {
-                        $disk->makeDirectory(dirname($newPath), 0755, true);
-                    }
+                $targetPath = "{$expectedFolder}{$subDir}/{$cleanFilename}";
 
-                    // Move file
-                    $disk->move($attachment, $newPath);
-                    TouchFile::registerFile($newPath);
-
-                    // Image thumbnails
-                    if ($isImage && $manager) {
-                        $this->generateImageThumbnail($newPath, $manager);
-                    }
-
-                    $finalAttachments[] = $newPath;
-                    $hasChanges = true;
+                // OVERWRITE LOGIC:
+                // If the target path exists and is different from current attachment
+                if ($disk->exists($targetPath) && $attachment !== $targetPath) {
+                    TouchFile::unregisterFile($targetPath); // Removes from DB and deletes physical file + thumbs
                 }
+
+                // If it was already in the folder but just named -v1, we move it to the clean name
+                if ($isInCorrectPlace && $needsRenaming) {
+                    $disk->move($attachment, $targetPath);
+                    // Update DB record if exists for the versioned name
+                    $oldRecord = TouchFile::where('path', $attachment)->first();
+                    if ($oldRecord) {
+                        $oldRecord->update(['path' => $targetPath, 'name' => $cleanFilename]);
+                    } else {
+                        TouchFile::registerFile($targetPath);
+                    }
+                } else {
+                    // Moving from temp or elsewhere
+                    if (!$disk->exists(dirname($targetPath))) {
+                        $disk->makeDirectory(dirname($targetPath), 0755, true);
+                    }
+                    $disk->move($attachment, $targetPath);
+                    TouchFile::registerFile($targetPath);
+                }
+
+                // ALWAYS generate thumbs for new or modified (cropped) images
+                if ($isImage && $manager) {
+                    $this->generateImageThumbnail($targetPath, $manager);
+                }
+
+                $finalPaths[] = $targetPath;
+                $changed = true;
             } else {
-                // Existing file, ensure it's registered
+                // Already in place and correctly named
                 if ($disk->exists($attachment)) {
                     TouchFile::registerFile($attachment);
                 }
-                $finalAttachments[] = $attachment;
+                $finalPaths[] = $attachment;
             }
         }
 
-        if ($hasChanges) {
-            $this->attachments = $finalAttachments;
+        if ($changed) {
+            $this->attachments = $finalPaths;
             $this->saveQuietly();
         }
 
-        // Cleanup empty folder if needed
         $this->cleanupEmptyFolder($resourceType, $recordId);
     }
 
-    /**
-     * Cleanup everything related to this model on deletion
-     */
     public function cleanupFileManagerOnDeletion(): void
     {
-        $resourceType = $this->getFileManagerFolderName();
-        $path = "{$resourceType}/{$this->id}";
-
+        $path = "{$this->getFileManagerFolderName()}/{$this->id}";
         $folder = TouchFile::where('path', $path)->where('is_folder', true)->first();
-        if ($folder) {
-            // This will recursively delete child records and disk files
+        if ($folder)
             $folder->delete();
-        } else {
-            // Fallback: Delete disk if record missing
+        else
             Storage::disk('attachments')->deleteDirectory($path);
-        }
     }
 
-    /**
-     * Get the folder name for this resource (e.g., 'blogs', 'blog_categories')
-     */
     public static function getStorageFolder(): string
     {
         return Str::lower(class_basename(static::class));
@@ -141,51 +152,55 @@ trait HasFileManagerSync
 
     protected function getFileManagerFolderName(): string
     {
-        if (isset($this->fileManagerFolder)) {
-            return $this->fileManagerFolder;
-        }
-
-        return static::getStorageFolder();
+        return $this->fileManagerFolder ?? static::getStorageFolder();
     }
 
-    /**
-     * Helper to clean up empty directory
-     */
     protected function cleanupEmptyFolder(string $resourceType, $id): void
     {
         $disk = Storage::disk('attachments');
         $path = "{$resourceType}/{$id}";
-
         if ($disk->exists($path) && empty($disk->allFiles($path))) {
             $folder = TouchFile::where('path', $path)->where('is_folder', true)->first();
-            if ($folder) {
+            if ($folder)
                 $folder->delete();
-            } else {
+            else
                 $disk->deleteDirectory($path);
-            }
         }
     }
 
-    /**
-     * Helper to generate image thumbnails
-     */
+    protected function getThumbnailSizes(): array
+    {
+        $folder = $this->getFileManagerFolderName();
+        $modelSizes = config("{$folder}.thumb_sizes");
+        if (is_array($modelSizes) && !empty($modelSizes))
+            return $modelSizes;
+
+        $global = app(GeneralSettings::class)->thumbnail_sizes;
+        if (is_array($global) && !empty($global))
+            return $global;
+
+        return config('touch-file-manager.thumb_sizes', [150]);
+    }
+
     protected function generateImageThumbnail(string $path, ImageManager $manager): void
     {
-        $disk = Storage::disk('attachments');
-        $filename = basename($path);
-        $dir = dirname($path);
-        $thumbsDir = $dir . '/thumbs';
-
-        if (!$disk->exists($thumbsDir)) {
-            $disk->makeDirectory($thumbsDir, 0755, true);
-        }
-
         try {
-            $image = $manager->read($disk->path($path));
-            $image->scale(width: 150);
-            $image->save($disk->path($thumbsDir . '/' . $filename));
+            $disk = Storage::disk('attachments');
+            $filename = basename($path);
+            $nameOnly = pathinfo($filename, PATHINFO_FILENAME);
+            $ext = pathinfo($filename, PATHINFO_EXTENSION);
+            $thumbsDir = dirname($path) . '/thumbs';
+
+            if (!$disk->exists($thumbsDir))
+                $disk->makeDirectory($thumbsDir, 0755, true);
+
+            foreach ($this->getThumbnailSizes() as $size) {
+                $target = "{$thumbsDir}/{$nameOnly}_{$size}.{$ext}";
+                $image = $manager->read($disk->path($path));
+                $image->scale(width: (int) $size);
+                $image->save($disk->path($target));
+            }
         } catch (Exception $e) {
-            // Fail silently
         }
     }
 }
