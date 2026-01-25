@@ -53,14 +53,12 @@ trait HasFileManagerSync
             return;
         }
 
-        $manager = class_exists(ImageManager::class) ? new ImageManager(new Driver()) : null;
         $finalPaths = [];
         $changed = false;
 
         foreach ($attachments as $attachment) {
             $attachment = str_replace('\\', '/', $attachment);
 
-            // DETECT FILAMENT VERSIONING (-v1, -v2, etc.)
             $filename = basename($attachment);
             $cleanFilename = $filename;
             if (preg_match('/^(.+)-v\d+\.(.+)$/i', $filename, $matches)) {
@@ -70,10 +68,8 @@ trait HasFileManagerSync
             $isInCorrectPlace = str_starts_with($attachment, $expectedFolder);
             $needsRenaming = ($filename !== $cleanFilename);
 
-            // If not in correct place OR renamed (e.g. crop versioned it), handle it
             if ((!$isInCorrectPlace && $disk->exists($attachment)) || ($isInCorrectPlace && $needsRenaming)) {
 
-                // Determine sub-directory
                 try {
                     $mime = $disk->mimeType($attachment) ?? '';
                 } catch (Exception $e) {
@@ -81,21 +77,16 @@ trait HasFileManagerSync
                 }
 
                 $type = TouchFile::determineFileType($mime, $attachment);
-                $isImage = ($type === 'image');
-                $subDir = ($type === 'video') ? 'videos' : ($isImage ? 'images' : 'files');
-
+                $subDir = ($type === 'video') ? 'videos' : ($type === 'image' ? 'images' : 'files');
                 $targetPath = "{$expectedFolder}{$subDir}/{$cleanFilename}";
 
-                // OVERWRITE LOGIC:
-                // If the target path exists and is different from current attachment
+                // Overwrite: Unregister ensures old thumbs are deleted if the file existed
                 if ($disk->exists($targetPath) && $attachment !== $targetPath) {
-                    TouchFile::unregisterFile($targetPath); // Removes from DB and deletes physical file + thumbs
+                    TouchFile::unregisterFile($targetPath);
                 }
 
-                // If it was already in the folder but just named -v1, we move it to the clean name
                 if ($isInCorrectPlace && $needsRenaming) {
                     $disk->move($attachment, $targetPath);
-                    // Update DB record if exists for the versioned name
                     $oldRecord = TouchFile::where('path', $attachment)->first();
                     if ($oldRecord) {
                         $oldRecord->update(['path' => $targetPath, 'name' => $cleanFilename]);
@@ -103,7 +94,6 @@ trait HasFileManagerSync
                         TouchFile::registerFile($targetPath);
                     }
                 } else {
-                    // Moving from temp or elsewhere
                     if (!$disk->exists(dirname($targetPath))) {
                         $disk->makeDirectory(dirname($targetPath), 0755, true);
                     }
@@ -111,15 +101,9 @@ trait HasFileManagerSync
                     TouchFile::registerFile($targetPath);
                 }
 
-                // ALWAYS generate thumbs for new or modified (cropped) images
-                if ($isImage && $manager) {
-                    $this->generateImageThumbnail($targetPath, $manager);
-                }
-
                 $finalPaths[] = $targetPath;
                 $changed = true;
             } else {
-                // Already in place and correctly named
                 if ($disk->exists($attachment)) {
                     TouchFile::registerFile($attachment);
                 }
@@ -167,8 +151,7 @@ trait HasFileManagerSync
                 $disk->deleteDirectory($path);
         }
     }
-
-    protected function getThumbnailSizes(): array
+    public function getThumbnailSizes(): array
     {
         $folder = $this->getFileManagerFolderName();
         $modelSizes = config("{$folder}.thumb_sizes");
@@ -180,27 +163,5 @@ trait HasFileManagerSync
             return $global;
 
         return config('touch-file-manager.thumb_sizes', [150]);
-    }
-
-    protected function generateImageThumbnail(string $path, ImageManager $manager): void
-    {
-        try {
-            $disk = Storage::disk('attachments');
-            $filename = basename($path);
-            $nameOnly = pathinfo($filename, PATHINFO_FILENAME);
-            $ext = pathinfo($filename, PATHINFO_EXTENSION);
-            $thumbsDir = dirname($path) . '/thumbs';
-
-            if (!$disk->exists($thumbsDir))
-                $disk->makeDirectory($thumbsDir, 0755, true);
-
-            foreach ($this->getThumbnailSizes() as $size) {
-                $target = "{$thumbsDir}/{$nameOnly}_{$size}.{$ext}";
-                $image = $manager->read($disk->path($path));
-                $image->scale(width: (int) $size);
-                $image->save($disk->path($target));
-            }
-        } catch (Exception $e) {
-        }
     }
 }
