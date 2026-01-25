@@ -58,7 +58,7 @@ class BlogObserver
         // Find all images in the content
         // Pattern matches: src=".../attachments/blogs/temp/..."
         // We assume the URL structure matches the config
-        $pattern = '/src="([^"]+?\/attachments\/blogs\/temp\/[^"]+)"/';
+        $pattern = '/src="([^"]+?\/attachments\/' . Blog::getStorageFolder() . '\/temp\/[^"]+)"/';
 
         $newContent = preg_replace_callback($pattern, function ($matches) use ($blog) {
             $oldUrl = $matches[1];
@@ -67,8 +67,8 @@ class BlogObserver
             $filename = basename($oldUrl);
 
             // Paths
-            $oldPath = 'blogs/temp/' . $filename;
-            $newPath = 'blogs/' . $blog->id . '/content-images/' . $filename;
+            $oldPath = Blog::getStorageFolder() . '/temp/' . $filename;
+            $newPath = Blog::getStorageFolder() . '/' . $blog->id . '/content-images/' . $filename;
 
             // Move file if it exists
             if (Storage::disk('attachments')->exists($oldPath)) {

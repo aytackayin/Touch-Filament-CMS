@@ -134,13 +134,18 @@ trait HasFileManagerSync
     /**
      * Get the folder name for this resource (e.g., 'blogs', 'blog_categories')
      */
+    public static function getStorageFolder(): string
+    {
+        return Str::lower(class_basename(static::class));
+    }
+
     protected function getFileManagerFolderName(): string
     {
         if (isset($this->fileManagerFolder)) {
             return $this->fileManagerFolder;
         }
 
-        return Str::snake(Str::plural(class_basename($this)));
+        return static::getStorageFolder();
     }
 
     /**

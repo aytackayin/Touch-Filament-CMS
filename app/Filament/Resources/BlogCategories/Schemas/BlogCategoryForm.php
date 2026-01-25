@@ -60,9 +60,9 @@ class BlogCategoryForm
                                     ->disk('attachments')
                                     ->directory(function ($record) {
                                         if ($record) {
-                                            return 'blog_categories/' . $record->id . '/images';
+                                            return BlogCategory::getStorageFolder() . '/' . $record->id . '/images';
                                         }
-                                        return 'blog_categories/temp';
+                                        return BlogCategory::getStorageFolder() . '/temp';
                                     })
                                     ->image()
                                     ->imageEditor()

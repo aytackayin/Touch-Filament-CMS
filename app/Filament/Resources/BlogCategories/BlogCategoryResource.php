@@ -83,7 +83,7 @@ class BlogCategoryResource extends Resource implements HasShieldPermissions
                 // Check if it's an image
                 if (preg_match('/\.(jpg|jpeg|png|gif|webp|bmp|svg)$/i', $attachment)) {
                     $filename = basename($attachment);
-                    $thumbPath = "blog_categories/{$record->id}/images/thumbs/{$filename}";
+                    $thumbPath = BlogCategory::getStorageFolder() . "/{$record->id}/images/thumbs/{$filename}";
                     if (Storage::disk('attachments')->exists($thumbPath)) {
                         $imageUrl = Storage::disk('attachments')->url($thumbPath);
                         break;

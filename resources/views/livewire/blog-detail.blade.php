@@ -175,7 +175,7 @@ $attachments = computed(fn() => collect($this->blog->attachments ?? [])->reverse
                             $videoThumbUrl = '';
                             if ($isVideo) {
                                 $slugName = Str::slug(pathinfo($attachment, PATHINFO_FILENAME));
-                                $thumbPath = "blogs/{$this->blog->id}/videos/thumbs/{$slugName}.jpg";
+                                $thumbPath = $this->blog->getStorageFolder() . "/{$this->blog->id}/videos/thumbs/{$slugName}.jpg";
                                 if (Storage::disk('attachments')->exists($thumbPath)) {
                                     $hasVideoThumb = true;
                                     $videoThumbUrl = Storage::disk('attachments')->url($thumbPath);

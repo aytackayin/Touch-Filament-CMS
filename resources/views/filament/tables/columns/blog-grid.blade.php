@@ -14,7 +14,7 @@
         // Durum 1: Resim ise
         if (in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'])) {
             $filename = basename($attachment);
-            $thumbPath = "blogs/{$record->id}/images/thumbs/{$filename}";
+            $thumbPath = $record->getStorageFolder() . "/{$record->id}/images/thumbs/{$filename}";
 
             if ($disk->exists($thumbPath)) {
                 $imageUrl = $disk->url($thumbPath);
@@ -25,7 +25,7 @@
         // Durum 2: Video ise
         elseif (in_array($ext, ['mp4', 'mov', 'avi', 'wmv', 'flv', 'mkv', 'webm'])) {
             $videoName = pathinfo($attachment, PATHINFO_FILENAME);
-            $videoThumbPath = "blogs/{$record->id}/videos/thumbs/{$videoName}.jpg";
+            $videoThumbPath = $record->getStorageFolder() . "/{$record->id}/videos/thumbs/{$videoName}.jpg";
 
             if ($disk->exists($videoThumbPath)) {
                 $imageUrl = $disk->url($videoThumbPath);

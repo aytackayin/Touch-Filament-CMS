@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\BlogCategories\Pages;
 
 use App\Filament\Resources\BlogCategories\BlogCategoryResource;
+use App\Models\BlogCategory;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Support\Facades\Storage;
@@ -54,7 +55,7 @@ class EditBlogCategory extends EditRecord
             return;
 
         $disk = Storage::disk('attachments');
-        $baseDir = "blog_categories/{$record->id}";
+        $baseDir = BlogCategory::getStorageFolder() . "/{$record->id}";
 
         if ($disk->exists($baseDir)) {
             // Get all files recursively

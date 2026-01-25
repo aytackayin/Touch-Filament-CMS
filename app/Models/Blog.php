@@ -120,7 +120,7 @@ class Blog extends Model
                 $thumbnails = is_string($thumbnailsData) ? json_decode($thumbnailsData, true) : $thumbnailsData;
 
                 if (is_array($thumbnails) && !empty($thumbnails)) {
-                    $thumbsDir = "blogs/{$model->id}/videos/thumbs";
+                    $thumbsDir = static::getStorageFolder() . "/{$model->id}/videos/thumbs";
 
                     // Ensure thumbs directory exists
                     if (!$disk->exists($thumbsDir)) {
@@ -247,7 +247,7 @@ class Blog extends Model
 
         if ($this->isVideo($path)) {
             $slugName = Str::slug(pathinfo($path, PATHINFO_FILENAME));
-            $thumbPath = "blogs/{$this->id}/videos/thumbs/{$slugName}.jpg";
+            $thumbPath = $this->getFileManagerFolderName() . "/{$this->id}/videos/thumbs/{$slugName}.jpg";
             if (Storage::disk('attachments')->exists($thumbPath)) {
                 return Storage::disk('attachments')->url($thumbPath);
             }

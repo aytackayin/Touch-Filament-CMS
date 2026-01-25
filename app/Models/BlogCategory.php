@@ -46,8 +46,6 @@ class BlogCategory extends Model
     // Temporary storage for old attachments
     public $oldAttachmentsForSync = null;
 
-    // Custom folder name for TouchFileManager
-    protected string $fileManagerFolder = 'blog_categories';
 
     /**
      * Relationships

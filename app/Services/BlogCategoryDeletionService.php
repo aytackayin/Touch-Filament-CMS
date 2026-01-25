@@ -109,12 +109,12 @@ class BlogCategoryDeletionService
     protected function deleteBlog(Blog $blog): void
     {
         // Cleanup TouchFileManager (this also deletes disk files)
-        $folder = TouchFile::where('path', "blogs/{$blog->id}")->where('is_folder', true)->first();
+        $folder = TouchFile::where('path', Blog::getStorageFolder() . "/{$blog->id}")->where('is_folder', true)->first();
         if ($folder) {
             $folder->delete();
         } else {
             // Fallback disk cleanup
-            Storage::disk('attachments')->deleteDirectory("blogs/{$blog->id}");
+            Storage::disk('attachments')->deleteDirectory(Blog::getStorageFolder() . "/{$blog->id}");
         }
 
         // Detach all categories first to prevent cascade issues
@@ -135,11 +135,11 @@ class BlogCategoryDeletionService
     {
         foreach ($categories as $category) {
             if ($category->id) {
-                $folder = TouchFile::where('path', "blog_categories/{$category->id}")->where('is_folder', true)->first();
+                $folder = TouchFile::where('path', BlogCategory::getStorageFolder() . "/{$category->id}")->where('is_folder', true)->first();
                 if ($folder) {
                     $folder->delete();
                 } else {
-                    Storage::disk('attachments')->deleteDirectory("blog_categories/{$category->id}");
+                    Storage::disk('attachments')->deleteDirectory(BlogCategory::getStorageFolder() . "/{$category->id}");
                 }
             }
         }

@@ -69,7 +69,7 @@ class BlogForm
                                     ->multiple()
                                     ->panelLayout('grid')
                                     ->disk('attachments')
-                                    ->directory('blogs/temp')
+                                    ->directory(Blog::getStorageFolder() . '/temp')
                                     ->acceptedFileTypes(['image/*', 'video/*'])
                                     ->imageEditor()
                                     ->enableReordering()
