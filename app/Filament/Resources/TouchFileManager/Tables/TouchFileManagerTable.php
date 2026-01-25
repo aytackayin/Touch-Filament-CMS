@@ -118,12 +118,21 @@ class TouchFileManagerTable
                         'image' => 'success', 'video' => 'info', 'document' => 'primary', 'archive' => 'warning', 'spreadsheet' => 'success', 'presentation' => 'danger', default => 'gray',
                     })
                     ->formatStateUsing(fn(string $state, $record) => $record?->id === 0 ? '' : __('file_manager.label.types.' . $state))
+                    ->toggleable(isToggledHiddenByDefault: fn($livewire) => !in_array('type', $livewire->visibleColumns ?? []))
                     ->extraAttributes(fn($record) => $record?->id === 0 ? ['style' => 'display: none !important;'] : []),
 
+                TextColumn::make('size')->label(__('file_manager.label.size'))
+                    ->formatStateUsing(fn($state, $record) => $record?->id === 0 ? '' : $record->human_size)
+                    ->toggleable(isToggledHiddenByDefault: fn($livewire) => !in_array('size', $livewire->visibleColumns ?? [])),
+
                 TextColumn::make('tags')->label(__('file_manager.label.tags'))->badge()->separator(',')->searchable()->wrap()->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('user.name')->label(__('file_manager.label.author'))->sortable()->toggleable(isToggledHiddenByDefault: true)->formatStateUsing(fn($state, $record) => $record?->id === 0 ? '' : $state),
+                TextColumn::make('user.name')->label(__('file_manager.label.author'))->sortable()
+                    ->toggleable(isToggledHiddenByDefault: fn($livewire) => !in_array('user', $livewire->visibleColumns ?? []))
+                    ->formatStateUsing(fn($state, $record) => $record?->id === 0 ? '' : $state),
                 TextColumn::make('editor.name')->label(__('file_manager.label.last_editor'))->sortable()->toggleable(isToggledHiddenByDefault: true)->formatStateUsing(fn($state, $record) => $record?->id === 0 ? '' : $state),
-                TextColumn::make('created_at')->label(__('file_manager.label.date'))->date()->sortable()->toggleable()->placeholder(''),
+                TextColumn::make('created_at')->label(__('file_manager.label.date'))->date()->sortable()
+                    ->toggleable(isToggledHiddenByDefault: fn($livewire) => !in_array('updated_at', $livewire->visibleColumns ?? []))
+                    ->placeholder(''),
             ])
             ->filters([
                 SelectFilter::make('type')

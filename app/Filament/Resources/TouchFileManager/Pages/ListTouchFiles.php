@@ -15,6 +15,8 @@ use Filament\Forms\Components\Hidden;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 use CodeWithDennis\FilamentSelectTree\SelectTree;
+use Filament\Forms\Components\Radio;
+use Filament\Forms\Components\CheckboxList;
 
 class ListTouchFiles extends ListRecords
 {
@@ -36,17 +38,28 @@ class ListTouchFiles extends ListRecords
     #[\Livewire\Attributes\Url]
     public ?string $iframe = null;
 
+    public array $visibleColumns = [];
+
     public function mount(): void
     {
         parent::mount();
 
-        // If URL param is not present or default, try to load from cookie
+        // Priority: 1. Cookie (browser-specific), 2. User Preference (user-specific), 3. Default
         if (request()->query('view_type') === null) {
-            $savedView = request()->cookie('touchfile_view_type');
-            if ($savedView && in_array($savedView, ['grid', 'list'])) {
-                $this->view_type = $savedView;
+            $cookieView = request()->cookie('touchfile_view_type');
+            if ($cookieView && in_array($cookieView, ['grid', 'list'])) {
+                $this->view_type = $cookieView;
+            } else {
+                $userPrefs = \App\Models\UserPreference::getTableSettings('touchfile_list');
+                if ($userPrefs && isset($userPrefs['view_type'])) {
+                    $this->view_type = $userPrefs['view_type'];
+                }
             }
         }
+
+        // Load visible columns from user preferences
+        $userPrefs = \App\Models\UserPreference::getTableSettings('touchfile_list');
+        $this->visibleColumns = $userPrefs['visible_columns'] ?? ['type', 'size', 'user'];
     }
 
     public function getBreadcrumbs(): array
@@ -368,6 +381,51 @@ class ListTouchFiles extends ListRecords
                     'view_type' => $this->view_type,
                     'iframe' => $this->iframe,
                 ])),
+
+            Action::make('tableSettings')
+                ->label(__('file_manager.label.settings'))
+                ->tooltip(__('file_manager.label.settings'))
+                ->hiddenLabel()
+                ->icon('heroicon-o-cog-6-tooth')
+                ->color('gray')
+                ->size('xs')
+                ->form([
+                    Section::make(__('file_manager.label.settings'))
+                        ->schema([
+                            Radio::make('view_type')
+                                ->label(__('blog.label.default_view'))
+                                ->options([
+                                    'list' => __('file_manager.label.list_view'),
+                                    'grid' => __('file_manager.label.grid_view'),
+                                ])
+                                ->default(fn() => \App\Models\UserPreference::getTableSettings('touchfile_list')['view_type'] ?? 'grid')
+                                ->inline()
+                                ->required(),
+                            CheckboxList::make('visible_columns')
+                                ->label(__('blog.label.visible_columns'))
+                                ->options([
+                                    'type' => __('file_manager.label.type'),
+                                    'size' => __('file_manager.label.size'),
+                                    'user' => __('file_manager.label.uploaded_by'),
+                                    'updated_at' => __('file_manager.label.updated_at'),
+                                ])
+                                ->default(fn() => \App\Models\UserPreference::getTableSettings('touchfile_list')['visible_columns'] ?? ['type', 'size', 'user'])
+                                ->columns(2),
+                        ]),
+                ])
+                ->action(function (array $data) {
+                    \App\Models\UserPreference::setTableSettings('touchfile_list', $data);
+
+                    \Filament\Notifications\Notification::make()
+                        ->title(__('blog.label.settings_saved'))
+                        ->success()
+                        ->send();
+
+                    return redirect(static::getResource()::getUrl('index', [
+                        'parent_id' => $this->parent_id,
+                        'iframe' => $this->iframe,
+                    ]));
+                }),
 
             Action::make('toggleView')
                 ->label($this->view_type === 'grid' ? __('file_manager.label.list_view') : __('file_manager.label.grid_view'))

@@ -55,24 +55,25 @@ class BlogCategoriesTable
                     ->badge()
                     ->separator(',')
                     ->searchable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->toggleable(isToggledHiddenByDefault: fn($livewire) => !in_array('tags', $livewire->visibleColumns ?? [])),
                 TextColumn::make('user.name')
                     ->label(__('blog.label.author'))
                     ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->toggleable(isToggledHiddenByDefault: fn($livewire) => !in_array('user', $livewire->visibleColumns ?? [])),
                 TextColumn::make('editor.name')
                     ->label(__('blog.label.last_edited_by'))
                     ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->toggleable(isToggledHiddenByDefault: fn($livewire) => !in_array('editor', $livewire->visibleColumns ?? [])),
                 TextColumn::make('parent.title')
                     ->label(__('blog.label.parent_category'))
                     ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->toggleable(isToggledHiddenByDefault: fn($livewire) => !in_array('parent', $livewire->visibleColumns ?? [])),
                 IconColumn::make('is_published')
                     ->label(__('blog.label.is_published'))
                     ->size(IconSize::Medium)
                     ->alignCenter(true)
                     ->boolean()
+                    ->toggleable(isToggledHiddenByDefault: fn($livewire) => !in_array('is_published', $livewire->visibleColumns ?? []))
                     ->action(function ($record) {
                         if (auth()->user()->can('update', $record)) {
                             $record->is_published = !$record->is_published;
@@ -83,7 +84,7 @@ class BlogCategoriesTable
                     ->label(__('blog.label.created_at'))
                     ->dateTime()
                     ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->toggleable(isToggledHiddenByDefault: fn($livewire) => !in_array('created_at', $livewire->visibleColumns ?? [])),
             ])
             ->reorderable('sort')
             ->defaultSort('sort', 'asc')
