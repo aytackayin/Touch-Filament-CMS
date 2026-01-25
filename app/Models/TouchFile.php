@@ -150,20 +150,42 @@ class TouchFile extends Model
 
         $thumbsDir = ($dir === '.' || $dir === '') ? 'thumbs' : "{$dir}/thumbs";
         $sizes = $this->getThumbnailSizes();
-        sort($sizes);
+        rsort($sizes); // Prioritize larger/better quality
 
-        foreach ($sizes as $size) {
-            $thumbFile = ($this->type === 'video') ? "{$nameOnly}_{$size}.jpg" : "{$nameOnly}_{$size}.{$extension}";
-            $thumbPath = "{$thumbsDir}/{$thumbFile}";
+        if ($this->type === 'video') {
+            $slugName = Str::slug($nameOnly);
+            foreach ($sizes as $size) {
+                // Check slugged with size
+                $thumbPath = "{$thumbsDir}/{$slugName}_{$size}.jpg";
+                if ($disk->exists($thumbPath))
+                    return $thumbPath;
 
-            if ($disk->exists($thumbPath))
-                return $thumbPath;
+                // Also check non-slugged with size for compatibility
+                $thumbPathNonSlug = "{$thumbsDir}/{$nameOnly}_{$size}.jpg";
+                if ($disk->exists($thumbPathNonSlug))
+                    return $thumbPathNonSlug;
+            }
+
+            // Legacy/Fallback (No size suffix)
+            $legacyThumbSlug = "{$thumbsDir}/{$slugName}.jpg";
+            if ($disk->exists($legacyThumbSlug))
+                return $legacyThumbSlug;
+
+            $legacyThumb = "{$thumbsDir}/{$nameOnly}.jpg";
+            if ($disk->exists($legacyThumb))
+                return $legacyThumb;
+        } else {
+            foreach ($sizes as $size) {
+                $thumbPath = "{$thumbsDir}/{$nameOnly}_{$size}.{$extension}";
+                if ($disk->exists($thumbPath))
+                    return $thumbPath;
+            }
+
+            // Legacy/Fallback
+            $legacyThumb = "{$thumbsDir}/" . basename($path);
+            if ($disk->exists($legacyThumb))
+                return $legacyThumb;
         }
-
-        // Legacy/Fallback
-        $legacyThumb = "{$thumbsDir}/" . ($this->type === 'video' ? "{$nameOnly}.jpg" : basename($path));
-        if ($disk->exists($legacyThumb))
-            return $legacyThumb;
 
         return ($this->type === 'image') ? $this->path : null;
     }

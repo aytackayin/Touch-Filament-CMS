@@ -168,30 +168,20 @@ $attachments = computed(fn() => collect($this->blog->attachments ?? [])->reverse
                 <div class="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-6 gap-4">
                     @foreach($this->attachments as $index => $attachment)
                         @php
-                            $isImage = str_ends_with($attachment, '.jpg') || str_ends_with($attachment, '.png') || str_ends_with($attachment, '.webp');
-                            $isVideo = str_ends_with($attachment, '.mp4') || str_ends_with($attachment, '.webm');
-                            
-                            $hasVideoThumb = false;
-                            $videoThumbUrl = '';
-                            if ($isVideo) {
-                                $slugName = Str::slug(pathinfo($attachment, PATHINFO_FILENAME));
-                                $thumbPath = $this->blog->getStorageFolder() . "/{$this->blog->id}/videos/thumbs/{$slugName}.jpg";
-                                if (Storage::disk('attachments')->exists($thumbPath)) {
-                                    $hasVideoThumb = true;
-                                    $videoThumbUrl = Storage::disk('attachments')->url($thumbPath);
-                                }
-                            }
+                            $thumbUrl = $this->blog->getThumbnailUrl($attachment);
+                            $isVideo = $this->blog->isVideo($attachment);
+                            $isImage = $this->blog->isImage($attachment);
                         @endphp
                         <button @click="lightbox = true; activeThumb = {{ $index }}" 
                                 class="group relative aspect-square rounded-2xl overflow-hidden bg-slate-100 dark:bg-[#2a2b3c] focus:outline-none focus:ring-4 focus:ring-indigo-500/20">
                             
-                            @if($isImage)
-                                <img src="{{ Storage::disk('attachments')->url($attachment) }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
-                            @elseif($hasVideoThumb)
-                                <img src="{{ $videoThumbUrl }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
-                                <div class="absolute inset-0 bg-black/20 flex items-center justify-center">
-                                    <svg class="w-10 h-10 text-white/80" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"></path></svg>
-                                </div>
+                            @if($thumbUrl)
+                                <img src="{{ $thumbUrl }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                                @if($isVideo)
+                                    <div class="absolute inset-0 bg-black/20 flex items-center justify-center">
+                                        <svg class="w-10 h-10 text-white/80" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"></path></svg>
+                                    </div>
+                                @endif
                             @elseif($isVideo)
                                 <div class="w-full h-full flex items-center justify-center bg-slate-200 dark:bg-slate-800">
                                     <svg class="w-10 h-10 text-slate-400" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"></path></svg>

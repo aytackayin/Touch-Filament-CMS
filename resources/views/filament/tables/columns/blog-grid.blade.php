@@ -1,44 +1,9 @@
 @php
     $record = $getRecord();
-    // Reverse attachments array as they are stored in reverse order
-    $attachments = is_array($record->attachments) ? array_reverse(array_values($record->attachments)) : [];
-    $imageUrl = null;
-    $disk = \Illuminate\Support\Facades\Storage::disk('attachments');
-
-    foreach ($attachments as $attachment) {
-        if (!is_string($attachment))
-            continue;
-
-        $ext = strtolower(pathinfo($attachment, PATHINFO_EXTENSION));
-
-        // Case 1: Image attachment
-        if (in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'])) {
-            $filename = basename($attachment);
-            $thumbPath = $record->getStorageFolder() . "/{$record->id}/images/thumbs/{$filename}";
-
-            if ($disk->exists($thumbPath)) {
-                $imageUrl = $disk->url($thumbPath);
-            } elseif ($disk->exists($attachment)) {
-                $imageUrl = $disk->url($attachment);
-            }
-        }
-        // Case 2: Video attachment
-        elseif (in_array($ext, ['mp4', 'mov', 'avi', 'wmv', 'flv', 'mkv', 'webm'])) {
-            $videoName = pathinfo($attachment, PATHINFO_FILENAME);
-            $videoThumbPath = $record->getStorageFolder() . "/{$record->id}/videos/thumbs/{$videoName}.jpg";
-
-            if ($disk->exists($videoThumbPath)) {
-                $imageUrl = $disk->url($videoThumbPath);
-            }
-        }
-
-        if ($imageUrl) {
-            break;
-        }
-    }
+    $imageUrl = $record->getThumbnailUrl();
 
     $fallbackUrl = url('/assets/icons/colorful-icons/grid-blog.svg');
-    if (!$imageUrl) {
+    if (!$imageUrl || $imageUrl === 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?auto=format&fit=crop&q=80&w=2070') {
         $imageUrl = $fallbackUrl;
     }
 

@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Support\Str;
 use App\Services\BlogCategoryDeletionService;
 use App\Traits\HasFileManagerSync;
+use Illuminate\Support\Facades\Storage;
 
 class BlogCategory extends Model
 {
@@ -148,5 +149,71 @@ class BlogCategory extends Model
         }
 
         return $slug;
+    }
+
+    public function getCoverMediaAttribute()
+    {
+        if (empty($this->attachments)) {
+            return null;
+        }
+        return collect($this->attachments)->last();
+    }
+
+    public function getThumbnailUrl($path = null)
+    {
+        $path = $path ?? $this->cover_media;
+
+        if (!$path) {
+            return url('/assets/icons/colorful-icons/blog-category.svg');
+        }
+
+        $path = str_replace('\\', '/', $path);
+        $disk = Storage::disk('attachments');
+
+        if (!$disk->exists($path)) {
+            return url('/assets/icons/colorful-icons/blog-category.svg');
+        }
+
+        $dir = dirname($path);
+        $filename = basename($path);
+        $nameOnly = pathinfo($filename, PATHINFO_FILENAME);
+        $extension = pathinfo($filename, PATHINFO_EXTENSION);
+        $thumbsDir = ($dir === '.' || $dir === '') ? 'thumbs' : "{$dir}/thumbs";
+
+        $sizes = $this->getThumbnailSizes();
+        rsort($sizes); // Prioritize larger/better quality
+
+        if ($this->isVideo($path)) {
+            $slugName = Str::slug($nameOnly);
+            foreach ($sizes as $size) {
+                $tPath = "{$thumbsDir}/{$slugName}_{$size}.jpg";
+                if ($disk->exists($tPath)) {
+                    return $disk->url($tPath);
+                }
+            }
+            // Legacy/Fallback
+            $legacyPath = "{$thumbsDir}/{$slugName}.jpg";
+            if ($disk->exists($legacyPath)) {
+                return $disk->url($legacyPath);
+            }
+
+            // If still no video thumb, fallback to FIRST AVAILABLE IMAGE THUMB within this record
+            $firstImage = collect($this->attachments)->filter(fn($a) => $this->isImage($a))->first();
+            if ($firstImage && $firstImage !== $path) {
+                return $this->getThumbnailUrl($firstImage);
+            }
+
+            return null;
+        }
+
+        // Image
+        foreach ($sizes as $size) {
+            $tPath = "{$thumbsDir}/{$nameOnly}_{$size}.{$extension}";
+            if ($disk->exists($tPath)) {
+                return $disk->url($tPath);
+            }
+        }
+
+        return $disk->url($path);
     }
 }

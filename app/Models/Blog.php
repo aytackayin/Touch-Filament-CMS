@@ -214,19 +214,7 @@ class Blog extends Model
         return $cover;
     }
 
-    public function isVideo($path): bool
-    {
-        if (!$path)
-            return false;
-        return str_ends_with(strtolower($path), '.mp4') || str_ends_with(strtolower($path), '.webm');
-    }
 
-    public function isImage($path): bool
-    {
-        if (!$path)
-            return false;
-        return str_ends_with(strtolower($path), '.jpg') || str_ends_with(strtolower($path), '.jpeg') || str_ends_with(strtolower($path), '.png') || str_ends_with(strtolower($path), '.webp');
-    }
 
     public function getThumbnailUrl($path = null)
     {
@@ -236,16 +224,54 @@ class Blog extends Model
             return 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?auto=format&fit=crop&q=80&w=2070';
         }
 
+        $path = str_replace('\\', '/', $path);
+        $disk = Storage::disk('attachments');
+
+        if (!$disk->exists($path)) {
+            return 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?auto=format&fit=crop&q=80&w=2070';
+        }
+
+        $dir = dirname($path);
+        $filename = basename($path);
+        $nameOnly = pathinfo($filename, PATHINFO_FILENAME);
+        $extension = pathinfo($filename, PATHINFO_EXTENSION);
+        $thumbsDir = ($dir === '.' || $dir === '') ? 'thumbs' : "{$dir}/thumbs";
+
+        $sizes = $this->getThumbnailSizes();
+        rsort($sizes); // Prioritize larger/better quality
+
         if ($this->isVideo($path)) {
-            $slugName = Str::slug(pathinfo($path, PATHINFO_FILENAME));
-            $thumbPath = $this->getFileManagerFolderName() . "/{$this->id}/videos/thumbs/{$slugName}.jpg";
-            if (Storage::disk('attachments')->exists($thumbPath)) {
-                return Storage::disk('attachments')->url($thumbPath);
+            $slugName = Str::slug($nameOnly);
+            foreach ($sizes as $size) {
+                $tPath = "{$thumbsDir}/{$slugName}_{$size}.jpg";
+                if ($disk->exists($tPath)) {
+                    return $disk->url($tPath);
+                }
             }
+            // Legacy/Fallback
+            $legacyPath = "{$thumbsDir}/{$slugName}.jpg";
+            if ($disk->exists($legacyPath)) {
+                return $disk->url($legacyPath);
+            }
+
+            // If still no video thumb, fallback to FIRST AVAILABLE IMAGE THUMB within this record
+            $firstImage = collect($this->attachments)->filter(fn($a) => $this->isImage($a))->first();
+            if ($firstImage && $firstImage !== $path) {
+                return $this->getThumbnailUrl($firstImage);
+            }
+
             return null;
         }
 
-        return Storage::disk('attachments')->url($path);
+        // Image
+        foreach ($sizes as $size) {
+            $tPath = "{$thumbsDir}/{$nameOnly}_{$size}.{$extension}";
+            if ($disk->exists($tPath)) {
+                return $disk->url($tPath);
+            }
+        }
+
+        return $disk->url($path);
     }
 
     public function getMediaUrl($path = null)

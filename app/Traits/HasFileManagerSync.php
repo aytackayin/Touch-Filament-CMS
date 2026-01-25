@@ -164,4 +164,17 @@ trait HasFileManagerSync
 
         return config('touch-file-manager.thumb_sizes', [150]);
     }
+    public function isVideo($path): bool
+    {
+        if (!$path)
+            return false;
+        return str_ends_with(strtolower($path), '.mp4') || str_ends_with(strtolower($path), '.webm');
+    }
+
+    public function isImage($path): bool
+    {
+        if (!$path)
+            return false;
+        return str_ends_with(strtolower($path), '.jpg') || str_ends_with(strtolower($path), '.jpeg') || str_ends_with(strtolower($path), '.png') || str_ends_with(strtolower($path), '.webp');
+    }
 }

@@ -67,35 +67,11 @@ class BlogResource extends Resource implements HasShieldPermissions
     {
         $details = [];
 
-        // 0. Set default image from config or fallback
-        $iconBase = config('blog.icon_paths.base', '/assets/icons/default/');
-        $iconFile = config('blog.icon_paths.file', 'blog.svg');
-        $imageUrl = url($iconBase . $iconFile);
-
-        $attachments = $record->attachments;
-
-        if (is_array($attachments) && count($attachments) > 0) {
-            foreach (array_reverse($attachments) as $attachment) {
-                // Check if it's an image
-                if ($record->isImage($attachment)) {
-                    $filename = basename($attachment);
-                    $thumbPath = Blog::getStorageFolder() . "/{$record->id}/images/thumbs/{$filename}";
-                    if (Storage::disk('attachments')->exists($thumbPath)) {
-                        $imageUrl = Storage::disk('attachments')->url($thumbPath);
-                        break;
-                    }
-                }
-
-                // Check if it's a video
-                if ($record->isVideo($attachment)) {
-                    $slugName = Str::slug(pathinfo($attachment, PATHINFO_FILENAME));
-                    $thumbPath = Blog::getStorageFolder() . "/{$record->id}/videos/thumbs/{$slugName}.jpg";
-                    if (Storage::disk('attachments')->exists($thumbPath)) {
-                        $imageUrl = Storage::disk('attachments')->url($thumbPath);
-                        break;
-                    }
-                }
-            }
+        $imageUrl = $record->getThumbnailUrl();
+        if (!$imageUrl) {
+            $iconBase = config('blog.icon_paths.base', '/assets/icons/default/');
+            $iconFile = config('blog.icon_paths.file', 'blog.svg');
+            $imageUrl = url($iconBase . $iconFile);
         }
 
         $uniqueId = 'gs-blog-' . $record->id;

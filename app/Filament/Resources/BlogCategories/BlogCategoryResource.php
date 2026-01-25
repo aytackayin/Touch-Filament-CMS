@@ -74,25 +74,11 @@ class BlogCategoryResource extends Resource implements HasShieldPermissions
     {
         $details = [];
 
-        // 0. Set default image from config or fallback
-        $iconBase = config('blogcategory.icon_paths.base', '/assets/icons/default/');
-        $iconFile = config('blogcategory.icon_paths.file', 'blog-category.svg');
-        $imageUrl = url($iconBase . $iconFile);
-
-        $attachments = $record->attachments;
-
-        if (is_array($attachments) && count($attachments) > 0) {
-            foreach (array_reverse($attachments) as $attachment) {
-                // Check if it's an image
-                if (preg_match('/\.(jpg|jpeg|png|gif|webp|bmp|svg)$/i', $attachment)) {
-                    $filename = basename($attachment);
-                    $thumbPath = BlogCategory::getStorageFolder() . "/{$record->id}/images/thumbs/{$filename}";
-                    if (Storage::disk('attachments')->exists($thumbPath)) {
-                        $imageUrl = Storage::disk('attachments')->url($thumbPath);
-                        break;
-                    }
-                }
-            }
+        $imageUrl = $record->getThumbnailUrl();
+        if (!$imageUrl) {
+            $iconBase = config('blogcategory.icon_paths.base', '/assets/icons/default/');
+            $iconFile = config('blogcategory.icon_paths.file', 'blog-category.svg');
+            $imageUrl = url($iconBase . $iconFile);
         }
 
         $uniqueId = 'gs-cat-' . $record->id;
