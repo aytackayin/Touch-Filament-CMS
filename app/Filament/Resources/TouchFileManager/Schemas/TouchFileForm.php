@@ -31,9 +31,17 @@ class TouchFileForm
                                     ->label(__('file_manager.label.name'))
                                     ->required()
                                     ->maxLength(255)
-                                    ->notIn(TouchFile::RESERVED_NAMES)
-                                    ->validationMessages([
-                                        'not_in' => __('file_manager.errors.reserved_name'),
+                                    ->rules([
+                                        function ($get) {
+                                            return function (string $attribute, $value, $fail) use ($get) {
+                                                if (!$get('parent_id')) {
+                                                    $reservedNames = TouchFile::getReservedNames();
+                                                    if (in_array(strtolower($value), $reservedNames)) {
+                                                        $fail(__('file_manager.errors.reserved_name'));
+                                                    }
+                                                }
+                                            };
+                                        },
                                     ])
                                     ->extraInputAttributes(fn($record) => [
                                         'style' => 'text-transform: lowercase',
@@ -223,9 +231,17 @@ class TouchFileForm
                             ->label(__('file_manager.label.folder_name'))
                             ->required()
                             ->maxLength(255)
-                            ->notIn(TouchFile::RESERVED_NAMES)
-                            ->validationMessages([
-                                'not_in' => __('file_manager.errors.reserved_name'),
+                            ->rules([
+                                function ($get) {
+                                    return function (string $attribute, $value, $fail) use ($get) {
+                                        if (!$get('parent_id')) {
+                                            $reservedNames = TouchFile::getReservedNames();
+                                            if (in_array(strtolower($value), $reservedNames)) {
+                                                $fail(__('file_manager.errors.reserved_name'));
+                                            }
+                                        }
+                                    };
+                                },
                             ])
                             ->extraInputAttributes([
                                 'style' => 'text-transform: lowercase',

@@ -6,83 +6,64 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Str;
 
 class TouchFile extends Model
 {
     use HasFactory;
-    public const RESERVED_NAMES = [
-        // Windows Reserved Names
-        'con',
-        'prn',
-        'aux',
-        'nul',
-        'com1',
-        'com2',
-        'com3',
-        'com4',
-        'com5',
-        'com6',
-        'com7',
-        'com8',
-        'com9',
-        'lpt1',
-        'lpt2',
-        'lpt3',
-        'lpt4',
-        'lpt5',
-        'lpt6',
-        'lpt7',
-        'lpt8',
-        'lpt9',
+    /**
+     * Get names of all models in the App\Models namespace
+     */
+    public static function getAllModelFolderNames(): array
+    {
+        $names = [];
+        $modelPath = app_path('Models');
 
-        // Linux/System Common Directories
-        'bin',
-        'etc',
-        'usr',
-        'var',
-        'boot',
-        'dev',
-        'home',
-        'lib',
-        'lib64',
-        'mnt',
-        'opt',
-        'proc',
-        'run',
-        'sbin',
-        'srv',
-        'sys',
-        'tmp',
+        if (is_dir($modelPath)) {
+            foreach (scandir($modelPath) as $file) {
+                if (str_ends_with($file, '.php')) {
+                    $names[] = Str::lower(substr($file, 0, -4));
+                }
+            }
+        }
 
-        // App/Laravel/Filament Specific
-        'thumb',
-        'thumbs',
-        'temp',
-        'temps',
-        'attachment',
-        'attachments',
-        'default',
-        'defaults',
-        'public',
-        'publics',
-        'local',
-        's3',
-        'root',
-        'storage',
-        'app',
-        'config',
-        'database',
-        'lang',
-        'node_modules',
-        'resources',
-        'routes',
-        'tests',
-        'vendor',
-        'bootstrap',
-        'filament',
-        'livewire',
-        'assets'
-    ];
+        return array_unique($names);
+    }
+
+    public static function getDynamicModelAssociations(): array
+    {
+        $associations = [];
+        $modelPath = app_path('Models');
+
+        if (is_dir($modelPath)) {
+            foreach (scandir($modelPath) as $file) {
+                if (str_ends_with($file, '.php')) {
+                    $className = 'App\\Models\\' . substr($file, 0, -4);
+                    if (class_exists($className)) {
+                        $traits = class_uses_recursive($className);
+                        // Sadece senkronizasyon gerektiren modeller (ID bazlı klasör kontrolü için)
+                        if (isset($traits['App\\Traits\\HasFileManagerSync'])) {
+                            if (method_exists($className, 'getStorageFolder')) {
+                                $associations[$className::getStorageFolder()] = $className;
+                            } else {
+                                $associations[Str::lower(class_basename($className))] = $className;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return $associations;
+    }
+
+    public static function getReservedNames(): array
+    {
+        $configNames = config('touch-file-manager.reserved_names', []);
+        $modelFolders = static::getAllModelFolderNames();
+
+        return array_unique(array_merge($configNames, $modelFolders));
+    }
 
     protected $fillable = [
         'user_id',

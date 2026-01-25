@@ -101,8 +101,18 @@ class ListTouchFiles extends ListRecords
                 ->visible(fn() => auth()->user()->can('sync', TouchFile::class))
                 ->action(function () {
                     $disk = Storage::disk('attachments');
-                    $allFiles = $disk->allFiles();
-                    $allDirectories = $disk->allDirectories();
+
+                    $parentId = $this->parent_id;
+                    $basePath = null;
+                    if ($parentId) {
+                        $parentFolder = TouchFile::find($parentId);
+                        if ($parentFolder) {
+                            $basePath = $parentFolder->path;
+                        }
+                    }
+
+                    $allFiles = $disk->allFiles($basePath);
+                    $allDirectories = $disk->allDirectories($basePath);
 
                     $isExcluded = function ($path) {
                         $parts = explode('/', $path);
@@ -117,7 +127,7 @@ class ListTouchFiles extends ListRecords
                     $addedCount = 0;
                     $removedCount = 0;
 
-                    // 1. Process Directories (Add Missing)
+                    // 1. Process Directories (Add Missing & Validate Models)
                     usort($allDirectories, function ($a, $b) {
                         return strlen($a) - strlen($b);
                     });
@@ -126,6 +136,13 @@ class ListTouchFiles extends ListRecords
                         if ($isExcluded($dirPath))
                             continue;
 
+                        // STICKY SYNC: Validate folder if it's inside a model directory
+                        if (!$this->isAuthorizedPath($dirPath)) {
+                            $disk->deleteDirectory($dirPath);
+                            $removedCount++;
+                            continue;
+                        }
+
                         $existing = TouchFile::where('is_folder', true)
                             ->where('path', $dirPath)
                             ->exists();
@@ -133,12 +150,12 @@ class ListTouchFiles extends ListRecords
                         if (!$existing) {
                             $name = basename($dirPath);
                             $parentPath = dirname($dirPath);
-                            $parentId = null;
+                            $foundParentId = null;
 
                             if ($parentPath !== '.') {
                                 $parent = TouchFile::where('is_folder', true)->where('path', $parentPath)->first();
                                 if ($parent) {
-                                    $parentId = $parent->id;
+                                    $foundParentId = $parent->id;
                                 }
                             }
 
@@ -147,17 +164,24 @@ class ListTouchFiles extends ListRecords
                                 'name' => $name,
                                 'path' => $dirPath,
                                 'is_folder' => true,
-                                'parent_id' => $parentId,
+                                'parent_id' => $foundParentId,
                             ]);
 
                             $addedCount++;
                         }
                     }
 
-                    // 2. Process Files (Add Missing)
+                    // 2. Process Files (Add Missing & Validate Models)
                     foreach ($allFiles as $filePath) {
                         if ($isExcluded($filePath))
                             continue;
+
+                        // STICKY SYNC: Validate file if it's inside a model directory
+                        if (!$this->isAuthorizedPath($filePath)) {
+                            $disk->delete($filePath);
+                            $removedCount++;
+                            continue;
+                        }
 
                         $existing = TouchFile::where('is_folder', false)
                             ->where('path', $filePath)
@@ -166,12 +190,12 @@ class ListTouchFiles extends ListRecords
                         if (!$existing) {
                             $name = basename($filePath);
                             $parentPath = dirname($filePath);
-                            $parentId = null;
+                            $foundParentId = null;
 
                             if ($parentPath !== '.') {
                                 $parent = TouchFile::where('is_folder', true)->where('path', $parentPath)->first();
                                 if ($parent) {
-                                    $parentId = $parent->id;
+                                    $foundParentId = $parent->id;
                                 }
                             }
 
@@ -184,7 +208,7 @@ class ListTouchFiles extends ListRecords
                                 'name' => $name,
                                 'path' => $filePath,
                                 'is_folder' => false,
-                                'parent_id' => $parentId,
+                                'parent_id' => $foundParentId,
                                 'mime_type' => $mimeType,
                                 'size' => $size,
                                 'type' => $type,
@@ -195,8 +219,16 @@ class ListTouchFiles extends ListRecords
                     }
 
                     // 3. Cleanup Orphaned Records
+                    $query = TouchFile::query();
+                    if ($basePath) {
+                        $query->where(function ($q) use ($basePath) {
+                            $q->where('path', $basePath)
+                                ->orWhere('path', 'like', $basePath . '/%');
+                        });
+                    }
+
                     // Check Files First
-                    $files = TouchFile::where('is_folder', false)->get();
+                    $files = (clone $query)->where('is_folder', false)->get();
                     foreach ($files as $file) {
                         if (!$disk->exists($file->path)) {
                             $file->delete();
@@ -205,7 +237,7 @@ class ListTouchFiles extends ListRecords
                     }
 
                     // Check Folders Next
-                    $folders = TouchFile::where('is_folder', true)->get();
+                    $folders = (clone $query)->where('is_folder', true)->get();
                     foreach ($folders as $folder) {
                         // Skip if already deleted (by parent recursive delete)
                         if (TouchFile::where('id', $folder->id)->doesntExist()) {
@@ -244,9 +276,18 @@ class ListTouchFiles extends ListRecords
                                             ->label(__('file_manager.label.folder_name'))
                                             ->required()
                                             ->maxLength(255)
-                                            ->notIn(TouchFile::RESERVED_NAMES)
-                                            ->validationMessages([
-                                                'not_in' => __('file_manager.errors.reserved_name'),
+                                            ->rules([
+                                                function () use ($parentId) {
+                                                    return function (string $attribute, $value, $fail) use ($parentId) {
+                                                        // Only restrict reserved names at the root level
+                                                        if (!$parentId) {
+                                                            $reservedNames = TouchFile::getReservedNames();
+                                                            if (in_array(strtolower($value), $reservedNames)) {
+                                                                $fail(__('file_manager.errors.reserved_name'));
+                                                            }
+                                                        }
+                                                    };
+                                                },
                                             ])
                                             ->extraInputAttributes([
                                                 'style' => 'text-transform: lowercase',
@@ -337,5 +378,41 @@ class ListTouchFiles extends ListRecords
                     ]));
                 }),
         ];
+    }
+
+    /**
+     * Check if a given path is authorized by a model record
+     */
+    protected function isAuthorizedPath(?string $path): bool
+    {
+        if (!$path)
+            return true;
+
+        $modelConfigs = TouchFile::getDynamicModelAssociations();
+        $parts = explode('/', str_replace('\\', '/', $path));
+        $rootFolder = $parts[0] ?? null;
+
+        if ($rootFolder && array_key_exists($rootFolder, $modelConfigs)) {
+            $modelClass = $modelConfigs[$rootFolder];
+            $recordId = $parts[1] ?? null;
+
+            if ($recordId !== null) {
+                // If the folder is 'temp', 'content-images', 'thumbs' etc, we skip model validation 
+                // but usually those are inside the ID folder.
+                // If the second part is NOT numeric (like 'temp' directly in root of model), it's unauthorized
+                if (!is_numeric($recordId)) {
+                    // Allow certain reserved names directly under model folder if needed, 
+                    // but according to user request, everything under model folder must relate to a record.
+                    // We already exclude 'temp' and 'thumbs' in the loop before calling this, 
+                    // so if we are here, it's likely a record folder or unauthorized file.
+                    return false;
+                }
+
+                // Check if record exists
+                return $modelClass::where('id', $recordId)->exists();
+            }
+        }
+
+        return true;
     }
 }
