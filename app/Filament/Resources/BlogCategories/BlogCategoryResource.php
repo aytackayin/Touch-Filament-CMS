@@ -74,8 +74,11 @@ class BlogCategoryResource extends Resource implements HasShieldPermissions
     {
         $details = [];
 
-        // 1. Thumbnail or Icon
-        $imageUrl = url('/assets/icons/colorful-icons/blog-category.svg');
+        // 0. Set default image from config or fallback
+        $iconBase = config('blogcategory.icon_paths.base', '/assets/icons/default/');
+        $iconFile = config('blogcategory.icon_paths.file', 'blog-category.svg');
+        $imageUrl = url($iconBase . $iconFile);
+
         $attachments = $record->attachments;
 
         if (is_array($attachments) && count($attachments) > 0) {
