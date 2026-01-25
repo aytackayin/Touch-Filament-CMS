@@ -180,6 +180,110 @@ trait HasFileManagerSync
 
         return $config['url'] ?? null;
     }
+    public function getThumbnailPath($path = null): ?string
+    {
+        $path = $path ?? ($this->cover_media ?? ($this->path ?? null));
+
+        if (!$path || (isset($this->is_folder) && $this->is_folder)) {
+            return null;
+        }
+
+        $path = str_replace('\\', '/', $path);
+        $disk = \Illuminate\Support\Facades\Storage::disk('attachments');
+
+        if (!$disk->exists($path)) {
+            return null;
+        }
+
+        $dir = dirname($path);
+        $filename = basename($path);
+        $nameOnly = pathinfo($filename, PATHINFO_FILENAME);
+        $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+        $thumbsDir = ($dir === '.' || $dir === '') ? 'thumbs' : "{$dir}/thumbs";
+
+        // Determine type if not provided (e.g., Blog model doesn't have 'type' column)
+        $type = $this->type ?? (method_exists($this, 'isVideo') && $this->isVideo($path) ? 'video' : (method_exists($this, 'isImage') && $this->isImage($path) ? 'image' : 'other'));
+
+        if ($type === 'other') {
+            $type = TouchFile::determineFileType($disk->mimeType($path) ?? '', $path);
+        }
+
+        $sizes = $this->getThumbnailSizes();
+        rsort($sizes); // Prioritize larger/better quality
+
+        if ($type === 'video') {
+            $slugName = \Illuminate\Support\Str::slug($nameOnly);
+            $searchNames = array_unique([$slugName, $nameOnly]);
+            $imageExts = ['jpg', 'jpeg', 'png', 'webp'];
+
+            foreach ($searchNames as $name) {
+                // 1. Try with sizes
+                foreach ($sizes as $size) {
+                    foreach ($imageExts as $ext) {
+                        $tPath = "{$thumbsDir}/{$name}_{$size}.{$ext}";
+                        if ($disk->exists($tPath))
+                            return $tPath;
+                    }
+                }
+                // 2. Try without sizes (Legacy/Fallback)
+                foreach ($imageExts as $ext) {
+                    $tPath = "{$thumbsDir}/{$name}.{$ext}";
+                    if ($disk->exists($tPath))
+                        return $tPath;
+                }
+            }
+
+            // 3. Fallback to first available image thumbnail in this record
+            if (isset($this->attachments) && is_array($this->attachments)) {
+                $firstImage = collect($this->attachments)->filter(fn($a) => $this->isImage($a))->first();
+                if ($firstImage && $firstImage !== $path) {
+                    return $this->getThumbnailPath($firstImage);
+                }
+            }
+        }
+
+        if ($type === 'image') {
+            // 1. Try with sizes
+            foreach ($sizes as $size) {
+                // Same extension
+                $tPath = "{$thumbsDir}/{$nameOnly}_{$size}.{$extension}";
+                if ($disk->exists($tPath))
+                    return $tPath;
+
+                // Fallback to jpg if original was different
+                if ($extension !== 'jpg') {
+                    $tPath = "{$thumbsDir}/{$nameOnly}_{$size}.jpg";
+                    if ($disk->exists($tPath))
+                        return $tPath;
+                }
+            }
+
+            // 2. Try without sizes (Legacy/Fallback)
+            $legacyPaths = [
+                "{$thumbsDir}/{$filename}",
+                "{$thumbsDir}/{$nameOnly}.jpg",
+                "{$thumbsDir}/{$nameOnly}.webp"
+            ];
+            foreach ($legacyPaths as $lPath) {
+                if ($disk->exists($lPath))
+                    return $lPath;
+            }
+        }
+
+        // Return original if it's an image, or null if it's something else we can't thumb
+        return ($type === 'image') ? $path : null;
+    }
+
+    public function getThumbnailUrl($path = null): ?string
+    {
+        $thumbPath = $this->getThumbnailPath($path);
+
+        if ($thumbPath) {
+            return \Illuminate\Support\Facades\Storage::disk('attachments')->url($thumbPath);
+        }
+
+        return null;
+    }
     public function isVideo($path): bool
     {
         if (!$path)

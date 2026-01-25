@@ -29,6 +29,13 @@ class BlogCategoriesTable
             ->paginatedWhileReordering()
             ->recordUrl(null)
             ->columns([
+                \Filament\Tables\Columns\ImageColumn::make('cover_thumbnail')
+                    ->label('')
+                    ->disk('attachments')
+                    ->state(fn(BlogCategory $record) => $record->getThumbnailPath())
+                    ->defaultImageUrl(fn(BlogCategory $record) => url(config('blogcategory.icon_paths.base') . config('blogcategory.icon_paths.file')))
+                    ->circular()
+                    ->size(40),
                 TextColumn::make('title')
                     ->label(__('blog.label.category'))
                     ->searchable(['title', 'description'])

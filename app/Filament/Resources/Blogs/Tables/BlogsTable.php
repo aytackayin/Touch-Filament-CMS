@@ -56,6 +56,13 @@ class BlogsTable
                         ->view('filament.tables.columns.blog-grid')->searchable(['title', 'content', 'tags']),
                 ])->space(0),
             ] : [
+                \Filament\Tables\Columns\ImageColumn::make('cover_thumbnail')
+                    ->label('')
+                    ->disk('attachments')
+                    ->state(fn(Blog $record) => $record->getThumbnailPath())
+                    ->defaultImageUrl(fn(Blog $record) => url(config('blog.icon_paths.base') . config('blog.icon_paths.file')))
+                    ->circular()
+                    ->size(40),
                 TextColumn::make('title')
                     ->label(__('blog.label.title'))
                     ->searchable(['title', 'content'])
