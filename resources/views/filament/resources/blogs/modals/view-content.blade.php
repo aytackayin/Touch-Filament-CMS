@@ -311,7 +311,7 @@
             </h3>
             <div
                 style="display: grid !important; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)) !important; gap: 12px !important;">
-                @foreach($record->attachments as $attachment)
+                @foreach(array_reverse($record->attachments ?? []) as $attachment)
                     @php
                         $isImage = $record->isImage($attachment);
                         $isVideo = $record->isVideo($attachment);
