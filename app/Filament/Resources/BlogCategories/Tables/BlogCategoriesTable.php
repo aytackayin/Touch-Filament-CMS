@@ -10,6 +10,7 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Support\Enums\IconSize;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\ImageColumn;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -29,12 +30,13 @@ class BlogCategoriesTable
             ->paginatedWhileReordering()
             ->recordUrl(null)
             ->columns([
-                \Filament\Tables\Columns\ImageColumn::make('cover_thumbnail')
+                ImageColumn::make('cover_thumbnail')
                     ->label('')
                     ->disk('attachments')
                     ->state(fn(BlogCategory $record) => $record->getThumbnailPath())
                     ->defaultImageUrl(fn(BlogCategory $record) => url(config('blogcategory.icon_paths.base') . config('blogcategory.icon_paths.file')))
-                    ->circular()
+                    ->square()
+                    ->extraImgAttributes(['style' => 'border-radius: 8px !important; object-fit: cover;'])
                     ->size(40),
                 TextColumn::make('title')
                     ->label(__('blog.label.category'))

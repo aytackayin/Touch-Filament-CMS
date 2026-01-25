@@ -12,6 +12,7 @@ use Filament\Support\Enums\IconSize;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\Layout\Stack;
 use Filament\Tables\Columns\ViewColumn;
+use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Table;
 use App\Models\Blog;
 use Illuminate\Support\Str;
@@ -56,12 +57,13 @@ class BlogsTable
                         ->view('filament.tables.columns.blog-grid')->searchable(['title', 'content', 'tags']),
                 ])->space(0),
             ] : [
-                \Filament\Tables\Columns\ImageColumn::make('cover_thumbnail')
+                ImageColumn::make('cover_thumbnail')
                     ->label('')
                     ->disk('attachments')
                     ->state(fn(Blog $record) => $record->getThumbnailPath())
                     ->defaultImageUrl(fn(Blog $record) => url(config('blog.icon_paths.base') . config('blog.icon_paths.file')))
-                    ->circular()
+                    ->square()
+                    ->extraImgAttributes(['style' => 'border-radius: 8px !important; object-fit: cover;'])
                     ->size(40),
                 TextColumn::make('title')
                     ->label(__('blog.label.title'))
