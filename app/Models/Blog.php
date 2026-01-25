@@ -182,10 +182,11 @@ class Blog extends Model
 
     public function getCoverMediaAttribute()
     {
-        if (empty($this->attachments)) {
+        if (empty($this->attachments) || !is_array($this->attachments)) {
             return null;
         }
-        return collect($this->attachments)->last();
+
+        return collect($this->attachments)->last(fn($path) => $this->isImage($path) || $this->isVideo($path));
     }
 
     public function getSlideMediaAttribute()
