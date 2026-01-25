@@ -15,6 +15,8 @@ class RelatedItemsWidget extends BaseWidget
 {
     protected int|string|array $columnSpan = 'full';
 
+    public array $visibleColumns = ['cover_thumbnail', 'title', 'is_published', 'created_at'];
+
     public ?int $parent_id = null;
     protected static ?string $heading = null;
 

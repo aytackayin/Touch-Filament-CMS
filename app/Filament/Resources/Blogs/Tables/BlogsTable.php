@@ -25,6 +25,7 @@ use App\Filament\Resources\Blogs\BlogResource;
 use CodeWithDennis\FilamentSelectTree\SelectTree;
 use Filament\Tables\Filters\Filter;
 use Illuminate\Database\Eloquent\Builder;
+use Filament\Actions\Action;
 
 class BlogsTable
 {
@@ -156,9 +157,16 @@ class BlogsTable
                     ]),
             ])
             ->actions([
-                ViewAction::make()
+                Action::make('view')
                     ->label('')
-                    ->tooltip(__('filament-actions::view.single.label')),
+                    ->icon('heroicon-o-eye')
+                    ->tooltip(__('filament-actions::view.single.label'))
+                    ->color('gray')
+                    ->modalHeading(fn($record) => $record->title)
+                    ->modalContent(fn($record) => view('filament.resources.blogs.modals.view-content', ['record' => $record]))
+                    ->modalSubmitAction(false)
+                    ->modalCancelActionLabel(__('filament-actions::view.single.modal.actions.close.label'))
+                    ->modalWidth('5xl'),
                 EditAction::make()
                     ->label('')
                     ->tooltip(__('filament-actions::edit.single.label'))
