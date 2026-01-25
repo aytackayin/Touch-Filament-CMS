@@ -90,7 +90,11 @@ trait HasTableSettings
     {
         return Action::make('tableSettings')
             ->label(__('table_settings.label'))
+            ->hiddenLabel()
+            ->tooltip(__('table_settings.label'))
             ->icon('heroicon-o-cog-6-tooth')
+            ->color('gray')
+            ->size('xs')
             ->modalHeading(__('table_settings.modal_heading'))
             ->modalSubmitActionLabel(__('table_settings.save'))
             ->form($this->getTableSettingsFormSchema())

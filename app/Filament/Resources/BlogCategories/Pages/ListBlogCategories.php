@@ -134,8 +134,6 @@ class ListBlogCategories extends ListRecords
             ->importer(BlogCategoryImporter::class)
             ->visible(fn() => auth()->user()->can('import', BlogCategoryResource::getModel()));
 
-        $actions[] = $this->getTableSettingsAction();
-
         $actions[] =
             CreateAction::make()
                 ->label('')
@@ -144,6 +142,8 @@ class ListBlogCategories extends ListRecords
                 ->size('xs')
                 ->icon('heroicon-m-squares-plus')
                 ->url(static::getResource()::getUrl('create', $createParams));
+
+        $actions[] = $this->getTableSettingsAction();
 
         return $actions;
     }

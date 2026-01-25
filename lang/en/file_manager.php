@@ -9,6 +9,7 @@ return [
         'new_folder' => 'New Folder',
         'list_view' => 'List View',
         'grid_view' => 'Grid View',
+        'default_view' => 'Default View',
         'upload_new_files' => 'Upload New Files',
         'sync_notification' => [
             'title' => 'Sync Completed',
@@ -21,6 +22,7 @@ return [
         'file_path' => 'File Path',
         'tags' => 'Tags',
         'type_size' => 'Type/Size',
+        'size' => 'Size',
         'video_support_error' => 'Your browser does not support the video tag.',
         'folder_name' => 'Folder Name',
         'file' => 'File',

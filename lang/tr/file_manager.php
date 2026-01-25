@@ -9,6 +9,7 @@ return [
         'new_folder' => 'Yeni Klasör',
         'list_view' => 'Liste Görünümü',
         'grid_view' => 'Izgara Görünümü',
+        'default_view' => 'Varsayılan Görünüm',
         'upload_new_files' => 'Yeni Dosyalar Yükle',
         'sync_notification' => [
             'title' => 'Senkronizasyon Tamamlandı',
@@ -21,6 +22,7 @@ return [
         'file_path' => 'Dosya Yolu',
         'tags' => 'Etiketler',
         'type_size' => 'Tür/Boyut',
+        'size' => 'Boyut',
         'video_support_error' => 'Tarayıcınız video etiketini desteklemiyor.',
         'folder_name' => 'Klasör Adı',
         'file' => 'Dosya',

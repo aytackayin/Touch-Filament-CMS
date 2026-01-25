@@ -126,7 +126,12 @@ class ListBlogs extends ListRecords
                 ->tooltip($this->view_type === 'grid' ? __('file_manager.label.list_view') : __('file_manager.label.grid_view'))
                 ->hiddenLabel()
                 ->icon($this->view_type === 'grid' ? 'heroicon-o-list-bullet' : 'heroicon-o-squares-2x2')
-                ->color('gray')
+                ->extraAttributes(fn() => [
+                    'style' => sprintf(
+                        'background-color:%s;color:white;',
+                        $this->view_type === 'grid' ? '#d08700' : '#0ea5e9'
+                    ),
+                ])
                 ->size('xs')
                 ->action(function () {
                     $newView = $this->view_type === 'grid' ? 'list' : 'grid';

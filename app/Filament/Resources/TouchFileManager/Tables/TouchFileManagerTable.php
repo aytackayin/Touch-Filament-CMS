@@ -121,7 +121,7 @@ class TouchFileManagerTable
                     ->hidden(fn($livewire) => !in_array('type', $livewire->visibleColumns ?? []) || $livewire->view_type === 'grid') // Also hide type in grid if needed, or just handle visibility. Wait, grid view uses Stack and ViewColumn. These columns are for List view.
                     // The 'columns' array definition has logic for $isGrid. If isGrid, it uses Stack. If not, it uses these columns. 
                     // So we only need to check visibleColumns.
-                    ->hidden(fn($livewire) => !in_array('type', $livewire->visibleColumns ?? []))
+                    ->hidden(fn($livewire) => !in_array('type', $livewire->visibleColumns ?? []) || ($livewire->view_type ?? 'list') === 'grid') // Also hide type in grid if needed, or just handle visibility. Wait, grid view uses Stack and ViewColumn. These columns are for List view.
                     ->extraAttributes(fn($record) => $record?->id === 0 ? ['style' => 'display: none !important;'] : []),
 
                 TextColumn::make('size')->label(__('file_manager.label.size'))
