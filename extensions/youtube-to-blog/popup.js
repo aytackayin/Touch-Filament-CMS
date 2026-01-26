@@ -96,11 +96,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    // 4. Fetch Categories from API
+    // 4. Fetch Categories from API and build Tree
     async function fetchCategories() {
         const { siteUrl, apiKey } = await chrome.storage.local.get(['siteUrl', 'apiKey']);
         if (!siteUrl || !apiKey) {
-            categorySelect.innerHTML = '<option>Önce ayarları yapın!</option>';
+            document.getElementById('categoryTree').innerHTML = '<span style="color: #f87171;">Önce ayarları yapın!</span>';
             return;
         }
 
@@ -108,11 +108,38 @@ document.addEventListener('DOMContentLoaded', async () => {
             const response = await fetch(`${siteUrl}/api/youtube/categories`, {
                 headers: { 'X-API-KEY': apiKey, 'Accept': 'application/json' }
             });
-            const categories = await response.json();
+            const tree = await response.json();
 
-            categorySelect.innerHTML = categories.map(c => `<option value="${c.id}">${c.title}</option>`).join('');
+            const treeContainer = document.getElementById('categoryTree');
+            treeContainer.innerHTML = '';
+
+            function renderNode(node, level = 0) {
+                const item = document.createElement('div');
+                item.className = 'tree-item';
+                item.style.paddingLeft = `${level * 16}px`;
+
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.className = 'checkbox-custom cat-checkbox';
+                checkbox.value = node.id;
+                checkbox.id = `cat-${node.id}`;
+
+                const label = document.createElement('label');
+                label.setAttribute('for', `cat-${node.id}`);
+                label.innerText = node.title;
+
+                item.appendChild(checkbox);
+                item.appendChild(label);
+                treeContainer.appendChild(item);
+
+                if (node.children && node.children.length > 0) {
+                    node.children.forEach(child => renderNode(child, level + 1));
+                }
+            }
+
+            tree.forEach(node => renderNode(node));
         } catch (err) {
-            categorySelect.innerHTML = '<option>Bağlantı hatası!</option>';
+            document.getElementById('categoryTree').innerHTML = '<span style="color: #f87171;">Bağlantı hatası!</span>';
         }
     }
 
@@ -122,7 +149,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     btnSave.addEventListener('click', async () => {
         const { siteUrl, apiKey } = await chrome.storage.local.get(['siteUrl', 'apiKey']);
 
-        if (!categorySelect.value) return showStatus("Lütfen kategori seçin.", "error");
+        // Get all selected categories
+        const selectedCheckboxes = document.querySelectorAll('.cat-checkbox:checked');
+        const categoryIds = Array.from(selectedCheckboxes).map(cb => cb.value);
+
+        if (categoryIds.length === 0) return showStatus("Lütfen en az bir kategori seçin.", "error");
 
         btnSave.disabled = true;
         showStatus("Kaydediliyor...", "success");
@@ -139,7 +170,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     title: titleInput.value,
                     video_id: youtubeData.id,
                     description: youtubeData.description || "Açıklama bulunamadı.",
-                    category_id: categorySelect.value,
+                    category_ids: categoryIds, // Multiple selection
                     note: noteInput.value
                 })
             });

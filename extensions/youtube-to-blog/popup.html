@@ -68,6 +68,46 @@
             border-color: transparent;
         }
 
+        .tree-container {
+            max-height: 180px;
+            overflow-y: auto;
+            background: var(--card);
+            border: 1px solid #334155;
+            border-radius: 8px;
+            padding: 8px;
+        }
+
+        .tree-item {
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+        }
+
+        .tree-item label {
+            text-transform: none;
+            color: var(--text);
+            font-weight: 500;
+            cursor: pointer;
+            margin: 0;
+            flex: 1;
+        }
+
+        .tree-indent {
+            width: 18px;
+            height: 1px;
+            display: inline-block;
+            border-bottom: 1px solid #334155;
+            margin-right: 4px;
+        }
+
+        .checkbox-custom {
+            width: 14px;
+            height: 14px;
+            cursor: pointer;
+        }
+
         .settings-btn {
             background: none;
             border: none;
@@ -133,10 +173,10 @@
         </div>
 
         <div class="form-group">
-            <label>Kategori</label>
-            <select id="category">
-                <option value="">Kategoriler yükleniyor...</option>
-            </select>
+            <label>Kategoriler (Çoklu Seçilebilir)</label>
+            <div id="categoryTree" class="tree-container">
+                <span style="color: #94a3b8; font-size: 12px;">Yükleniyor...</span>
+            </div>
         </div>
 
         <div class="form-group">

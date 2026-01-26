@@ -11,13 +11,27 @@ use Illuminate\Support\Str;
 class YouTubeIntegrationController extends Controller
 {
     /**
-     * List categories for the Chrome extension selection.
+     * List categories for the Chrome extension selection (as a tree).
      */
     public function getCategories()
     {
-        return response()->json(
-            BlogCategory::select('id', 'title')->orderBy('title')->get()
-        );
+        $categories = BlogCategory::orderBy('sort')->orderBy('title')->get();
+        return response()->json($this->buildTree($categories));
+    }
+
+    private function buildTree($categories, $parentId = null)
+    {
+        $branch = [];
+        foreach ($categories as $category) {
+            if ($category->parent_id == $parentId) {
+                $children = $this->buildTree($categories, $category->id);
+                if ($children) {
+                    $category['children'] = $children;
+                }
+                $branch[] = $category;
+            }
+        }
+        return $branch;
     }
 
     /**
@@ -29,7 +43,8 @@ class YouTubeIntegrationController extends Controller
             'title' => 'required|string|max:255',
             'video_id' => 'required|string',
             'description' => 'nullable|string',
-            'category_id' => 'required|exists:blog_categories,id',
+            'category_ids' => 'required|array',
+            'category_ids.*' => 'exists:blog_categories,id',
             'note' => 'nullable|string',
         ]);
 
@@ -58,7 +73,7 @@ class YouTubeIntegrationController extends Controller
             'is_published' => false,
         ]);
 
-        $blog->categories()->attach($validated['category_id']);
+        $blog->categories()->sync($validated['category_ids']);
 
         // Download YouTube Cover Image and add to attachments
         try {
