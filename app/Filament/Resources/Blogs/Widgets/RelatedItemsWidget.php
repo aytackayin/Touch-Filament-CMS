@@ -10,18 +10,22 @@ use Filament\Actions\CreateAction;
 use Filament\Actions\ActionGroup;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
+use App\Traits\HasTableSettings;
+use Filament\Actions\Action as TableAction;
 
 class RelatedItemsWidget extends BaseWidget
 {
-    protected int|string|array $columnSpan = 'full';
+    use HasTableSettings;
 
-    public array $visibleColumns = ['cover_thumbnail', 'title', 'is_published', 'created_at'];
+    protected int|string|array $columnSpan = 'full';
 
     public ?int $parent_id = null;
     protected static ?string $heading = null;
 
     public function mount(): void
     {
+        $this->mountHasTableSettings();
+
         if ($this->parent_id) {
             $record = BlogCategory::find($this->parent_id);
             if ($record) {
@@ -50,6 +54,20 @@ class RelatedItemsWidget extends BaseWidget
 
         $table->query($query)
             ->headerActions([
+                TableAction::make('tableSettings')
+                    ->label(__('table_settings.label'))
+                    ->hiddenLabel()
+                    ->tooltip(__('table_settings.label'))
+                    ->icon('heroicon-o-cog-6-tooth')
+                    ->color('gray')
+                    ->size('xs')
+                    ->modalHeading(__('table_settings.modal_heading'))
+                    ->modalSubmitActionLabel(__('table_settings.save'))
+                    ->form($this->getTableSettingsFormSchema())
+                    ->action(function (array $data) {
+                        $this->saveTableSettings($data);
+                        return redirect(request()->header('Referer'));
+                    }),
                 ActionGroup::make([
                     CreateAction::make()
                         ->label('')
@@ -62,5 +80,28 @@ class RelatedItemsWidget extends BaseWidget
             ]);
 
         return BlogsTable::configure($table);
+    }
+
+    protected function getTableSettingsKey(): string
+    {
+        return 'blog_list';
+    }
+
+    protected function getDefaultVisibleColumns(): array
+    {
+        return ['categories', 'user', 'is_published', 'created_at'];
+    }
+
+    protected function getTableColumnOptions(): array
+    {
+        return [
+            'categories' => __('blog.label.categories'),
+            'language' => __('blog.label.language'),
+            'user' => __('blog.label.author'),
+            'editor' => __('blog.label.last_edited_by'),
+            'tags' => __('blog.label.tags'),
+            'is_published' => __('blog.label.is_published'),
+            'created_at' => __('blog.label.created_at'),
+        ];
     }
 }
