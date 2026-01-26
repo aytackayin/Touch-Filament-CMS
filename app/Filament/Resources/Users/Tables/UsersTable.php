@@ -35,13 +35,15 @@ class UsersTable
             ->striped()
             ->columns([
                 ImageColumn::make('avatar_url')
-                    ->label(__('filament-breezy::default.fields.avatar'))
+                    ->label('')
                     ->circular()
                     ->disk('attachments')
-                    ->toggleable(),
+                    ->width('50px')
+                    ->size(35)
+                    ->toggleable(isToggledHiddenByDefault: fn($livewire) => !in_array('avatar_url', $livewire->visibleColumns ?? [])),
                 TextColumn::make('name')
                     ->label(__('user.label.name'))
-                    ->searchable()
+                    ->searchable(['name', 'address', 'social_links'])
                     ->toggleable(false),
                 TextColumn::make('email')
                     ->label(__('user.label.email'))
@@ -65,6 +67,12 @@ class UsersTable
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: fn($livewire) => !in_array('updated_at', $livewire->visibleColumns ?? [])),
+                TextColumn::make('address')
+                    ->searchable()
+                    ->hidden(),
+                TextColumn::make('social_links')
+                    ->searchable()
+                    ->hidden(),
             ])
             ->filters([
                 //

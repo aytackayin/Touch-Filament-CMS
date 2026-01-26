@@ -27,6 +27,11 @@ class UserResource extends Resource
         return 300;
     }
 
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['name', 'email', 'phone', 'address', 'social_links'];
+    }
+
     public static function getNavigationLabel(): string
     {
         return __('user.nav.label');

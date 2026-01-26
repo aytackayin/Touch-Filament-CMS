@@ -36,8 +36,10 @@ class ListUsers extends ListRecords
     protected function getTableColumnOptions(): array
     {
         return [
+            'avatar_url' => __('filament-breezy::default.fields.avatar'),
             'email' => __('user.label.email'),
             'roles' => __('user.label.roles'),
+            'phone' => __('user.label.phone'),
             'created_at' => __('user.label.created_at'),
             'updated_at' => __('user.label.updated_at'),
         ];
