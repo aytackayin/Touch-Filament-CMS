@@ -152,8 +152,8 @@ class BlogsTable
                 SelectFilter::make('is_published')
                     ->label(__('blog.label.is_published'))
                     ->options([
-                        '1' => 'Yayımlandı',
-                        '0' => 'Yayımlanmadı',
+                        '1' => __('blog.label.published'),
+                        '0' => __('blog.label.draft'),
                     ]),
             ])
             ->actions([

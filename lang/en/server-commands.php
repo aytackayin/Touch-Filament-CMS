@@ -14,6 +14,8 @@ return [
         'queue_restart' => 'Queue Restart',
         'system_info' => 'System Info',
         'copy_to_clipboard' => 'Copy to Clipboard',
+        'clear_livewire_tmp' => 'Clear Livewire Temp',
+        'clear_filament_exports' => 'Clear Export Files',
     ],
     'notifications' => [
         'optimize_cleared' => 'System optimization cleared',
@@ -24,6 +26,8 @@ return [
         'storage_linked' => 'Symbolic links created',
         'queue_restarted' => 'Queue workers restarted',
         'system_info_title' => 'System Information',
+        'livewire_tmp_cleared' => 'Livewire temp files cleared',
+        'filament_exports_cleared' => 'Export files cleared',
     ],
     'categories' => [
         'cache_management' => 'Cache Management',
@@ -34,6 +38,8 @@ return [
         'db_migration_description' => 'Used to update and manage the database structure.',
         'queue_schedule' => 'Queue & Scheduler',
         'queue_schedule_description' => 'Management of background tasks and scheduled items.',
+        'file_cleanup' => 'File Cleanup',
+        'file_cleanup_description' => 'Cleaning up temporary and old files accumulated in the system.',
     ],
     'commands' => [
         'optimize_clear_desc' => 'Clears all cached configurations, routes, views, and general cache at once. Safest way to reflect changes.',
@@ -53,5 +59,7 @@ return [
         'queue_restart_desc' => 'Safely shuts down queue workers; usually used after code changes.',
         'schedule_run_desc' => 'Checks all scheduled tasks and runs those that are due.',
         'schedule_list_desc' => 'Shows list of all scheduled tasks and their run times.',
+        'clear_livewire_tmp_desc' => 'Clears old temporary files in storage/app/private/livewire-tmp folder.',
+        'clear_filament_exports_desc' => 'Clears old export files in storage/app/private/filament_exports folder.',
     ],
 ];

@@ -103,8 +103,8 @@ class BlogCategoriesTable
                 SelectFilter::make('is_published')
                     ->label(__('blog.label.is_published'))
                     ->options([
-                        '1' => 'Published',
-                        '0' => 'Unpublished',
+                        '1' => __('blog.label.published'),
+                        '0' => __('blog.label.draft'),
                     ]),
             ])
             ->actions([
