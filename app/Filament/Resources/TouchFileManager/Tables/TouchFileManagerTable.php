@@ -118,7 +118,7 @@ class TouchFileManagerTable
                         'image' => 'success', 'video' => 'info', 'document' => 'primary', 'archive' => 'warning', 'spreadsheet' => 'success', 'presentation' => 'danger', default => 'gray',
                     })
                     ->formatStateUsing(fn(string $state, $record) => $record?->id === 0 ? '' : __('file_manager.label.types.' . $state))
-                    ->toggleable(isToggledHiddenByDefault: fn($livewire) => !in_array('type', $livewire->visibleColumns ?? []) || ($livewire->view_type ?? 'list') === 'grid')
+                    ->toggleable(isToggledHiddenByDefault: fn($livewire) => !in_array('type', $livewire->visibleColumns ?? []) || (($livewire->view_type ?? 'list') === 'grid'))
                     ->extraAttributes(fn($record) => $record?->id === 0 ? ['style' => 'display: none !important;'] : []),
 
                 TextColumn::make('size')->label(__('file_manager.label.size'))

@@ -32,20 +32,26 @@ class UsersTable
             ->columns([
                 TextColumn::make('name')
                     ->label(__('user.label.name'))
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(false),
                 TextColumn::make('email')
                     ->label(__('user.label.email'))
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: fn($livewire) => !in_array('email', $livewire->visibleColumns ?? [])),
+                TextColumn::make('roles.name')
+                    ->label(__('user.label.roles'))
+                    ->badge()
+                    ->toggleable(isToggledHiddenByDefault: fn($livewire) => !in_array('roles', $livewire->visibleColumns ?? [])),
                 TextColumn::make('created_at')
                     ->label(__('user.label.created_at'))
                     ->dateTime()
                     ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->toggleable(isToggledHiddenByDefault: fn($livewire) => !in_array('created_at', $livewire->visibleColumns ?? [])),
                 TextColumn::make('updated_at')
                     ->label(__('user.label.updated_at'))
                     ->dateTime()
                     ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->toggleable(isToggledHiddenByDefault: fn($livewire) => !in_array('updated_at', $livewire->visibleColumns ?? [])),
             ])
             ->filters([
                 //

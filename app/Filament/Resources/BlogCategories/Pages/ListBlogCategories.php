@@ -44,6 +44,7 @@ class ListBlogCategories extends ListRecords
     protected function getTableColumnOptions(): array
     {
         return [
+            'language' => __('blog.label.language'),
             'tags' => __('blog.label.tags'),
             'user' => __('blog.label.author'),
             'editor' => __('blog.label.last_edited_by'),

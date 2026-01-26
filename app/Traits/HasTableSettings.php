@@ -91,7 +91,7 @@ trait HasTableSettings
             ->modalSubmitActionLabel(__('table_settings.save'))
             ->form(fn() => [
                 Radio::make('view_type')
-                    ->label(__('blog.label.default_view'))
+                    ->label(__('table_settings.view_type'))
                     ->options([
                         'list' => __('file_manager.label.list_view'),
                         'grid' => __('file_manager.label.grid_view'),

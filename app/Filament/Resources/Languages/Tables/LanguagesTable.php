@@ -20,21 +20,26 @@ class LanguagesTable
             ->columns([
                 TextColumn::make('name')
                     ->label(__('language.label.name'))
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(false),
                 TextColumn::make('code')
                     ->label(__('language.label.code'))
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: fn($livewire) => !in_array('code', $livewire->visibleColumns ?? [])),
                 TextColumn::make('charset')
                     ->label(__('language.label.charset'))
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: fn($livewire) => !in_array('charset', $livewire->visibleColumns ?? [])),
                 TextColumn::make('direction')
                     ->label(__('language.label.direction'))
-                    ->badge(),
+                    ->badge()
+                    ->toggleable(isToggledHiddenByDefault: fn($livewire) => !in_array('direction', $livewire->visibleColumns ?? [])),
                 IconColumn::make('is_default')
                     ->label(__('language.label.is_default'))
                     ->size(IconSize::Medium)
                     ->alignCenter(true)
                     ->boolean()
+                    ->toggleable(isToggledHiddenByDefault: fn($livewire) => !in_array('is_default', $livewire->visibleColumns ?? []))
                     ->action(function (Language $record) {
                         if (!auth()->user()->can('update', $record)) {
                             return;
@@ -71,6 +76,7 @@ class LanguagesTable
                     ->size(IconSize::Medium)
                     ->alignCenter(true)
                     ->boolean()
+                    ->toggleable(isToggledHiddenByDefault: fn($livewire) => !in_array('is_active', $livewire->visibleColumns ?? []))
                     ->action(function (Language $record) {
                         if (!auth()->user()->can('update', $record)) {
                             return;
@@ -88,12 +94,12 @@ class LanguagesTable
                     ->label(__('language.label.created_at'))
                     ->dateTime()
                     ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->toggleable(isToggledHiddenByDefault: fn($livewire) => !in_array('created_at', $livewire->visibleColumns ?? [])),
                 TextColumn::make('updated_at')
                     ->label(__('language.label.updated_at'))
                     ->dateTime()
                     ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->toggleable(isToggledHiddenByDefault: fn($livewire) => !in_array('updated_at', $livewire->visibleColumns ?? [])),
             ])
             ->filters([
                 //

@@ -49,7 +49,8 @@ class BlogCategoriesTable
                     ->url(fn($record) => BlogCategoryResource::getUrl('index', ['parent_id' => $record->id])),
                 TextColumn::make('language.name')
                     ->label(__('blog.label.language'))
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: fn($livewire) => !in_array('language', $livewire->visibleColumns ?? [])),
                 TextColumn::make('tags')
                     ->label(__('blog.label.tags'))
                     ->badge()
