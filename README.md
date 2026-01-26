@@ -2,6 +2,7 @@
 
 Antigravity CMS is a professional, modern, and highly-scalable Content Management System built on the latest **Laravel 12** framework and **Filament 4** admin panel. It provides a robust architecture for managing blogs, media, and system settings with a focus on user experience and performance.
 
+> **v1.0.5 Update:** YouTube to Blog Integration with Browser Extension. Automated thumbnail downloading, hashtag-to-tag extraction, and secure API system introduced.
 > **v1.0.4 Update:** Extended "My Profile" system introduced with custom tabs. Universal Live Preview engine for Blogs and other resources implemented with frontend-mirroring typography.
 > **v1.0.3 Update:** User-specific Table Settings introduced. Persist your column visibility, view type (grid/list), and records per page preferences across all resources.
 > **v1.0.1 Update:** Public Frontend added for testing purposes.
@@ -67,13 +68,25 @@ Antigravity CMS is a professional, modern, and highly-scalable Content Managemen
 +### 9. Extended My Profile
 +- **Tabbed Management:** Comprehensive profile settings organized into Personal Info, Social Media, Preferences, and Security tabs.
 +- **Social Integration:** Add and manage multiple social media links (Instagram, Twitter, LinkedIn, etc.) directly.
-+- **User Preferences:** Choose your workspace experience, such as the preferred Default Editor (TinyMCE, Markdown, or Simple).
-+
-+### 10. Universal Live Preview Engine
-+- **Frontend Mirroring:** Isolated Iframe-based preview that uses frontend fonts and Tailwind Typography (prose-lg) to show content exactly as it appears to visitors.
-+- **Dynamic & Reusable:** A single universal route handles previews for Blogs, Pages, and any other model dynamically via parameters.
-+- **Secure by Design:** Integrated with Laravel Policies to ensure only authorized users with 'view' permission can access previews.
-+- **Auto-Height:** Intelligently adjusts preview container height based on content length for a seamless admin experience.
+
+### 9. Extended My Profile
+- **Tabbed Management:** Comprehensive profile settings organized into Personal Info, Social Media, Preferences, and Security tabs.
+- **Social Integration:** Add and manage multiple social media links (Instagram, Twitter, LinkedIn, etc.) directly.
+- **User Preferences:** Choose your workspace experience, such as the preferred Default Editor (TinyMCE, Markdown, or Simple).
+
+### 10. Universal Live Preview Engine
+- **Frontend Mirroring:** Isolated Iframe-based preview that uses frontend fonts and Tailwind Typography (prose-lg) to show content exactly as it appears to visitors.
+- **Dynamic & Reusable:** A single universal route handles previews for Blogs, Pages, and any other model dynamically via parameters.
+- **Secure by Design:** Integrated with Laravel Policies to ensure only authorized users with 'view' permission can access previews.
+- **Auto-Height:** Intelligently adjusts preview container height based on content length for a seamless admin experience.
+
+### 11. YouTube to Blog Integration
+- **Browser Extension:** Dedicated Chrome/Opera extension for one-click blog creation while browsing YouTube.
+- **Metadata Extraction:** Automatically captures clean titles (bypassing notifications) and full descriptions with repaired links.
+- **Smart Asset Handling:** Automatically downloads the highest quality video thumbnail as the blog's cover image.
+- **Auto-Tagging:** Extracts hashtags from the video description and automatically registers them as system tags.
+- **Hiyerarşik Kategori:** Access and select hierarchical categories directly within the extension's interface.
+- **Draft Workflow:** Saves content as drafts with direct links to the Filament admin panel for final editing.
 
 
 ## 🛠 Installation
@@ -123,6 +136,21 @@ php artisan storage:link
 npm run dev
 php artisan serve
 ```
+
+## 🧩 Browser Extension
+
+Antigravity CMS comes with a companion browser extension for Opera, Chrome, and Edge.
+
+### Installation
+1. Open your browser's extensions page (`opera://extensions` or `chrome://extensions`).
+2. Enable **Developer Mode**.
+3. Click **Load Unpacked**.
+4. Select the `extensions/youtube-to-blog` folder from this project.
+
+### Configuration
+1. Go to **My Profile > Chrome Eklentisi** in your CMS panel.
+2. If authorized, generate your **API Key**.
+3. Open the extension, click **Settings (⚙️)**, and enter your Site URL and API Key.
 
 ## 🔐 Default Credentials (Local)
 - **Super Admin:** `admin@admin.com` / `password`
