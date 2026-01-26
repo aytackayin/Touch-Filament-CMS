@@ -63,12 +63,9 @@ trait HasTableSettings
         // 1. Veritabanına Kaydet
         UserPreference::setTableSettings($this->getTableSettingsKey(), $saveData);
 
-        // 2. KRİTİK: Filament'in seans belleğini zorla siliyoruz.
-        // Filament v4'te seans anahtarı "tables.{md5(class)}_columns" formatındadır.
+        // 2. KRİTİK: Filament'in seans belleğini zorla siliyoruz (v4 uyumlu).
         $sessionKey = "tables." . md5(static::class) . "_columns";
         session()->forget($sessionKey);
-
-        // Ek olarak varsa eski formatları da temizleyelim
         session()->forget("tables." . static::class . ".toggled_table_columns");
 
         // 3. State'i güncelle
@@ -103,7 +100,6 @@ trait HasTableSettings
                     ->label(__('table_settings.columns'))
                     ->options($this->getTableColumnOptions())
                     ->default($this->visibleColumns)
-
                     ->columns(2),
             ])
             ->action(fn(array $data) => $this->saveTableSettings($data));
