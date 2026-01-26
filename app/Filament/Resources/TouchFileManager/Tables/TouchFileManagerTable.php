@@ -91,6 +91,7 @@ class TouchFileManagerTable
                     ->orderBy('is_folder', 'desc')
                     ->orderBy('name', 'asc');
             })
+            ->defaultPaginationPageOption($table->getLivewire()->perPage ?? 10)
             ->striped()
             ->recordUrl(function ($record) use ($table): ?string {
                 if (!$record)

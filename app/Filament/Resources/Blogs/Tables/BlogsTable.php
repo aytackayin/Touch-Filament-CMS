@@ -49,6 +49,7 @@ class BlogsTable
                         'class' => 'blogs-grid',
                     ])
             )
+            ->defaultPaginationPageOption($table->getLivewire()->perPage ?? 10)
             ->striped()
             ->paginatedWhileReordering()
             ->recordUrl(null)

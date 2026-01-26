@@ -10,6 +10,7 @@ use Filament\Forms\Components\Radio;
 trait HasTableSettings
 {
     public array $visibleColumns = [];
+    public ?int $perPage = null;
 
     public function mountHasTableSettings(): void
     {
@@ -20,12 +21,27 @@ trait HasTableSettings
     abstract protected function getDefaultVisibleColumns(): array;
     abstract protected function getTableColumnOptions(): array;
 
+    protected function getDefaultPerPage(): int
+    {
+        return 10;
+    }
+
+    protected function getPerPageOptions(): array
+    {
+        return [5, 10, 25, 50];
+    }
+
     /**
      * Filament'in kendi iç kalıcılığını KAPATIYORUZ.
      */
     public function shouldPersistTableColumnDisplayStates(): bool
     {
         return false;
+    }
+
+    public function getTableRecordsPerPage(): ?int
+    {
+        return $this->perPage ?? $this->getDefaultPerPage();
     }
 
     public function loadTableSettings(): void
@@ -48,8 +64,11 @@ trait HasTableSettings
             if (isset($settings['view_type']) && property_exists($this, 'view_type')) {
                 $this->view_type = $settings['view_type'];
             }
+
+            $this->perPage = $settings['per_page'] ?? $this->getDefaultPerPage();
         } else {
             $this->visibleColumns = $this->getDefaultVisibleColumns();
+            $this->perPage = $this->getDefaultPerPage();
         }
     }
 
@@ -63,6 +82,7 @@ trait HasTableSettings
         $saveData = [
             'visible_columns' => $newVisibleColumns,
             'view_type' => $data['view_type'] ?? (property_exists($this, 'view_type') ? $this->view_type : 'list'),
+            'per_page' => $data['per_page'] ?? $this->getDefaultPerPage(),
         ];
 
         // 1. Veritabanına Kaydet
@@ -101,6 +121,11 @@ trait HasTableSettings
                     ->default(property_exists($this, 'view_type') ? $this->view_type : 'list')
                     ->inline()
                     ->hidden(!property_exists($this, 'view_type')),
+                Radio::make('per_page')
+                    ->label(__('table_settings.per_page'))
+                    ->options(array_combine($this->getPerPageOptions(), $this->getPerPageOptions()))
+                    ->default($this->perPage)
+                    ->inline(),
                 CheckboxList::make('visible_columns')
                     ->label(__('table_settings.columns'))
                     ->options($this->getTableColumnOptions())

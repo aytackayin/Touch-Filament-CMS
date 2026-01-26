@@ -17,6 +17,7 @@ class LanguagesTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->defaultPaginationPageOption($table->getLivewire()->perPage ?? 10)
             ->columns([
                 TextColumn::make('name')
                     ->label(__('language.label.name'))
