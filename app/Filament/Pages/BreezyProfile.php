@@ -126,6 +126,44 @@ class BreezyProfile extends Page implements HasForms
                                     ->default('richtext')
                             ]),
 
+                        Tab::make('Extension')
+                            ->label('Chrome Eklentisi')
+                            ->icon('heroicon-o-puzzle-piece')
+                            ->schema([
+                                Grid::make(1)->schema([
+                                    Section::make()
+                                        ->description('YouTube videolarını tek tıkla blog makalesine dönüştürmek için bu bölümdeki API anahtarını kullanın.')
+                                        ->schema([
+                                            TextInput::make('chrome_token')
+                                                ->label('API Anahtarınız')
+                                                ->password()
+                                                ->revealable()
+                                                ->readOnly()
+                                                ->dehydrated()
+                                                ->helperText('Bu anahtarı Chrome eklentisi ayarlarında "API Key" alanına yapıştırın.'),
+
+                                            Actions::make([
+                                                Action::make('generateToken')
+                                                    ->label('Yeni Anahtar Oluştur')
+                                                    ->icon('heroicon-o-arrow-path')
+                                                    ->color('warning')
+                                                    ->action(function (callable $set) {
+                                                        $token = \Illuminate\Support\Str::random(40);
+                                                        $set('chrome_token', $token);
+
+                                                        Notification::make()
+                                                            ->title('Yeni API anahtarı hazırlandı. Kaydet butonu ile kalıcı hale getirebilirsiniz.')
+                                                            ->warning()
+                                                            ->send();
+                                                    })
+                                                    ->requiresConfirmation()
+                                                    ->modalHeading('Emin misiniz?')
+                                                    ->modalDescription('Yeni bir anahtar oluşturduğunuzda, eklenti içindeki eski anahtarınız geçersiz kalacaktır.'),
+                                            ]),
+                                        ]),
+                                ]),
+                            ]),
+
                         Tab::make('Password')
                             ->label(__('user.label.password_section'))
                             ->icon('heroicon-o-key')
