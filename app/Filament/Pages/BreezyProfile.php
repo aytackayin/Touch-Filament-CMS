@@ -50,108 +50,95 @@ class BreezyProfile extends Page implements HasForms
                             ->label(__('user.label.personal_info'))
                             ->icon('heroicon-o-user')
                             ->schema([
-                                Section::make()
-                                    ->description(__('filament-breezy::default.profile.personal_info.subheading'))
-                                    ->schema([
-                                        FileUpload::make('avatar_url')
-                                            ->label(__('filament-breezy::default.fields.avatar'))
-                                            ->avatar()
-                                            ->imageEditor()
-                                            ->circleCropper()
-                                            ->directory('avatars')
-                                            ->disk('attachments')
-                                            ->live(),
+                                FileUpload::make('avatar_url')
+                                    ->label(__('filament-breezy::default.fields.avatar'))
+                                    ->avatar()
+                                    ->imageEditor()
+                                    ->circleCropper()
+                                    ->directory('avatars')
+                                    ->disk('attachments')
+                                    ->live(),
 
-                                        Grid::make()->schema([
-                                            TextInput::make('name')
-                                                ->label(__('user.label.name'))
-                                                ->required(),
-                                            TextInput::make('email')
-                                                ->label(__('user.label.email'))
-                                                ->required()
-                                                ->email()
-                                                ->unique('users', 'email', ignoreRecord: true),
-                                        ]),
+                                Grid::make()->schema([
+                                    TextInput::make('name')
+                                        ->label(__('user.label.name'))
+                                        ->required(),
+                                    TextInput::make('email')
+                                        ->label(__('user.label.email'))
+                                        ->required()
+                                        ->email()
+                                        ->unique('users', 'email', ignoreRecord: true),
+                                ]),
 
-                                        Grid::make()->schema([
-                                            TextInput::make('phone')
-                                                ->label(__('user.label.phone'))
-                                                ->tel(),
-                                            Textarea::make('address')
-                                                ->label(__('user.label.address'))
-                                                ->rows(3),
-                                        ]),
-                                    ]),
+                                Grid::make()->schema([
+                                    TextInput::make('phone')
+                                        ->label(__('user.label.phone'))
+                                        ->tel(),
+                                    Textarea::make('address')
+                                        ->label(__('user.label.address'))
+                                        ->rows(3),
+                                ]),
                             ]),
 
                         Tab::make('SocialMedia')
                             ->label(__('user.label.social_media'))
                             ->icon('heroicon-o-share')
                             ->schema([
-                                Section::make()
+                                Repeater::make('social_links')
+                                    ->label(__('user.label.social_links'))
                                     ->schema([
-                                        Repeater::make('social_links')
-                                            ->label(__('user.label.social_links'))
-                                            ->schema([
-                                                Grid::make(2)->schema([
-                                                    Select::make('platform')
-                                                        ->label(__('user.label.platform'))
-                                                        ->options([
-                                                            'instagram' => 'Instagram',
-                                                            'twitter' => 'Twitter / X',
-                                                            'facebook' => 'Facebook',
-                                                            'linkedin' => 'LinkedIn',
-                                                            'github' => 'GitHub',
-                                                            'website' => 'Website',
-                                                            'other' => 'Other',
-                                                        ])
-                                                        ->required(),
-                                                    TextInput::make('url')
-                                                        ->label(__('user.label.link'))
-                                                        ->placeholder('instagram.com/username')
-                                                        ->required()
-                                                        ->prefix('https://'),
-                                                ]),
-                                            ])
-                                            ->defaultItems(0)
-                                            ->createItemButtonLabel(__('user.label.add_account'))
-                                            ->grid(2),
-                                    ]),
+                                        Grid::make(2)->schema([
+                                            Select::make('platform')
+                                                ->label(__('user.label.platform'))
+                                                ->options([
+                                                    'instagram' => 'Instagram',
+                                                    'twitter' => 'Twitter / X',
+                                                    'facebook' => 'Facebook',
+                                                    'linkedin' => 'LinkedIn',
+                                                    'github' => 'GitHub',
+                                                    'website' => 'Website',
+                                                    'other' => 'Other',
+                                                ])
+                                                ->required(),
+                                            TextInput::make('url')
+                                                ->label(__('user.label.link'))
+                                                ->placeholder('instagram.com/username')
+                                                ->required()
+                                                ->prefix('https://'),
+                                        ]),
+                                    ])
+                                    ->defaultItems(0)
+                                    ->createItemButtonLabel(__('user.label.add_account'))
+                                    ->grid(2)
                             ]),
 
                         Tab::make('Preferences')
                             ->label(__('user.label.preferences'))
                             ->icon('heroicon-o-cog-6-tooth')
                             ->schema([
-                                Section::make()
-                                    ->schema([
-                                        Select::make('default_editor')
-                                            ->label(__('user.label.default_editor'))
-                                            ->options([
-                                                'richtext' => 'Rich Text Editor (TinyMCE)',
-                                                'markdown' => 'Markdown Editor',
-                                                'simple' => 'Simple Textarea',
-                                            ])
-                                            ->default('richtext'),
-                                    ]),
+                                Select::make('default_editor')
+                                    ->label(__('user.label.default_editor'))
+                                    ->options([
+                                        'richtext' => 'Rich Text Editor (TinyMCE)',
+                                        'markdown' => 'Markdown Editor',
+                                        'simple' => 'Simple Textarea',
+                                    ])
+                                    ->default('richtext')
                             ]),
 
                         Tab::make('Password')
                             ->label(__('user.label.password_section'))
                             ->icon('heroicon-o-key')
                             ->schema([
-                                Section::make()
-                                    ->schema([
-                                        TextInput::make('new_password')
-                                            ->label(__('filament-breezy::default.fields.new_password'))
-                                            ->password()
-                                            ->confirmed()
-                                            ->autocomplete('new-password'),
-                                        TextInput::make('new_password_confirmation')
-                                            ->label(__('filament-breezy::default.fields.new_password_confirmation'))
-                                            ->password()
-                                            ->autocomplete('new-password'),
-                                    ]),
+                                TextInput::make('new_password')
+                                    ->label(__('filament-breezy::default.fields.new_password'))
+                                    ->password()
+                                    ->confirmed()
+                                    ->autocomplete('new-password'),
+                                TextInput::make('new_password_confirmation')
+                                    ->label(__('filament-breezy::default.fields.new_password_confirmation'))
+                                    ->password()
+                                    ->autocomplete('new-password')
                             ]),
                     ])
                     ->persistTabInQueryString(),
