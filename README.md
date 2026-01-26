@@ -2,6 +2,7 @@
 
 Antigravity CMS is a professional, modern, and highly-scalable Content Management System built on the latest **Laravel 12** framework and **Filament 4** admin panel. It provides a robust architecture for managing blogs, media, and system settings with a focus on user experience and performance.
 
+> **v1.0.4 Update:** Extended "My Profile" system introduced with custom tabs. Universal Live Preview engine for Blogs and other resources implemented with frontend-mirroring typography.
 > **v1.0.3 Update:** User-specific Table Settings introduced. Persist your column visibility, view type (grid/list), and records per page preferences across all resources.
 > **v1.0.1 Update:** Public Frontend added for testing purposes.
 
@@ -62,6 +63,18 @@ Antigravity CMS is a professional, modern, and highly-scalable Content Managemen
 - **Persistence:** Column visibility, view types (Grid/List), and pagination limits are saved per user in the database.
 - **Dynamic Options:** Automatically syncs with each Resource's specific table configuration.
 - **Improved UX:** Settings are applied instantly without session conflicts.
++
++### 9. Extended My Profile
++- **Tabbed Management:** Comprehensive profile settings organized into Personal Info, Social Media, Preferences, and Security tabs.
++- **Social Integration:** Add and manage multiple social media links (Instagram, Twitter, LinkedIn, etc.) directly.
++- **User Preferences:** Choose your workspace experience, such as the preferred Default Editor (TinyMCE, Markdown, or Simple).
++
++### 10. Universal Live Preview Engine
++- **Frontend Mirroring:** Isolated Iframe-based preview that uses frontend fonts and Tailwind Typography (prose-lg) to show content exactly as it appears to visitors.
++- **Dynamic & Reusable:** A single universal route handles previews for Blogs, Pages, and any other model dynamically via parameters.
++- **Secure by Design:** Integrated with Laravel Policies to ensure only authorized users with 'view' permission can access previews.
++- **Auto-Height:** Intelligently adjusts preview container height based on content length for a seamless admin experience.
+
 
 ## 🛠 Installation
 
