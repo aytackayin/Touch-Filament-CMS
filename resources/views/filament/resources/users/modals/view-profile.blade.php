@@ -207,6 +207,18 @@
             </div>
         @endif
 
+        <div class="social-section">
+            <span class="social-title">{{ __('user.label.preferences') }}</span>
+            <div class="upm-grid">
+                <div class="upm-card" style="grid-column: span 2;">
+                    <span class="upm-label">{{ __('user.label.default_editor') }}</span>
+                    <span class="upm-value" style="text-transform: uppercase; color: var(--upm-accent);">
+                        {{ $record->default_editor }}
+                    </span>
+                </div>
+            </div>
+        </div>
+
         <div class="upm-footer">
             <span>{{ __('user.label.created_at') }}: {{ $record->created_at->format('d/m/Y') }}</span>
             <span>{{ __('user.label.updated_at') }}: {{ $record->updated_at->format('d/m/Y') }}</span>
