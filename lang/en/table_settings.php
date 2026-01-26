@@ -7,5 +7,6 @@ return [
     'save' => 'Save Changes',
     'view_type' => 'Default View',
     'per_page' => 'Records Per Page',
+    'all' => 'All',
     'tips' => 'Customize your view by selecting columns. Your preferences are saved automatically.',
 ];

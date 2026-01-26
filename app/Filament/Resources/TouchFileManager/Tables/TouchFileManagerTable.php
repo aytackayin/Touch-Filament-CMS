@@ -93,6 +93,7 @@ class TouchFileManagerTable
             })
             ->defaultPaginationPageOption($table->getLivewire()->perPage ?? 10)
             ->striped()
+            ->paginated([5, 10, 25, 50, 100, 'all'])
             ->recordUrl(function ($record) use ($table): ?string {
                 if (!$record)
                     return null;
