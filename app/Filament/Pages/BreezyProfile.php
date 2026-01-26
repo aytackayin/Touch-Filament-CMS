@@ -18,7 +18,6 @@ use Filament\Schemas\Components\Actions;
 use Filament\Actions\Action;
 use Filament\Pages\Page;
 use Filament\Notifications\Notification;
-use Filament\Support\Enums\Alignment;
 use Illuminate\Support\Facades\Storage;
 use BackedEnum;
 
@@ -157,20 +156,20 @@ class BreezyProfile extends Page implements HasForms
                     ])
                     ->persistTabInQueryString(),
 
-                Section::make()
-                    ->schema([
-                        Actions::make([
-                            Action::make('save')
-                                ->label(__('filament-breezy::default.profile.personal_info.submit.label'))
-                                ->submit('submit')
-                                ->size('lg')
-                                ->extraAttributes([
-                                    'wire:loading.attr' => 'disabled',
-                                    'wire:target' => 'data.avatar_url, submit',
-                                ]),
-                        ])->alignStart(),
-                    ])
-                    ->extraAttributes(['style' => 'border-top: 1px solid rgba(128, 128, 128, 0.2); margin-top: 40px; padding-top: 30px;']),
+                Actions::make([
+                    Action::make('save')
+                        ->label(__('filament-breezy::default.profile.personal_info.submit.label'))
+                        ->submit('submit') // This triggers form submission
+                        ->size('lg')
+                        ->extraAttributes([
+                            'wire:loading.attr' => 'disabled',
+                            'wire:target' => 'data.avatar_url, submit',
+                        ]),
+                ])
+                    ->alignStart()
+                    ->extraAttributes([
+                        'style' => 'margin-top: 20px;',
+                    ]),
             ])
             ->statePath('data')
             ->model(auth()->user());
