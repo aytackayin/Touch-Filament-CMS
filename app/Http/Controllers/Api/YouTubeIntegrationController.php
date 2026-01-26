@@ -38,7 +38,7 @@ class YouTubeIntegrationController extends Controller
 
         $content = $embedHtml;
         if (!empty($validated['note'])) {
-            $content .= '<br><h3>Notlarım:</h3><blockquote style="border-left: 4px solid #6366f1; padding: 1rem; background: #f8fafc; font-style: italic;">' . nl2br(e($validated['note'])) . '</blockquote><br>';
+            $content .= '<br><h3>Notlarım:</h3>' . nl2br(e($validated['note'])) . '<br>';
         }
         $description = e($validated['description']);
         // Linkify: Convert URLs to clickable links
@@ -51,14 +51,51 @@ class YouTubeIntegrationController extends Controller
 
         $blog = Blog::create([
             'user_id' => auth()->id(),
-            'language_id' => 1, // Default Language (TR usually)
+            'language_id' => 1, // Default Language
             'title' => $validated['title'],
             'slug' => Blog::generateUniqueSlug($validated['title']),
             'content' => $content,
-            'is_published' => false, // Save as draft by default
+            'is_published' => false,
         ]);
 
         $blog->categories()->attach($validated['category_id']);
+
+        // Download YouTube Cover Image and add to attachments
+        try {
+            $apiKey = $validated['video_id'];
+            $thumbUrl = "https://i.ytimg.com/vi/{$apiKey}/maxresdefault.jpg";
+            $imageResponse = \Illuminate\Support\Facades\Http::get($thumbUrl);
+
+            if (!$imageResponse->successful()) {
+                $thumbUrl = "https://i.ytimg.com/vi/{$apiKey}/hqdefault.jpg"; // Fallback
+                $imageResponse = \Illuminate\Support\Facades\Http::get($thumbUrl);
+            }
+
+            if ($imageResponse->successful()) {
+                $disk = \Illuminate\Support\Facades\Storage::disk('attachments');
+                $folder = "blog/{$blog->id}/images";
+                $filename = "youtube-cover.jpg";
+                $path = "{$folder}/{$filename}";
+
+                if (!$disk->exists($folder)) {
+                    $disk->makeDirectory($folder, 0755, true);
+                }
+
+                $disk->put($path, $imageResponse->body());
+
+                // Update blog attachments
+                $blog->update(['attachments' => [$path]]);
+
+                // Refresh to trigger sync logic if necessary or manual registration
+                \App\Models\TouchFile::registerFile($path, auth()->id());
+                $touchFile = \App\Models\TouchFile::where('path', $path)->first();
+                if ($touchFile) {
+                    $touchFile->generateThumbnails();
+                }
+            }
+        } catch (\Exception $e) {
+            // Silently fail image download
+        }
 
         return response()->json([
             'message' => 'Blog başarıyla taslak olarak kaydedildi.',

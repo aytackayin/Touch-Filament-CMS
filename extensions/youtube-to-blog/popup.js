@@ -31,36 +31,64 @@ document.addEventListener('DOMContentLoaded', async () => {
         settingsPanel.style.display = 'none';
     });
 
-    // 3. Detect YouTube Info & Fetch Description
+    // 3. Detect YouTube Info & Fetch Metadata (Title & Description)
     chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
         const tab = tabs[0];
         if (tab.url && tab.url.includes("youtube.com/watch?v=")) {
             const urlObj = new URL(tab.url);
             youtubeData.id = urlObj.searchParams.get("v");
-            titleInput.value = tab.title.replace(" - YouTube", "");
 
-            // Fetch description from page DOM
+            // Fetch info from page DOM
             try {
                 const results = await chrome.scripting.executeScript({
                     target: { tabId: tab.id },
                     func: () => {
-                        // YouTube description selectors vary, trying common ones
+                        const titleEl = document.querySelector('h1.ytd-watch-metadata yt-formatted-string') ||
+                            document.querySelector('h1.style-scope.ytd-video-primary-info-renderer');
+
                         const descEl = document.querySelector('#description-inline-expander .yt-core-attributed-string') ||
                             document.querySelector('yt-attributed-string#description-text') ||
-                            document.querySelector('meta[name="description"]');
+                            document.querySelector('#description .content');
+
+                        let description = "";
 
                         if (descEl) {
-                            return descEl.innerText || descEl.getAttribute('content') || "";
+                            // Create a temporary clone to process links without breaking page UI
+                            const clone = descEl.cloneNode(true);
+                            const links = clone.querySelectorAll('a');
+
+                            links.forEach(link => {
+                                let href = link.getAttribute('href');
+                                if (href) {
+                                    // Handle YouTube redirect URLs (extract q parameter)
+                                    if (href.includes('youtube.com/redirect') || href.startsWith('/redirect')) {
+                                        try {
+                                            const urlParams = new URLSearchParams(href.includes('?') ? href.split('?')[1] : "");
+                                            href = urlParams.get('q') || href;
+                                        } catch (e) { }
+                                    }
+                                    // Replace the truncated text (...) with the full real URL
+                                    link.innerText = href;
+                                }
+                            });
+                            description = clone.innerText;
                         }
-                        return "";
+
+                        return {
+                            title: titleEl ? titleEl.innerText : document.title.replace(" - YouTube", ""),
+                            description: description
+                        };
                     }
                 });
 
                 if (results && results[0] && results[0].result) {
-                    youtubeData.description = results[0].result;
+                    const info = results[0].result;
+                    titleInput.value = info.title;
+                    youtubeData.description = info.description;
                 }
             } catch (e) {
-                console.error("Description fetch error:", e);
+                console.error("Metadata fetch error:", e);
+                titleInput.value = tab.title.replace(" - YouTube", "");
             }
         } else {
             showStatus("Lütfen bir YouTube video sayfasında olun.", "error");
