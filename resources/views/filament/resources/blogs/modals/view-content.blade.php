@@ -294,17 +294,45 @@
             <div
                 style="display: grid !important; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)) !important; gap: 12px !important;">
                 @foreach(array_reverse($record->attachments ?? []) as $attachment)
+                    @php
+                        $thumb = $record->getThumbnailUrl($attachment);
+                        $isImage = $record->isImage($attachment);
+                        $isVideo = $record->isVideo($attachment);
+                        $fileName = basename($attachment);
+                        $extension = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
+
+                        $iconMap = [
+                            'pdf' => 'pdf.svg',
+                            'doc' => 'doc.svg',
+                            'docx' => 'docx.svg',
+                            'xls' => 'xls.svg',
+                            'xlsx' => 'xlsx.svg',
+                            'ppt' => 'ppt.svg',
+                            'pptx' => 'pptx.svg',
+                            'zip' => 'zip.svg',
+                            'rar' => 'rar.svg',
+                            '7z' => '7z.svg',
+                            'txt' => 'txt.svg',
+                            'mp3' => 'mp3.svg',
+                            'json' => 'json.svg',
+                            'js' => 'code.svg',
+                            'php' => 'code.svg',
+                            'css' => 'code.svg',
+                            'html' => 'code.svg',
+                        ];
+                        $fileIcon = $iconMap[$extension] ?? 'file.svg';
+                    @endphp
                     <a href="{{ $record->getMediaUrl($attachment) }}" target="_blank" class="attachment-card">
                         <div class="attachment-thumb-wrap">
-                            @if($record->isImage($attachment))
-                                <img src="{{ $record->getThumbnailUrl($attachment) }}"
-                                    style="width: 100%; height: 100%; object-fit: cover;">
+                            @if($thumb)
+                                <img src="{{ $thumb }}" style="width: 100%; height: 100%; object-fit: cover;">
                             @else
-                                <x-heroicon-o-document class="w-8 h-8 text-gray-400" />
+                                <img src="{{ asset('assets/icons/colorful-icons/' . $fileIcon) }}"
+                                    style="width: 32px; height: 32px;">
                             @endif
                         </div>
                         <div class="attachment-info">
-                            <span class="file-name">{{ basename($attachment) }}</span>
+                            <span class="file-name" title="{{ $fileName }}">{{ Str::limit($fileName, 25) }}</span>
                         </div>
                     </a>
                 @endforeach
