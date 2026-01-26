@@ -2,6 +2,7 @@
 
 Antigravity CMS is a professional, modern, and highly-scalable Content Management System built on the latest **Laravel 12** framework and **Filament 4** admin panel. It provides a robust architecture for managing blogs, media, and system settings with a focus on user experience and performance.
 
+> **v1.0.3 Update:** User-specific Table Settings introduced. Persist your column visibility, view type (grid/list), and records per page preferences across all resources.
 > **v1.0.1 Update:** Public Frontend added for testing purposes.
 
 ## 🚀 Teck Stack
@@ -56,6 +57,11 @@ Antigravity CMS is a professional, modern, and highly-scalable Content Managemen
 ### 7. Global Search
 - Fully customized global search experience.
 - Instant search results for Blogs, Categories, and Media with high-speed indexing.
+
+### 8. User-Specific Table Settings
+- **Persistence:** Column visibility, view types (Grid/List), and pagination limits are saved per user in the database.
+- **Dynamic Options:** Automatically syncs with each Resource's specific table configuration.
+- **Improved UX:** Settings are applied instantly without session conflicts.
 
 ## 🛠 Installation
 

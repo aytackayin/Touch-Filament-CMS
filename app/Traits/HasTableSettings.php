@@ -23,18 +23,38 @@ trait HasTableSettings
 
     protected function getDefaultPerPage(): int|string
     {
+        // Filament v4 initialization check
+        if (!isset($this->table)) {
+            return 10;
+        }
+
         return $this->getTable()->getDefaultPaginationPageOption() ?? 10;
     }
 
     protected function getPerPageOptions(): array
     {
+        if (!isset($this->table)) {
+            return [5, 10, 25, 50];
+        }
+
         return $this->getTable()->getPaginationPageOptions() ?? [5, 10, 25, 50];
     }
 
     /**
-     * Filament'in kendi iç kalıcılığını KAPATIYORUZ.
+     * Filament'in kendi iç (session tabanlı) kalıcılığını KAPATIYORUZ.
+     * Bu sayede ayarlar sadece bizim UserPreference tablomuzdan okunur.
      */
     public function shouldPersistTableColumnDisplayStates(): bool
+    {
+        return false;
+    }
+
+    public function shouldPersistTableRecordsPerPageInSession(): bool
+    {
+        return false;
+    }
+
+    public function shouldPersistTableFiltersInSession(): bool
     {
         return false;
     }
@@ -89,9 +109,16 @@ trait HasTableSettings
         UserPreference::setTableSettings($this->getTableSettingsKey(), $saveData);
 
         // 2. KRİTİK: Filament'in seans belleğini zorla siliyoruz (v4 uyumlu).
-        $sessionKey = "tables." . md5(static::class) . "_columns";
-        session()->forget($sessionKey);
-        session()->forget("tables." . static::class . ".toggled_table_columns");
+        // Hem MD5'li (sütunlar için) hem de standart (sayfalama için) anahtarlar temizlenir.
+        $sessionPrefix = "tables." . static::class;
+        $hashedPrefix = "tables." . md5(static::class);
+
+        session()->forget([
+            "{$sessionPrefix}.records_per_page",
+            "{$sessionPrefix}.toggled_table_columns",
+            "{$hashedPrefix}_columns",
+            "{$hashedPrefix}_records_per_page",
+        ]);
 
         // 3. State'i güncelle
         $this->visibleColumns = $newVisibleColumns;
