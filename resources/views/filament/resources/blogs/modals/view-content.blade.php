@@ -1,5 +1,5 @@
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@300;400;600;800&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap');
 
     .blog-modal-container {
         font-family: 'Outfit', sans-serif !important;
@@ -22,7 +22,6 @@
         flex-direction: column !important;
         gap: 12px !important;
         margin-bottom: 15px !important;
-        /* Reduced margin before content */
     }
 
     .meta-line {
@@ -80,138 +79,28 @@
         border-color: rgba(37, 99, 235, 0.2) !important;
     }
 
-    /* Content Area */
-    .blog-content-rich {
+    /* Content Area with Iframe Preview */
+    .blog-content-preview-box {
         background: #ffffff !important;
         border-radius: 24px !important;
-        padding: 2rem !important;
         margin: 0 0 15px 0 !important;
-        /* Reduced bottom margin */
         border: 1px solid #f1f5f9 !important;
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05) !important;
+        overflow: hidden;
+        position: relative;
     }
 
-    .dark .blog-content-rich {
+    .dark .blog-content-preview-box {
         background: #0f172a !important;
         border-color: #1e293b !important;
         box-shadow: none !important;
     }
 
-    /* Frontend Mirror Typography (Prose-lg match) */
-    .blog-content-rich .content-wrapper {
-        font-family: 'Plus Jakarta Sans', sans-serif !important;
-        color: #475569 !important;
-        /* slate-600 */
-        font-size: 1.125rem !important;
-        /* prose-lg base */
-        line-height: 1.75 !important;
-    }
-
-    .dark .blog-content-rich .content-wrapper {
-        color: #cbd5e1 !important;
-        /* slate-300 */
-    }
-
-    /* Headings matched to frontend Outfit font */
-    .blog-content-rich h1,
-    .blog-content-rich h2,
-    .blog-content-rich h3,
-    .blog-content-rich h4 {
-        font-family: 'Outfit', sans-serif !important;
-        color: #0f172a !important;
-        /* slate-900 */
-        font-weight: 800 !important;
-        margin-top: 2.5rem !important;
-        margin-bottom: 1.25rem !important;
-        line-height: 1.2 !important;
-    }
-
-    .dark .blog-content-rich h1,
-    .dark .blog-content-rich h2,
-    .dark .blog-content-rich h3,
-    .dark .blog-content-rich h4 {
-        color: #f8fafc !important;
-        /* slate-50 */
-    }
-
-    .blog-content-rich h1 {
-        font-size: 3rem !important;
-        letter-spacing: -0.025em !important;
-    }
-
-    .blog-content-rich h2 {
-        font-size: 2.25rem !important;
-        letter-spacing: -0.025em !important;
-    }
-
-    .blog-content-rich h3 {
-        font-size: 1.875rem !important;
-    }
-
-    .blog-content-rich h4 {
-        font-size: 1.5rem !important;
-    }
-
-    .blog-content-rich p {
-        margin-bottom: 1.5rem !important;
-    }
-
-    .blog-content-rich ul {
-        list-style-type: disc !important;
-        padding-left: 1.75rem !important;
-        margin-bottom: 1.75rem !important;
-    }
-
-    .blog-content-rich ol {
-        list-style-type: decimal !important;
-        padding-left: 1.75rem !important;
-        margin-bottom: 1.75rem !important;
-    }
-
-    .blog-content-rich li {
-        margin-bottom: 0.75rem !important;
-        padding-left: 0.5rem !important;
-    }
-
-    .blog-content-rich strong {
-        font-weight: 800 !important;
-        color: #0f172a !important;
-    }
-
-    .dark .blog-content-rich strong {
-        color: #ffffff !important;
-    }
-
-    .blog-content-rich img {
-        border-radius: 20px !important;
-        margin: 2.5rem 0 !important;
-        max-width: 100% !important;
-        height: auto !important;
-        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1) !important;
-    }
-
-    .blog-content-rich blockquote {
-        border-left: 4px solid #6366f1 !important;
-        padding: 1rem 2rem !important;
-        margin: 2rem 0 !important;
-        background: #f8fafc !important;
-        border-radius: 0 20px 20px 0 !important;
-        font-style: italic !important;
-        font-weight: 500 !important;
-    }
-
-    .dark .blog-content-rich blockquote {
-        background: #1e293b !important;
-    }
-
-    .blog-content-rich a {
-        color: #6366f1 !important;
-        text-decoration: underline !important;
-        font-weight: 600 !important;
-    }
-
-    .blog-content-rich a:hover {
-        color: #4338ca !important;
+    .preview-iframe {
+        width: 100%;
+        min-height: 200px;
+        border: none;
+        display: block;
     }
 
     /* Attachments Grid */
@@ -309,52 +198,6 @@
         color: #cbd5e1 !important;
     }
 
-    /* Status Styling */
-    .status-wrapper {
-        display: flex !important;
-        align-items: center !important;
-        gap: 8px !important;
-        padding: 8px 16px !important;
-        border-radius: 12px !important;
-        background: #ffffff !important;
-        font-weight: 900 !important;
-        letter-spacing: 0.05em !important;
-    }
-
-    .dark .status-wrapper {
-        background: #0f172a !important;
-    }
-
-    .status-published {
-        color: #16a34a !important;
-        border: 1px solid #dcfce7 !important;
-    }
-
-    .dark .status-published {
-        color: #4ade80 !important;
-        border-color: rgba(34, 197, 94, 0.2) !important;
-    }
-
-    .status-draft {
-        color: #dc2626 !important;
-        border: 1px solid #fee2e2 !important;
-    }
-
-    .dark .status-draft {
-        color: #f87171 !important;
-        border-color: rgba(239, 68, 68, 0.2) !important;
-    }
-
-    .status-icon {
-        width: 22px !important;
-        height: 22px !important;
-        flex-shrink: 0 !important;
-    }
-
-    .status-text {
-        font-size: 12px !important;
-    }
-
     .section-title {
         font-size: 18px !important;
         font-weight: 800 !important;
@@ -370,7 +213,30 @@
     }
 </style>
 
-<div class="blog-modal-container">
+<div class="blog-modal-container" x-data="{
+    iframeHeight: 200,
+    isDark: document.documentElement.classList.contains('dark'),
+    syncIframeMode() {
+        if (this.$refs.contentIframe && this.$refs.contentIframe.contentWindow) {
+            this.$refs.contentIframe.contentWindow.postMessage(this.isDark ? 'enable-dark' : 'disable-dark', '*');
+        }
+    }
+}" x-init="
+    // Listen for height updates from Iframe
+    window.addEventListener('message', (event) => {
+        if (event.data.type === 'resize') {
+            iframeHeight = event.data.height + 40;
+        }
+    });
+    
+    // Sync dark mode
+    $watch('isDark', () => syncIframeMode());
+
+    const observer = new MutationObserver(() => {
+        isDark = document.documentElement.classList.contains('dark');
+    });
+    observer.observe(document.documentElement, { attributes: true });
+">
     {{-- Hero Header --}}
     @if($record->cover_image)
         <img src="{{ $record->getThumbnailPath() }}" alt="{{ $record->title }}" class="blog-modal-hero">
@@ -408,11 +274,10 @@
         @endif
     </div>
 
-    {{-- Main Content Card --}}
-    <div class="blog-content-rich">
-        <div class="content-wrapper prose-lg max-w-none">
-            {!! $record->content !!}
-        </div>
+    <div class="blog-content-preview-box">
+        <iframe x-ref="contentIframe"
+            src="{{ route('admin.preview', ['model' => 'Blog', 'id' => $record->id, 'field' => 'content']) }}"
+            class="preview-iframe" :style="'height: ' + iframeHeight + 'px;'" @load="syncIframeMode()"></iframe>
     </div>
 
     {{-- Attachments Section --}}
@@ -429,47 +294,17 @@
             <div
                 style="display: grid !important; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)) !important; gap: 12px !important;">
                 @foreach(array_reverse($record->attachments ?? []) as $attachment)
-                    @php
-                        $isImage = $record->isImage($attachment);
-                        $isVideo = $record->isVideo($attachment);
-                        $thumb = $record->getThumbnailUrl($attachment);
-                        $fileName = basename($attachment);
-                        $extension = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
-
-                        $iconMap = [
-                            'pdf' => 'pdf.svg',
-                            'doc' => 'doc.svg',
-                            'docx' => 'docx.svg',
-                            'xls' => 'xls.svg',
-                            'xlsx' => 'xlsx.svg',
-                            'ppt' => 'ppt.svg',
-                            'pptx' => 'pptx.svg',
-                            'zip' => 'zip.svg',
-                            'rar' => 'rar.svg',
-                            '7z' => '7z.svg',
-                            'txt' => 'txt.svg',
-                            'mp3' => 'mp3.svg',
-                            'json' => 'json.svg',
-                            'js' => 'code.svg',
-                            'php' => 'code.svg',
-                            'css' => 'code.svg',
-                            'html' => 'code.svg',
-                        ];
-
-                        $fileIcon = $iconMap[$extension] ?? 'file.svg';
-                    @endphp
                     <a href="{{ $record->getMediaUrl($attachment) }}" target="_blank" class="attachment-card">
                         <div class="attachment-thumb-wrap">
-                            @if(($isImage || $isVideo) && $thumb)
-                                <img src="{{ $thumb }}"
-                                    style="width: 100% !important; height: 100% !important; object-fit: cover !important;">
+                            @if($record->isImage($attachment))
+                                <img src="{{ $record->getThumbnailUrl($attachment) }}"
+                                    style="width: 100%; height: 100%; object-fit: cover;">
                             @else
-                                <img src="{{ asset('assets/icons/colorful-icons/' . $fileIcon) }}"
-                                    style="width: 32px !important; height: 32px !important;">
+                                <x-heroicon-o-document class="w-8 h-8 text-gray-400" />
                             @endif
                         </div>
                         <div class="attachment-info">
-                            <span class="file-name" title="{{ $fileName }}">{{ $fileName }}</span>
+                            <span class="file-name">{{ basename($attachment) }}</span>
                         </div>
                     </a>
                 @endforeach
@@ -485,62 +320,12 @@
                 <span>{{ $record->created_at->format('d M Y, H:i') }}</span>
             </div>
 
-            @if($record->publish_start)
-                <div class="footer-item">
-                    <label>{{ __('blog.label.publish_start') }}</label>
-                    <span>{{ $record->publish_start instanceof \DateTime ? $record->publish_start->format('d M Y, H:i') : $record->publish_start }}</span>
-                </div>
-            @endif
-
-            @if($record->publish_end)
-                <div class="footer-item">
-                    <label>{{ __('blog.label.publish_end') }}</label>
-                    <span>{{ $record->publish_end instanceof \DateTime ? $record->publish_end->format('d M Y, H:i') : $record->publish_end }}</span>
-                </div>
-            @endif
-
             @if($record->user)
                 <div class="footer-item">
                     <label>{{ __('blog.label.author') }}</label>
                     <span>{{ $record->user->name }}</span>
                 </div>
             @endif
-
-            @if($record->language)
-                <div class="footer-item">
-                    <label>{{ __('blog.label.language') }}</label>
-                    <span>{{ $record->language->name }}</span>
-                </div>
-            @endif
-        </div>
-
-        <div
-            style="display: flex !important; justify-content: space-between !important; align-items: center !important; flex-wrap: wrap !important; gap: 1rem !important; border-top: 1px solid rgba(0,0,0,0.05) !important; padding-top: 1.5rem !important;">
-            @if($record->editor)
-                <div class="footer-item"
-                    style="display: flex !important; align-items: center !important; gap: 8px !important;">
-                    <label style="margin-bottom: 0 !important;">{{ __('blog.label.last_edited_by') }}:</label>
-                    <span style="font-size: 12px !important;">{{ $record->editor->name }}</span>
-                </div>
-            @endif
-
-            <div class="status-wrapper {{ $record->is_published ? 'status-published' : 'status-draft' }}">
-                @if($record->is_published)
-                    <svg class="status-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                        stroke-width="2.5" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                    </svg>
-                    <span class="status-text">{{ __('blog.label.published') }}</span>
-                @else
-                    <svg class="status-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                        stroke-width="2.5" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                    </svg>
-                    <span class="status-text">{{ __('blog.label.draft') }}</span>
-                @endif
-            </div>
         </div>
     </div>
 </div>
