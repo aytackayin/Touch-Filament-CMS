@@ -14,8 +14,6 @@ use Filament\Actions\ImportAction;
 use App\Filament\Exports\BlogCategoryExporter;
 use App\Filament\Imports\BlogCategoryImporter;
 use Filament\Support\Icons\Heroicon;
-use Filament\Schemas\Components\Section;
-use Filament\Forms\Components\CheckboxList;
 use App\Traits\HasTableSettings;
 
 class ListBlogCategories extends ListRecords
@@ -24,7 +22,6 @@ class ListBlogCategories extends ListRecords
     protected static string $resource = BlogCategoryResource::class;
 
     public ?int $parent_id = null;
-    public array $visibleColumns = [];
 
     public function mount(): void
     {

@@ -54,20 +54,6 @@ class RelatedItemsWidget extends BaseWidget
 
         $table->query($query)
             ->headerActions([
-                TableAction::make('tableSettings')
-                    ->label(__('table_settings.label'))
-                    ->hiddenLabel()
-                    ->tooltip(__('table_settings.label'))
-                    ->icon('heroicon-o-cog-6-tooth')
-                    ->color('gray')
-                    ->size('xs')
-                    ->modalHeading(__('table_settings.modal_heading'))
-                    ->modalSubmitActionLabel(__('table_settings.save'))
-                    ->form($this->getTableSettingsFormSchema())
-                    ->action(function (array $data) {
-                        $this->saveTableSettings($data);
-                        return redirect(request()->header('Referer'));
-                    }),
                 ActionGroup::make([
                     CreateAction::make()
                         ->label('')

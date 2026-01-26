@@ -5,7 +5,7 @@ namespace App\Traits;
 use App\Models\UserPreference;
 use Filament\Actions\Action;
 use Filament\Forms\Components\CheckboxList;
-use Illuminate\Support\Facades\Cookie;
+use Filament\Forms\Components\Radio;
 
 trait HasTableSettings
 {
@@ -17,73 +17,62 @@ trait HasTableSettings
     }
 
     abstract protected function getTableSettingsKey(): string;
-
     abstract protected function getDefaultVisibleColumns(): array;
-
     abstract protected function getTableColumnOptions(): array;
 
-    protected function getTableSettingsCookieName(): string
+    /**
+     * Filament'in kendi iç kalıcılığını KAPATIYORUZ.
+     */
+    public function shouldPersistTableColumnDisplayStates(): bool
     {
-        return 'table_settings_' . $this->getTableSettingsKey();
-    }
-
-    protected function getTableSettingsFormSchema(): array
-    {
-        return [
-            CheckboxList::make('visible_columns')
-                ->label(__('table_settings.columns'))
-                ->options($this->getTableColumnOptions())
-                ->default($this->visibleColumns)
-                ->required()
-                ->columns(2),
-        ];
+        return false;
     }
 
     public function loadTableSettings(): void
     {
-        // 1. Cookie (Priority: High)
-        $cookieVal = request()->cookie($this->getTableSettingsCookieName());
-        if ($cookieVal) {
-            $decoded = json_decode($cookieVal, true);
-            if (is_array($decoded)) {
-                $this->applySettings($decoded);
-                return;
-            }
+        if (!auth()->check()) {
+            $this->visibleColumns = $this->getDefaultVisibleColumns();
+            return;
         }
 
-        // 2. DB (User Preference) (Priority: Medium)
-        if (auth()->check()) {
-            $dbVal = UserPreference::getTableSettings($this->getTableSettingsKey());
-            if ($dbVal && is_array($dbVal)) {
-                $this->applySettings($dbVal);
-                // Sync to cookie for consistency
-                Cookie::queue($this->getTableSettingsCookieName(), json_encode($dbVal), 60 * 24 * 365);
-                return;
+        $settings = UserPreference::getTableSettings($this->getTableSettingsKey());
+
+        if ($settings && is_array($settings)) {
+            $this->visibleColumns = $settings['visible_columns'] ?? $this->getDefaultVisibleColumns();
+
+            if (isset($settings['view_type']) && property_exists($this, 'view_type')) {
+                $this->view_type = $settings['view_type'];
             }
+        } else {
+            $this->visibleColumns = $this->getDefaultVisibleColumns();
         }
-
-        // 3. Default (Priority: Low)
-        $this->applySettings(['visible_columns' => $this->getDefaultVisibleColumns()]);
-    }
-
-    protected function applySettings(array $settings): void
-    {
-        $this->visibleColumns = $settings['visible_columns'] ?? [];
     }
 
     public function saveTableSettings(array $data): void
     {
-        $this->applySettings($data);
+        if (!auth()->check())
+            return;
 
-        // Save to DB
-        if (auth()->check()) {
-            UserPreference::setTableSettings($this->getTableSettingsKey(), $data);
-        }
+        $newVisibleColumns = $data['visible_columns'] ?? [];
 
-        // Save to Cookie
-        Cookie::queue($this->getTableSettingsCookieName(), json_encode($data), 60 * 24 * 365);
+        $saveData = [
+            'visible_columns' => $newVisibleColumns,
+            'view_type' => $data['view_type'] ?? (property_exists($this, 'view_type') ? $this->view_type : 'list'),
+        ];
 
-        $this->dispatch('table-settings-updated');
+        // 1. Veritabanına Kaydet
+        UserPreference::setTableSettings($this->getTableSettingsKey(), $saveData);
+
+        // 2. KRİTİK: Filament'in seans belleğini zorla siliyoruz.
+        // Filament tablo durumlarını seans içinde 'tables.{component_class}' altında tutar.
+        $componentName = static::class;
+        session()->forget("tables.{$componentName}.toggled_table_columns");
+
+        // 3. State'i güncelle
+        $this->visibleColumns = $newVisibleColumns;
+
+        // 4. Sayfayı yenileyerek temiz bir başlangıç yapıyoruz.
+        $this->redirect(request()->header('Referer'));
     }
 
     public function getTableSettingsAction(): Action
@@ -97,10 +86,23 @@ trait HasTableSettings
             ->size('xs')
             ->modalHeading(__('table_settings.modal_heading'))
             ->modalSubmitActionLabel(__('table_settings.save'))
-            ->form($this->getTableSettingsFormSchema())
-            ->action(function (array $data) {
-                $this->saveTableSettings($data);
-                return redirect(request()->header('Referer'));
-            });
+            ->form(fn() => [
+                Radio::make('view_type')
+                    ->label(__('blog.label.default_view'))
+                    ->options([
+                        'list' => __('file_manager.label.list_view'),
+                        'grid' => __('file_manager.label.grid_view'),
+                    ])
+                    ->default(property_exists($this, 'view_type') ? $this->view_type : 'list')
+                    ->inline()
+                    ->hidden(!property_exists($this, 'view_type')),
+                CheckboxList::make('visible_columns')
+                    ->label(__('table_settings.columns'))
+                    ->options($this->getTableColumnOptions())
+                    ->default($this->visibleColumns)
+                    ->required()
+                    ->columns(2),
+            ])
+            ->action(fn(array $data) => $this->saveTableSettings($data));
     }
 }

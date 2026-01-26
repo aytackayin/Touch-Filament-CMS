@@ -41,8 +41,6 @@ class ListTouchFiles extends ListRecords
     #[\Livewire\Attributes\Url]
     public ?string $iframe = null;
 
-    public array $visibleColumns = [];
-
     public function mount(): void
     {
         parent::mount();
@@ -56,7 +54,7 @@ class ListTouchFiles extends ListRecords
 
     protected function getDefaultVisibleColumns(): array
     {
-        return ['type', 'size', 'created_at', 'user']; // 4 default columns
+        return ['type', 'size', 'created_at', 'user'];
     }
 
     protected function getTableColumnOptions(): array
@@ -68,35 +66,6 @@ class ListTouchFiles extends ListRecords
             'user' => __('file_manager.label.author'),
             'editor' => __('file_manager.label.last_editor'),
             'created_at' => __('file_manager.label.date'),
-        ];
-    }
-
-    protected function applySettings(array $settings): void
-    {
-        $this->visibleColumns = $settings['visible_columns'] ?? [];
-        if (isset($settings['view_type']) && in_array($settings['view_type'], ['grid', 'list'])) {
-            $this->view_type = $settings['view_type'];
-        }
-    }
-
-    protected function getTableSettingsFormSchema(): array
-    {
-        return [
-            Radio::make('view_type')
-                ->label(__('file_manager.label.default_view')) // Or some translation
-                ->options([
-                    'list' => __('file_manager.label.list_view'),
-                    'grid' => __('file_manager.label.grid_view'),
-                ])
-                ->default($this->view_type)
-                ->inline()
-                ->required(),
-            CheckboxList::make('visible_columns')
-                ->label(__('table_settings.columns'))
-                ->options($this->getTableColumnOptions())
-                ->default($this->visibleColumns)
-                ->required()
-                ->columns(2),
         ];
     }
 
