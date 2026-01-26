@@ -28,7 +28,7 @@ class UsersTable
                     });
                 }
             })
-            ->defaultPaginationPageOption($table->getLivewire()->perPage ?? 10)
+            ->defaultPaginationPageOption($table->getLivewire()->userPreferredPerPage ?? 10)
             ->striped()
             ->columns([
                 TextColumn::make('name')

@@ -27,7 +27,7 @@ class BlogCategoriesTable
     {
         return $table
             ->striped()
-            ->defaultPaginationPageOption($table->getLivewire()->perPage ?? 10)
+            ->defaultPaginationPageOption($table->getLivewire()->userPreferredPerPage ?? 10)
             ->paginatedWhileReordering()
             ->recordUrl(null)
             ->columns([

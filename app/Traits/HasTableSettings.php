@@ -10,7 +10,7 @@ use Filament\Forms\Components\Radio;
 trait HasTableSettings
 {
     public array $visibleColumns = [];
-    public $tableRecordsPerPage = null;
+    public $userPreferredPerPage = null;
 
     public function mountHasTableSettings(): void
     {
@@ -60,10 +60,15 @@ trait HasTableSettings
                 $this->view_type = $settings['view_type'];
             }
 
-            $this->tableRecordsPerPage = $settings['per_page'] ?? $this->getDefaultPerPage();
+            $this->userPreferredPerPage = $settings['per_page'] ?? $this->getDefaultPerPage();
         } else {
             $this->visibleColumns = $this->getDefaultVisibleColumns();
-            $this->tableRecordsPerPage = $this->getDefaultPerPage();
+            $this->userPreferredPerPage = $this->getDefaultPerPage();
+        }
+
+        // Filament'in iç değişkenini, dışarıdan (URL/Session) bir değer gelmemişse güncelle.
+        if (property_exists($this, 'tableRecordsPerPage')) {
+            $this->tableRecordsPerPage = $this->userPreferredPerPage;
         }
     }
 
@@ -123,7 +128,7 @@ trait HasTableSettings
                         $labels = array_map(fn($opt) => $opt === 'all' ? (__('table_settings.all') ?? 'Hepsi') : $opt, $options);
                         return array_combine($options, $labels);
                     })
-                    ->default($this->tableRecordsPerPage)
+                    ->default($this->userPreferredPerPage)
                     ->inline(),
                 CheckboxList::make('visible_columns')
                     ->label(__('table_settings.columns'))

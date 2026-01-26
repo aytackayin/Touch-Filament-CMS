@@ -49,7 +49,7 @@ class BlogsTable
                         'class' => 'blogs-grid',
                     ])
             )
-            ->defaultPaginationPageOption($table->getLivewire()->perPage ?? 10)
+            ->defaultPaginationPageOption($table->getLivewire()->userPreferredPerPage ?? 10)
             ->paginated([10, 25, 50, 100, 'all'])
             ->striped()
             ->paginatedWhileReordering()
