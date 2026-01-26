@@ -11,9 +11,6 @@ use App\Models\Language;
 use App\Observers\BlogObserver;
 use App\Observers\BlogCategoryObserver;
 use App\Settings\GeneralSettings;
-use Illuminate\Support\Facades\Queue;
-use Illuminate\Queue\Events\JobQueued;
-use App\Services\QueueStarterService;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -35,7 +32,7 @@ class AppServiceProvider extends ServiceProvider
 
         // En Basit Çözüm: Uygulama yanıtı gönderdikten sonra (terminating anında)
         // kuyrukta iş varsa worker'ı arka planda bir kere çalıştırıp kapatır.
-        $this->app->terminating(function () {
+/*         $this->app->terminating(function () {
             if (app()->environment('local') || config('queue.default') === 'database') {
                 // Windows veya Linux ayrımı yaparak arka planda çalıştır
                 $command = PHP_BINARY . ' artisan queue:work --stop-when-empty --tries=3 --timeout=0 --memory=512';
@@ -46,7 +43,7 @@ class AppServiceProvider extends ServiceProvider
                     exec($command . " > /dev/null 2>&1 &");
                 }
             }
-        });
+        }); */
 
         LanguageSwitch::configureUsing(function (LanguageSwitch $switch) {
             $languages = Language::where('is_active', 1)->get();
