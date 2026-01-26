@@ -9,9 +9,12 @@ use App\Filament\Exports\UserExporter;
 use Filament\Support\Icons\Heroicon;
 use Filament\Actions\EditAction;
 use Filament\Actions\DeleteAction;
+use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Table;
 use App\Models\User;
+use Illuminate\Contracts\View\View;
 
 class UsersTable
 {
@@ -31,6 +34,11 @@ class UsersTable
             ->defaultPaginationPageOption($table->getLivewire()->userPreferredPerPage ?? 10)
             ->striped()
             ->columns([
+                ImageColumn::make('avatar_url')
+                    ->label(__('filament-breezy::default.fields.avatar'))
+                    ->circular()
+                    ->disk('attachments')
+                    ->toggleable(),
                 TextColumn::make('name')
                     ->label(__('user.label.name'))
                     ->searchable()
@@ -39,6 +47,10 @@ class UsersTable
                     ->label(__('user.label.email'))
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: fn($livewire) => !in_array('email', $livewire->visibleColumns ?? [])),
+                TextColumn::make('phone')
+                    ->label(__('user.label.phone'))
+                    ->searchable()
+                    ->toggleable(),
                 TextColumn::make('roles.name')
                     ->label(__('user.label.roles'))
                     ->badge()
@@ -58,6 +70,18 @@ class UsersTable
                 //
             ])
             ->actions([
+                ViewAction::make()
+                    ->icon('heroicon-o-eye')
+                    ->label('')
+                    ->tooltip(__('filament-actions::view.single.label'))
+                    ->modalContent(fn(User $record): View => view(
+                        'filament.resources.users.modals.view-profile',
+                        ['record' => $record],
+                    ))
+                    ->modalWidth('xl')
+                    ->modalHeading(false)
+                    ->modalSubmitAction(false)
+                    ->modalCancelAction(false),
                 EditAction::make()
                     ->icon('heroicon-o-pencil-square')
                     ->label('')
