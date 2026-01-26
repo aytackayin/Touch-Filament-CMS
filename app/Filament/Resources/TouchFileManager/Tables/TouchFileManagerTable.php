@@ -146,7 +146,32 @@ class TouchFileManagerTable
                     ->color(fn(string $state): string => match ($state) {
                         'image' => 'success', 'video' => 'info', 'document' => 'primary', 'archive' => 'warning', 'spreadsheet' => 'success', 'presentation' => 'danger', default => 'gray',
                     })
-                    ->searchable(['type', 'mime_type'])
+                    ->searchable(query: function (Builder $query, string $search) {
+                        $search = strtolower($search);
+                        $typeMap = [
+                            'resim' => 'image',
+                            'video' => 'video',
+                            'belge' => 'document',
+                            'arşiv' => 'archive',
+                            'arsiv' => 'archive',
+                            'e-tablo' => 'spreadsheet',
+                            'etablo' => 'spreadsheet',
+                            'sunum' => 'presentation',
+                            'diğer' => 'other',
+                            'diger' => 'other',
+                        ];
+
+                        $dbType = $typeMap[$search] ?? null;
+
+                        return $query->where(function ($q) use ($search, $dbType) {
+                            $q->where('path', 'like', "%{$search}%"); // search by extension (part of path)
+                            if ($dbType) {
+                                $q->orWhere('type', '=', $dbType);
+                            } else {
+                                $q->orWhere('type', 'like', "%{$search}%");
+                            }
+                        });
+                    })
                     ->formatStateUsing(fn(string $state, $record) => $record?->id === 0 ? '' : __('file_manager.label.types.' . $state))
                     ->description(function ($record) {
                         if (!$record || $record->id === 0 || $record->is_folder)
