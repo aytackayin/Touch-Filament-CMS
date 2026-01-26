@@ -47,12 +47,34 @@ class TouchFileManagerTable
                 $livewire = $table->getLivewire();
                 $parentId = ($livewire && property_exists($livewire, 'parent_id')) ? $livewire->parent_id : null;
 
-                if ($parentId) {
-                    $columns = ['id', 'user_id', 'edit_user_id', 'name', 'alt', 'path', 'type', 'mime_type', 'size', 'parent_id', 'is_folder', 'metadata', 'tags', 'created_at', 'updated_at'];
-                    $query->select($columns)->where('parent_id', $parentId);
+                $columns = [
+                    'touch_files.id',
+                    'touch_files.user_id',
+                    'touch_files.edit_user_id',
+                    'touch_files.name',
+                    'touch_files.alt',
+                    'touch_files.path',
+                    'touch_files.type',
+                    'touch_files.mime_type',
+                    'touch_files.size',
+                    'touch_files.parent_id',
+                    'touch_files.is_folder',
+                    'touch_files.metadata',
+                    'touch_files.tags',
+                    'touch_files.created_at',
+                    'touch_files.updated_at'
+                ];
 
-                    $fakeRow = TouchFile::query()->selectRaw("0 as id, null as user_id, null as edit_user_id, 'Up' as name, null as alt, '' as path, 'folder' as type, null as mime_type, 0 as size, ? as parent_id, 1 as is_folder, null as metadata, null as tags, null as created_at, null as updated_at", [$parentId]);
-                    $unionQuery = $query->union($fakeRow);
+                if ($parentId) {
+                    $mainQuery = TouchFile::query()->select($columns)
+                        ->leftJoin('users as u', 'touch_files.user_id', '=', 'u.id')
+                        ->leftJoin('users as e', 'touch_files.edit_user_id', '=', 'e.id')
+                        ->addSelect('u.name as user_name', 'e.name as editor_name')
+                        ->where('parent_id', $parentId);
+
+                    $fakeRow = TouchFile::query()->selectRaw("0 as id, null as user_id, null as edit_user_id, 'Up' as name, null as alt, '' as path, 'folder' as type, null as mime_type, 0 as size, ? as parent_id, 1 as is_folder, null as metadata, null as tags, null as created_at, null as updated_at, null as user_name, null as editor_name", [$parentId]);
+
+                    $unionQuery = $mainQuery->union($fakeRow);
 
                     return TouchFile::query()->fromSub($unionQuery, 'touch_files')->select('*')
                         ->orderByRaw('CASE WHEN id = 0 THEN 1 ELSE 0 END DESC')
@@ -60,7 +82,14 @@ class TouchFileManagerTable
                         ->orderBy('name', 'asc');
                 }
 
-                return $query->whereNull('parent_id')->orderBy('is_folder', 'desc')->orderBy('name', 'asc');
+                return TouchFile::query()->from((new TouchFile)->getTable())
+                    ->select($columns)
+                    ->leftJoin('users as u', 'touch_files.user_id', '=', 'u.id')
+                    ->leftJoin('users as e', 'touch_files.edit_user_id', '=', 'e.id')
+                    ->addSelect('u.name as user_name', 'e.name as editor_name')
+                    ->whereNull('parent_id')
+                    ->orderBy('is_folder', 'desc')
+                    ->orderBy('name', 'asc');
             })
             ->striped()
             ->recordUrl(function ($record) use ($table): ?string {
@@ -79,7 +108,9 @@ class TouchFileManagerTable
             })
             ->columns($isGrid ? [
                 Stack::make([
-                    ViewColumn::make('details')->view('filament.tables.columns.touchfilemanager-grid')->searchable(['name', 'type', 'alt', 'tags']),
+                    ViewColumn::make('details')
+                        ->view('filament.tables.columns.touchfilemanager-grid')
+                        ->searchable(['name', 'type', 'alt', 'tags', 'user_name', 'editor_name', 'created_at']),
                 ])->space(0),
             ] : [
                 ImageColumn::make('thumbnail_preview')->label('')->disk('attachments')->state(fn(TouchFile $record) => $record->thumbnail_path)->width(60)->height(60)
@@ -115,6 +146,7 @@ class TouchFileManagerTable
                     ->color(fn(string $state): string => match ($state) {
                         'image' => 'success', 'video' => 'info', 'document' => 'primary', 'archive' => 'warning', 'spreadsheet' => 'success', 'presentation' => 'danger', default => 'gray',
                     })
+                    ->searchable(['type', 'mime_type'])
                     ->formatStateUsing(fn(string $state, $record) => $record?->id === 0 ? '' : __('file_manager.label.types.' . $state))
                     ->description(function ($record) {
                         if (!$record || $record->id === 0 || $record->is_folder)
@@ -127,12 +159,15 @@ class TouchFileManagerTable
                 TextColumn::make('tags')->label(__('file_manager.label.tags'))->badge()->separator(',')->searchable()->wrap()
                     ->toggleable(isToggledHiddenByDefault: fn($livewire) => !in_array('tags', $livewire->visibleColumns ?? [])),
                 TextColumn::make('user.name')->label(__('file_manager.label.author'))->sortable()
+                    ->searchable(query: fn(Builder $query, string $search) => $query->where('user_name', 'like', "%{$search}%"))
                     ->toggleable(isToggledHiddenByDefault: fn($livewire) => !in_array('user', $livewire->visibleColumns ?? []))
                     ->formatStateUsing(fn($state, $record) => $record?->id === 0 ? '' : $state),
                 TextColumn::make('editor.name')->label(__('file_manager.label.last_editor'))->sortable()
+                    ->searchable(query: fn(Builder $query, string $search) => $query->where('editor_name', 'like', "%{$search}%"))
                     ->toggleable(isToggledHiddenByDefault: fn($livewire) => !in_array('editor', $livewire->visibleColumns ?? []))
                     ->formatStateUsing(fn($state, $record) => $record?->id === 0 ? '' : $state),
                 TextColumn::make('created_at')->label(__('file_manager.label.date'))->date()->sortable()
+                    ->searchable()
                     ->toggleable(isToggledHiddenByDefault: fn($livewire) => !in_array('created_at', $livewire->visibleColumns ?? []))
                     ->placeholder(''),
             ])
