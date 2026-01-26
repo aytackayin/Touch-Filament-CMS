@@ -47,6 +47,23 @@
     <img src="{{ $imageUrl }}" alt="{{ $name }}" class="touch-file-bg {{ $isUp ? 'is-icon' : '' }}"
         onerror="this.src='{{ $fallbackUrl }}'; this.classList.add('is-icon')">
 
+    @if(!$isUp && !$isFolder)
+        @php
+            $typeColor = match ($record->type) {
+                'image' => '#22c55e',       // green-500
+                'video' => '#0ea5e9',       // sky-500
+                'document' => '#6366f1',    // indigo-500
+                'archive' => '#f59e0b',     // amber-500
+                'spreadsheet' => '#10b981', // emerald-500
+                'presentation' => '#ef4444', // red-500
+                default => '#6b7280',        // gray-500
+            };
+        @endphp
+        <div class="touch-file-type-badge" style="background-color: {{ $typeColor }};">
+            {{ __('file_manager.label.types.' . ($record->type ?? 'other')) }}
+        </div>
+    @endif
+
     @if(!$isUp && (str_contains($record->type ?? '', 'video') || str_contains($record->mime_type ?? '', 'video')))
         <div
             style="position: absolute !important; inset: 0 !important; display: flex !important; align-items: center !important; justify-content: center !important; z-index: 1 !important; pointer-events: none !important;">
@@ -158,6 +175,22 @@
         gap: 10px;
         font-size: 11px;
         opacity: 0.8;
+    }
+
+    /* === TYPE BADGE === */
+    .touch-file-type-badge {
+        position: absolute;
+        top: 12px;
+        left: 12px;
+        z-index: 20;
+        padding: 2px 8px;
+        border-radius: 6px;
+        font-size: 10px;
+        font-weight: 700;
+        color: white;
+        text-transform: uppercase;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        pointer-events: none;
     }
 
     /* === CHECKBOX === */
