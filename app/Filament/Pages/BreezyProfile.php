@@ -129,6 +129,7 @@ class BreezyProfile extends Page implements HasForms
                         Tab::make('Extension')
                             ->label('Chrome Eklentisi')
                             ->icon('heroicon-o-puzzle-piece')
+                            ->visible(fn() => auth()->user()->can('AccessChromeExtension'))
                             ->schema([
                                 Grid::make(1)->schema([
                                     Section::make()

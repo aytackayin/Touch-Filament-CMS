@@ -27,7 +27,7 @@ class ChromeExtensionAuth
         }
 
         // Security: Check if user has permission to use the extension via Shield
-        if (!$user->can('access_chrome_extension')) {
+        if (!$user->can('AccessChromeExtension')) {
             return response()->json(['message' => 'Bu eklentiyi kullanma yetkiniz bulunmamaktadır.'], 403);
         }
 
