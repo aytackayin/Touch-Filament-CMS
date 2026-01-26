@@ -60,7 +60,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                             links.forEach(link => {
                                 let href = link.getAttribute('href');
                                 if (href) {
-                                    // Handle YouTube redirect URLs (extract q parameter)
+                                    // Skip hashtag links (keep original # text)
+                                    if (href.startsWith('/hashtag/') || href.startsWith('hashtag/')) return;
+
+                                    // Handle YouTube redirect URLs
                                     if (href.includes('youtube.com/redirect') || href.startsWith('/redirect')) {
                                         try {
                                             const urlParams = new URLSearchParams(href.includes('?') ? href.split('?')[1] : "");

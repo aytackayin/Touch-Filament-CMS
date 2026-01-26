@@ -75,6 +75,14 @@ class YouTubeIntegrationController extends Controller
 
         $blog->categories()->sync($validated['category_ids']);
 
+        // Extract and Save Hashtags as Tags
+        if (!empty($validated['description'])) {
+            preg_match_all('/#(\w+)/u', $validated['description'], $matches);
+            if (!empty($matches[1])) {
+                $blog->update(['tags' => array_values(array_unique($matches[1]))]);
+            }
+        }
+
         // Download YouTube Cover Image and add to attachments
         try {
             $apiKey = $validated['video_id'];
