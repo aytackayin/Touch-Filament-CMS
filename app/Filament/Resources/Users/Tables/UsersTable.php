@@ -78,6 +78,8 @@ class UsersTable
                         'filament.resources.users.modals.view-profile',
                         ['record' => $record],
                     ))
+                    ->form([])
+                    ->infolist([])
                     ->modalWidth('xl')
                     ->modalHeading(false)
                     ->modalSubmitAction(false)
