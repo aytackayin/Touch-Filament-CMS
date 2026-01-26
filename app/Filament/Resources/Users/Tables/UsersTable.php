@@ -14,6 +14,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Table;
 use App\Models\User;
+use Filament\Facades\Filament;
 use Illuminate\Contracts\View\View;
 
 class UsersTable
@@ -40,6 +41,7 @@ class UsersTable
                     ->disk('attachments')
                     ->width('50px')
                     ->size(35)
+                    ->defaultImageUrl(fn($record) => Filament::getUserAvatarUrl($record))
                     ->toggleable(isToggledHiddenByDefault: fn($livewire) => !in_array('avatar_url', $livewire->visibleColumns ?? [])),
                 TextColumn::make('name')
                     ->label(__('user.label.name'))

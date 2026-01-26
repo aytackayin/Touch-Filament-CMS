@@ -97,6 +97,94 @@
         box-shadow: none !important;
     }
 
+    /* Rich Content Typography Fix */
+    .blog-content-rich h1 {
+        font-size: 2.25rem !important;
+        font-weight: 800 !important;
+        margin: 2rem 0 1rem 0 !important;
+        color: var(--profile-text, inherit) !important;
+        line-height: 1.2 !important;
+    }
+
+    .blog-content-rich h2 {
+        font-size: 1.875rem !important;
+        font-weight: 700 !important;
+        margin: 1.75rem 0 0.875rem 0 !important;
+        color: var(--profile-text, inherit) !important;
+        line-height: 1.3 !important;
+        border-bottom: 2px solid rgba(99, 102, 241, 0.1) !important;
+        padding-bottom: 8px !important;
+    }
+
+    .blog-content-rich h3 {
+        font-size: 1.5rem !important;
+        font-weight: 700 !important;
+        margin: 1.5rem 0 0.75rem 0 !important;
+        color: var(--profile-text, inherit) !important;
+    }
+
+    .blog-content-rich h4 {
+        font-size: 1.25rem !important;
+        font-weight: 600 !important;
+        margin: 1.25rem 0 0.6rem 0 !important;
+    }
+
+    .blog-content-rich p {
+        margin-bottom: 1.25rem !important;
+        font-size: 1.05rem !important;
+    }
+
+    .blog-content-rich ul {
+        list-style-type: disc !important;
+        margin-left: 1.5rem !important;
+        margin-bottom: 1.25rem !important;
+    }
+
+    .blog-content-rich ol {
+        list-style-type: decimal !important;
+        margin-left: 1.5rem !important;
+        margin-bottom: 1.25rem !important;
+    }
+
+    .blog-content-rich li {
+        margin-bottom: 0.5rem !important;
+    }
+
+    .blog-content-rich blockquote {
+        border-left: 4px solid #6366f1 !important;
+        background: #f8fafc !important;
+        padding: 1rem 1.5rem !important;
+        margin: 1.5rem 0 !important;
+        font-style: italic !important;
+        border-radius: 0 12px 12px 0 !important;
+    }
+
+    .dark .blog-content-rich blockquote {
+        background: #1e293b !important;
+    }
+
+    .blog-content-rich img {
+        border-radius: 12px !important;
+        margin: 1.5rem 0 !important;
+        max-width: 100% !important;
+        height: auto !important;
+    }
+
+    .blog-content-rich a {
+        color: #6366f1 !important;
+        text-decoration: underline !important;
+        font-weight: 600 !important;
+    }
+
+    .blog-content-rich a:hover {
+        color: #4338ca !important;
+    }
+
+    .blog-content-rich strong,
+    .blog-content-rich b {
+        font-weight: 700 !important;
+    }
+
     /* Attachments Grid */
     .attachment-card {
         display: flex !important;
