@@ -97,11 +97,15 @@ trait HasFileManagerSync
                     $record = TouchFile::where('path', $targetPath)->first() ?? TouchFile::where('path', $attachment)->first();
 
                     if ($record) {
-                        $record->update(['path' => $targetPath, 'name' => $cleanFilename]);
+                        $record->update([
+                            'path' => $targetPath,
+                            'name' => $cleanFilename,
+                            'edit_user_id' => auth()->id() ?? $this->edit_user_id ?? $this->user_id
+                        ]);
                         if ($record->type === 'image')
                             $record->generateThumbnails();
                     } else {
-                        TouchFile::registerFile($targetPath);
+                        TouchFile::registerFile($targetPath, auth()->id() ?? $this->user_id, auth()->id() ?? $this->edit_user_id);
                         $record = TouchFile::where('path', $targetPath)->first();
                         if ($record && $record->type === 'image')
                             $record->generateThumbnails();
@@ -128,7 +132,7 @@ trait HasFileManagerSync
 
                         usleep(50000);
 
-                        TouchFile::registerFile($targetPath);
+                        TouchFile::registerFile($targetPath, auth()->id() ?? $this->user_id, auth()->id() ?? $this->edit_user_id);
                         $record = TouchFile::where('path', $targetPath)->first();
                         if ($record && $record->type === 'image')
                             $record->generateThumbnails();
@@ -151,7 +155,7 @@ trait HasFileManagerSync
                 if (function_exists('clearstatcache'))
                     clearstatcache(true, $disk->path($attachment));
                 if ($disk->exists($attachment)) {
-                    TouchFile::registerFile($attachment);
+                    TouchFile::registerFile($attachment, $this->user_id, auth()->id() ?? $this->edit_user_id);
                     // Ensure fresh thumbnails even if already in correct place
                     $record = TouchFile::where('path', $attachment)->first();
                     if ($record && $record->type === 'image')

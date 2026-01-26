@@ -105,12 +105,8 @@ class TouchFileManagerTable
                     ->description(function ($record) {
                         if (!$record || $record->id === 0)
                             return null;
-                        $desc = [];
-                        if (!empty($record->alt))
-                            $desc[] = $record->alt;
-                        if (!$record->is_folder)
-                            $desc[] = $record->human_size;
-                        return implode(' • ', $desc);
+
+                        return !empty($record->alt) ? $record->alt : null;
                     }),
 
                 TextColumn::make('type_size')->label(__('file_manager.label.type_size'))

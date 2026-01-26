@@ -273,7 +273,7 @@ class TouchFile extends Model
         return 'other';
     }
 
-    public static function registerFile(string $path): void
+    public static function registerFile(string $path, ?int $userId = null, ?int $editUserId = null): void
     {
         $disk = Storage::disk('attachments');
         $path = str_replace('\\', '/', $path);
@@ -293,9 +293,13 @@ class TouchFile extends Model
         $existing = static::where('path', $path)->where('is_folder', false)->first();
         if ($existing) {
             $newSize = $disk->size($path);
-            if ($existing->size !== $newSize) {
-                $existing->update(['size' => $newSize]);
+            $updateData = ['size' => $newSize];
+
+            if ($editUserId || auth()->check()) {
+                $updateData['edit_user_id'] = $editUserId ?? auth()->id();
             }
+
+            $existing->update($updateData);
             return;
         }
 
@@ -308,7 +312,11 @@ class TouchFile extends Model
             $currentPath = $currentPath ? "{$currentPath}/{$part}" : $part;
             $folder = static::firstOrCreate(
                 ['path' => $currentPath, 'is_folder' => true],
-                ['name' => $part, 'parent_id' => $parentId]
+                [
+                    'name' => $part,
+                    'parent_id' => $parentId,
+                    'user_id' => $userId ?? auth()->id()
+                ]
             );
             $parentId = $folder->id;
         }
@@ -327,6 +335,8 @@ class TouchFile extends Model
             'mime_type' => $mimeType,
             'size' => $disk->size($path),
             'type' => static::determineFileType($mimeType, $path),
+            'user_id' => $userId ?? auth()->id(),
+            'edit_user_id' => $editUserId
         ]);
     }
 
