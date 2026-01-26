@@ -50,6 +50,7 @@ class BlogsTable
                     ])
             )
             ->defaultPaginationPageOption($table->getLivewire()->perPage ?? 10)
+            ->paginated([10, 25, 50, 100, 'all'])
             ->striped()
             ->paginatedWhileReordering()
             ->recordUrl(null)

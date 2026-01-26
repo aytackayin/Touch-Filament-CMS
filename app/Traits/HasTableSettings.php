@@ -23,12 +23,12 @@ trait HasTableSettings
 
     protected function getDefaultPerPage(): int
     {
-        return 10;
+        return $this->getTable()->getDefaultPaginationPageOption() ?? 10;
     }
 
     protected function getPerPageOptions(): array
     {
-        return [5, 10, 25, 50];
+        return $this->getTable()->getPaginationPageOptions() ?? [5, 10, 25, 50];
     }
 
     /**
