@@ -50,7 +50,7 @@ class UsersTable
                 TextColumn::make('phone')
                     ->label(__('user.label.phone'))
                     ->searchable()
-                    ->toggleable(),
+                    ->toggleable(isToggledHiddenByDefault: fn($livewire) => !in_array('phone', $livewire->visibleColumns ?? [])),
                 TextColumn::make('roles.name')
                     ->label(__('user.label.roles'))
                     ->badge()

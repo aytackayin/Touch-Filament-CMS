@@ -23,6 +23,8 @@ return [
         'default_editor' => 'Varsayılan Editör',
         'personal_info' => 'Kişisel Bilgiler',
         'password_section' => 'Şifre Değiştir',
+        'user' => 'Kullanıcı',
+        'users' => 'Kullanıcılar',
     ],
     'nav' => [
         'group' => 'Kullanıcı Yönetimi',

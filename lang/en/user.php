@@ -23,6 +23,8 @@ return [
         'default_editor' => 'Default Editor',
         'personal_info' => 'Personal Information',
         'password_section' => 'Change Password',
+        'user' => 'User',
+        'users' => 'Users',
     ],
     'nav' => [
         'group' => 'User Management',
