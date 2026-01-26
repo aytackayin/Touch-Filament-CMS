@@ -118,6 +118,26 @@ class TouchFile extends Model
         return Storage::disk('attachments')->url($this->path);
     }
 
+    public function getHumanSizeAttribute(): string
+    {
+        if ($this->is_folder || $this->size === null) {
+            return '';
+        }
+
+        $units = ['B', 'KB', 'MB', 'GB', 'TB'];
+        $bytes = max($this->size, 0);
+        $pow = floor(($bytes ? log($bytes) : 0) / log(1024));
+        $pow = min($pow, count($units) - 1);
+        $bytes /= pow(1024, $pow);
+
+        return round($bytes, 2) . ' ' . $units[$pow];
+    }
+
+    public function getFullPathAttribute(): string
+    {
+        return $this->path ?? '';
+    }
+
     public function getThumbnailSizes(): array
     {
         $path = str_replace('\\', '/', $this->path);

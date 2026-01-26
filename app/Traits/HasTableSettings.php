@@ -38,7 +38,12 @@ trait HasTableSettings
         $settings = UserPreference::getTableSettings($this->getTableSettingsKey());
 
         if ($settings && is_array($settings)) {
-            $this->visibleColumns = $settings['visible_columns'] ?? $this->getDefaultVisibleColumns();
+            $savedColumns = $settings['visible_columns'] ?? $this->getDefaultVisibleColumns();
+
+            // Sadece şu anki seçeneklerde (options) var olan anahtarları kabul et.
+            // Bu sayede kodda yapılan sütun değişiklikleri validation hatalarına yol açmaz.
+            $availableOptions = array_keys($this->getTableColumnOptions());
+            $this->visibleColumns = array_intersect($savedColumns, $availableOptions);
 
             if (isset($settings['view_type']) && property_exists($this, 'view_type')) {
                 $this->view_type = $settings['view_type'];

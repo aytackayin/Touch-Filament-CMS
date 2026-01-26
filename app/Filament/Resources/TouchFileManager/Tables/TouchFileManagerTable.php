@@ -113,17 +113,20 @@ class TouchFileManagerTable
                         return implode(' • ', $desc);
                     }),
 
-                TextColumn::make('type')->label(__('file_manager.label.type'))->badge()
+                TextColumn::make('type_size')->label(__('file_manager.label.type_size'))
+                    ->state(fn($record) => $record?->id === 0 ? '' : $record->type)
+                    ->badge()
                     ->color(fn(string $state): string => match ($state) {
                         'image' => 'success', 'video' => 'info', 'document' => 'primary', 'archive' => 'warning', 'spreadsheet' => 'success', 'presentation' => 'danger', default => 'gray',
                     })
                     ->formatStateUsing(fn(string $state, $record) => $record?->id === 0 ? '' : __('file_manager.label.types.' . $state))
-                    ->toggleable(isToggledHiddenByDefault: fn($livewire) => !in_array('type', $livewire->visibleColumns ?? []) || ($livewire->view_type ?? 'list') === 'grid')
+                    ->description(function ($record) {
+                        if (!$record || $record->id === 0 || $record->is_folder)
+                            return null;
+                        return strtoupper($record->extension) . ' - ' . $record->human_size;
+                    })
+                    ->toggleable(isToggledHiddenByDefault: fn($livewire) => !in_array('type_size', $livewire->visibleColumns ?? []) || ($livewire->view_type ?? 'list') === 'grid')
                     ->extraAttributes(fn($record) => $record?->id === 0 ? ['style' => 'display: none !important;'] : []),
-
-                TextColumn::make('size')->label(__('file_manager.label.size'))
-                    ->formatStateUsing(fn($state, $record) => $record?->id === 0 ? '' : $record->human_size)
-                    ->toggleable(isToggledHiddenByDefault: fn($livewire) => !in_array('size', $livewire->visibleColumns ?? [])),
 
                 TextColumn::make('tags')->label(__('file_manager.label.tags'))->badge()->separator(',')->searchable()->wrap()
                     ->toggleable(isToggledHiddenByDefault: fn($livewire) => !in_array('tags', $livewire->visibleColumns ?? [])),

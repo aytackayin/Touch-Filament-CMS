@@ -16,8 +16,6 @@ use App\Traits\HasTableSettings;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 use CodeWithDennis\FilamentSelectTree\SelectTree;
-use Filament\Forms\Components\Radio;
-use Filament\Forms\Components\CheckboxList;
 
 class ListTouchFiles extends ListRecords
 {
@@ -54,14 +52,13 @@ class ListTouchFiles extends ListRecords
 
     protected function getDefaultVisibleColumns(): array
     {
-        return ['type', 'size', 'created_at', 'user'];
+        return ['type_size', 'created_at', 'user'];
     }
 
     protected function getTableColumnOptions(): array
     {
         return [
-            'type' => __('file_manager.label.type'),
-            'size' => __('file_manager.label.size'),
+            'type_size' => __('file_manager.label.type_size'),
             'tags' => __('file_manager.label.tags'),
             'user' => __('file_manager.label.author'),
             'editor' => __('file_manager.label.last_editor'),
