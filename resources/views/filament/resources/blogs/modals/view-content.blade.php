@@ -1,5 +1,5 @@
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@300;400;600;800&display=swap');
 
     .blog-modal-container {
         font-family: 'Outfit', sans-serif !important;
@@ -97,77 +97,111 @@
         box-shadow: none !important;
     }
 
-    /* Rich Content Typography Fix */
-    .blog-content-rich h1 {
-        font-size: 2.25rem !important;
+    /* Frontend Mirror Typography (Prose-lg match) */
+    .blog-content-rich .content-wrapper {
+        font-family: 'Plus Jakarta Sans', sans-serif !important;
+        color: #475569 !important;
+        /* slate-600 */
+        font-size: 1.125rem !important;
+        /* prose-lg base */
+        line-height: 1.75 !important;
+    }
+
+    .dark .blog-content-rich .content-wrapper {
+        color: #cbd5e1 !important;
+        /* slate-300 */
+    }
+
+    /* Headings matched to frontend Outfit font */
+    .blog-content-rich h1,
+    .blog-content-rich h2,
+    .blog-content-rich h3,
+    .blog-content-rich h4 {
+        font-family: 'Outfit', sans-serif !important;
+        color: #0f172a !important;
+        /* slate-900 */
         font-weight: 800 !important;
-        margin: 2rem 0 1rem 0 !important;
-        color: var(--profile-text, inherit) !important;
+        margin-top: 2.5rem !important;
+        margin-bottom: 1.25rem !important;
         line-height: 1.2 !important;
     }
 
+    .dark .blog-content-rich h1,
+    .dark .blog-content-rich h2,
+    .dark .blog-content-rich h3,
+    .dark .blog-content-rich h4 {
+        color: #f8fafc !important;
+        /* slate-50 */
+    }
+
+    .blog-content-rich h1 {
+        font-size: 3rem !important;
+        letter-spacing: -0.025em !important;
+    }
+
     .blog-content-rich h2 {
-        font-size: 1.875rem !important;
-        font-weight: 700 !important;
-        margin: 1.75rem 0 0.875rem 0 !important;
-        color: var(--profile-text, inherit) !important;
-        line-height: 1.3 !important;
-        border-bottom: 2px solid rgba(99, 102, 241, 0.1) !important;
-        padding-bottom: 8px !important;
+        font-size: 2.25rem !important;
+        letter-spacing: -0.025em !important;
     }
 
     .blog-content-rich h3 {
-        font-size: 1.5rem !important;
-        font-weight: 700 !important;
-        margin: 1.5rem 0 0.75rem 0 !important;
-        color: var(--profile-text, inherit) !important;
+        font-size: 1.875rem !important;
     }
 
     .blog-content-rich h4 {
-        font-size: 1.25rem !important;
-        font-weight: 600 !important;
-        margin: 1.25rem 0 0.6rem 0 !important;
+        font-size: 1.5rem !important;
     }
 
     .blog-content-rich p {
-        margin-bottom: 1.25rem !important;
-        font-size: 1.05rem !important;
+        margin-bottom: 1.5rem !important;
     }
 
     .blog-content-rich ul {
         list-style-type: disc !important;
-        margin-left: 1.5rem !important;
-        margin-bottom: 1.25rem !important;
+        padding-left: 1.75rem !important;
+        margin-bottom: 1.75rem !important;
     }
 
     .blog-content-rich ol {
         list-style-type: decimal !important;
-        margin-left: 1.5rem !important;
-        margin-bottom: 1.25rem !important;
+        padding-left: 1.75rem !important;
+        margin-bottom: 1.75rem !important;
     }
 
     .blog-content-rich li {
-        margin-bottom: 0.5rem !important;
+        margin-bottom: 0.75rem !important;
+        padding-left: 0.5rem !important;
+    }
+
+    .blog-content-rich strong {
+        font-weight: 800 !important;
+        color: #0f172a !important;
+    }
+
+    .dark .blog-content-rich strong {
+        color: #ffffff !important;
+    }
+
+    .blog-content-rich img {
+        border-radius: 20px !important;
+        margin: 2.5rem 0 !important;
+        max-width: 100% !important;
+        height: auto !important;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1) !important;
     }
 
     .blog-content-rich blockquote {
         border-left: 4px solid #6366f1 !important;
+        padding: 1rem 2rem !important;
+        margin: 2rem 0 !important;
         background: #f8fafc !important;
-        padding: 1rem 1.5rem !important;
-        margin: 1.5rem 0 !important;
+        border-radius: 0 20px 20px 0 !important;
         font-style: italic !important;
-        border-radius: 0 12px 12px 0 !important;
+        font-weight: 500 !important;
     }
 
     .dark .blog-content-rich blockquote {
         background: #1e293b !important;
-    }
-
-    .blog-content-rich img {
-        border-radius: 12px !important;
-        margin: 1.5rem 0 !important;
-        max-width: 100% !important;
-        height: auto !important;
     }
 
     .blog-content-rich a {
@@ -178,11 +212,6 @@
 
     .blog-content-rich a:hover {
         color: #4338ca !important;
-    }
-
-    .blog-content-rich strong,
-    .blog-content-rich b {
-        font-weight: 700 !important;
     }
 
     /* Attachments Grid */
@@ -381,7 +410,7 @@
 
     {{-- Main Content Card --}}
     <div class="blog-content-rich">
-        <div class="prose dark:prose-invert max-w-none">
+        <div class="content-wrapper prose-lg max-w-none">
             {!! $record->content !!}
         </div>
     </div>
