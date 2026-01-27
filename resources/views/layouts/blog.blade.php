@@ -27,7 +27,29 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
 
-    <title>{{ config('site.title', 'Filament CMS Blog') }}</title>
+    @php
+        $siteTitle = config('site.title', config('app.name', 'Filament CMS'));
+        $pageTitle = $siteTitle;
+        
+        if (request()->routeIs('blog.index')) {
+            $pageTitle = $siteTitle . ' - Blog';
+        } elseif (request()->routeIs('blog.show')) {
+            $blog = request()->route('slug') ? \App\Models\Blog::where('slug', request()->route('slug'))->first() : null;
+            if ($blog) {
+                $pageTitle = $siteTitle . ' - ' . $blog->title;
+            }
+        }
+    @endphp
+
+    <title>{{ $pageTitle }}</title>
+
+    @if(config('site.description'))
+        <meta name="description" content="{{ config('site.description') }}">
+    @endif
+
+    @if(config('site.keywords'))
+        <meta name="keywords" content="{{ config('site.keywords') }}">
+    @endif
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">

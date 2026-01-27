@@ -27,7 +27,15 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
 
-    <title>{{ config('app.name', 'Filament CMS') }}</title>
+    <title>{{ config('site.title', config('app.name', 'Filament CMS')) }}</title>
+
+    @if(config('site.description'))
+        <meta name="description" content="{{ config('site.description') }}">
+    @endif
+
+    @if(config('site.keywords'))
+        <meta name="keywords" content="{{ config('site.keywords') }}">
+    @endif
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
