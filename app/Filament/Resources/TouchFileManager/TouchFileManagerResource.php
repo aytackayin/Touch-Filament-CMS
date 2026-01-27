@@ -21,6 +21,8 @@ class TouchFileManagerResource extends Resource implements HasShieldPermissions
 {
     protected static ?string $model = TouchFile::class;
 
+    protected static ?string $slug = 'touch-file-managers';
+
     public static function getNavigationIcon(): string
     {
         return __('file_manager.nav.icon');
