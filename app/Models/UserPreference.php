@@ -29,9 +29,11 @@ class UserPreference extends Model
     /**
      * Get a preference value for the current user
      */
-    public static function get(string $category, string $key, mixed $default = null): mixed
+    public static function get(string $category, string $key, mixed $default = null, ?int $userId = null): mixed
     {
-        $preference = static::where('user_id', auth()->id())
+        $userId = $userId ?? auth()->id();
+
+        $preference = static::where('user_id', $userId)
             ->where('category', $category)
             ->where('key', $key)
             ->first();
@@ -42,11 +44,13 @@ class UserPreference extends Model
     /**
      * Set a preference value for the current user
      */
-    public static function set(string $category, string $key, mixed $value): void
+    public static function set(string $category, string $key, mixed $value, ?int $userId = null): void
     {
+        $userId = $userId ?? auth()->id();
+
         static::updateOrCreate(
             [
-                'user_id' => auth()->id(),
+                'user_id' => $userId,
                 'category' => $category,
                 'key' => $key,
             ],
