@@ -1,0 +1,28 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+@plugin "@tailwindcss/forms";
+
+@theme {
+    --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui;
+    --font-display: "Outfit", ui-sans-serif, system-ui;
+
+    --color-indigo-50: #f5f7ff;
+    --color-indigo-600: #4f46e5;
+}
+
+@layer base {
+    body {
+        @apply antialiased text-slate-900 bg-slate-50 dark:text-slate-100;
+    }
+
+    .dark body {
+        background-color: #222330;
+    }
+
+    .dark {
+        --color-bg-primary: #222330;
+        --color-bg-secondary: #2a2b3c;
+        --color-bg-tertiary: #2a2b3c;
+        --color-bg-accent: #2a2b3c;
+    }
+}

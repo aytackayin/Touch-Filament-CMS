@@ -1,0 +1,185 @@
+<?php
+
+namespace App\Filament\Resources\TouchFileManager;
+
+use App\Filament\Resources\TouchFileManager\Pages\CreateTouchFile;
+use App\Filament\Resources\TouchFileManager\Pages\EditTouchFile;
+use App\Filament\Resources\TouchFileManager\Pages\ListTouchFiles;
+use App\Filament\Resources\TouchFileManager\Schemas\TouchFileForm;
+use App\Filament\Resources\TouchFileManager\Tables\TouchFileManagerTable;
+use App\Models\TouchFile;
+use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
+use Filament\Tables\Table;
+use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
+use Illuminate\Support\HtmlString;
+use Illuminate\Support\Facades\Storage;
+
+class TouchFileManagerResource extends Resource implements HasShieldPermissions
+{
+    protected static ?string $model = TouchFile::class;
+
+    public static function getNavigationIcon(): string
+    {
+        return __('file_manager.nav.icon');
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return __('file_manager.nav.group');
+    }
+
+    public static function getNavigationSort(): ?int
+    {
+        return 200;
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return __('file_manager.nav.label');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('file_manager.label.resource_label');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('file_manager.label.plural_resource_label');
+    }
+
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['name', 'tags'];
+    }
+
+    public static function getGlobalSearchResultUrl(Model $record): string
+    {
+        if ($record->is_folder) {
+            return static::getUrl('index', ['parent_id' => $record->id]);
+        }
+
+        return static::getUrl('edit', ['record' => $record]);
+    }
+
+    public static function getGlobalSearchResultTitle(Model $record): string
+    {
+        return ' ';
+    }
+
+    public static function getGlobalSearchResultDetails(Model $record): array
+    {
+        $details = [];
+
+        $iconConfig = config('touch-file-manager.icon_paths');
+        $basePath = $iconConfig['base'] ?? '/assets/icons/colorful-icons/';
+        $folderIcon = $basePath . ($iconConfig['folder'] ?? 'folder.svg');
+        $defaultFileIcon = $basePath . ($iconConfig['file'] ?? 'file.svg');
+
+        $imageUrl = '';
+        if ($record->is_folder) {
+            $imageUrl = url($folderIcon);
+        } else {
+            if ($record->thumbnail_path) {
+                $imageUrl = Storage::disk('attachments')->url($record->thumbnail_path);
+            } else {
+                $isMedia = in_array($record->type, ['image', 'video'])
+                    || Str::startsWith($record->mime_type ?? '', 'audio/');
+
+                if ($isMedia) {
+                    $imageUrl = url($defaultFileIcon);
+                } else {
+                    $ext = strtolower($record->extension);
+                    $imageUrl = $ext
+                        ? url($basePath . "{$ext}.svg")
+                        : url($defaultFileIcon);
+                }
+            }
+        }
+
+        $uniqueId = 'gs-name-' . $record->id;
+        $details[] = new HtmlString('
+            <style>
+                #' . $uniqueId . ' { color: #030712 !important; opacity: 1 !important; }
+                .dark #' . $uniqueId . ' { color: #ffffff !important; }
+            </style>
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 6px; margin-top: -10px;">
+                <div style="width: 48px; height: 48px; border-radius: 8px; overflow: hidden; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                    <img src="' . $imageUrl . '" 
+                         style="width: 100%; height: 100%; object-fit: ' . ($record->thumbnail_path ? 'cover' : 'contain; padding: 6px') . ';"
+                         onerror="this.src=\'' . url('/assets/icons/colorful-icons/file.svg') . '\'">
+                </div>
+                <div style="display: flex; flex-direction: column;">
+                    <span id="' . $uniqueId . '" style="font-weight: 600; font-size: 14px;">' . $record->name . '</span>
+                </div>
+            </div>
+        ');
+
+        if (!$record->is_folder) {
+            if ($record->alt) {
+                $description = strip_tags($record->alt);
+                $firstSentence = Str::of($description)->explode('.')->first();
+                $details[] = new HtmlString('<span style="font-size: 12px; line-height: 1;">' . Str::limit($firstSentence, 120) . '</span>');
+            }
+
+            if ($record->tags && is_array($record->tags)) {
+                $details[] = new HtmlString('<span style="font-size: 12px; line-height: 1;">' . implode(', ', $record->tags) . '</span>');
+            }
+
+            $details[] = new HtmlString('<span style="font-size: 12px; line-height: 1;">' . __('file_manager.label.types.' . ($record->type ?? 'other')) . ' (' . $record->human_size . ')</span>');
+        }
+
+        if ($record->parent) {
+            $details[] = new HtmlString('<span style="font-size: 12px; line-height: 1;">' . $record->parent->full_path . '</span>');
+        }
+
+        return $details;
+    }
+
+    public static function form(Schema $schema): Schema
+    {
+        return TouchFileForm::configure($schema);
+    }
+
+    public static function table(Table $table): Table
+    {
+        return TouchFileManagerTable::configure($table);
+    }
+
+    public static function getRelations(): array
+    {
+        return [
+            //
+        ];
+    }
+
+    public static function getPages(): array
+    {
+        return [
+            'index' => ListTouchFiles::route('/'),
+            'create' => CreateTouchFile::route('/create'),
+            'edit' => EditTouchFile::route('/{record}/edit'),
+        ];
+    }
+
+    public static function canCreate(): bool
+    {
+        return true;
+    }
+
+    public static function getPermissionPrefixes(): array
+    {
+        return [
+            'view',
+            'view_any',
+            'create',
+            'update',
+            'delete',
+            'delete_any',
+            'sync',
+        ];
+    }
+}
