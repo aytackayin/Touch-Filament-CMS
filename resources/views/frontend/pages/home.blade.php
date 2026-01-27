@@ -3,7 +3,7 @@
 use function Livewire\Volt\{state, computed, layout};
 use App\Models\Blog;
 
-layout('layouts.blog');
+layout('frontend.layouts.app');
 
 $latestBlogs = computed(fn () => 
     Blog::where('is_published', true)

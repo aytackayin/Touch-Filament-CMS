@@ -5,14 +5,14 @@ use Livewire\Volt\Volt;
 use Illuminate\Http\Request;
 
 Volt::route('/', 'home')->name('home');
-Volt::route('/blog', 'blog-list')->name('blog.index');
-Volt::route('/blog/{slug}', 'blog-detail')->name('blog.show');
+Volt::route('/blog', 'blog.blog-list')->name('blog.index');
+Volt::route('/blog/{slug}', 'blog.blog-detail')->name('blog.show');
 
-Route::view('dashboard', 'dashboard')
+Route::view('dashboard', 'frontend.pages.dashboard')
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
 
-Route::view('profile', 'profile')
+Route::view('profile', 'frontend.pages.profile')
     ->middleware(['auth'])
     ->name('profile');
 
@@ -31,7 +31,7 @@ Route::get('/admin/preview', function (Request $request) {
         abort(403, 'Yetkisiz erişim.');
     }
 
-    return view('admin.universal-preview', [
+    return view('frontend.pages.universal-preview', [
         'content' => $record->{$field}
     ]);
 })->middleware(['auth'])->name('admin.preview');

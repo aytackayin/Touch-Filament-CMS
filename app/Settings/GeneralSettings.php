@@ -6,7 +6,7 @@ use Spatie\LaravelSettings\Settings;
 
 class GeneralSettings extends Settings
 {
-    public string $site_title;
+    public string $site_title = 'Filament CMS';
     public ?string $site_description = null;
     public array $site_keywords = [];
     public string $attachments_path = 'attachments';

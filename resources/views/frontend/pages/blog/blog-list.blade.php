@@ -4,7 +4,7 @@ use function Livewire\Volt\{state, computed, with, layout, usesPagination};
 use App\Models\Blog;
 use App\Models\BlogCategory;
 
-layout('layouts.blog');
+layout('frontend.layouts.app');
 usesPagination();
 
 state(['search' => '', 'categoryId' => null]);
@@ -113,8 +113,7 @@ $selectCategory = function ($id) {
                             </button>
 
                             @foreach($this->categories as $category)
-                                <x-blog.category-item :category="$category" :categoryId="$this->categoryId"
-                                    :activePath="$this->activePath" />
+                                @include('frontend.pages.blog.components.category-item', ['category' => $category, 'categoryId' => $this->categoryId, 'activePath' => $this->activePath])
                             @endforeach
                         </div>
                     </div>

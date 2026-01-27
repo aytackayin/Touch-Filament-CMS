@@ -1,7 +1,7 @@
 @props(['category', 'categoryId', 'activePath', 'level' => 0])
 
 @php 
-                $isChildActive = collect($activePath)->contains(fn($id) => collect($category->allChildren->pluck('id'))->contains($id));
+                    $isChildActive = collect($activePath)->contains(fn($id) => collect($category->allChildren->pluck('id'))->contains($id));
     $isActive = $categoryId == $category->id || $isChildActive;
 @endphp
 
@@ -28,7 +28,7 @@
     @if($category->children->count() > 0)
         <div x-show="open" x-collapse class="pl-5 ml-4 border-l-2 border-slate-100 dark:border-slate-800 space-y-1 mt-1">
             @foreach($category->children as $child)
-                <x-blog.category-item :category="$child" :categoryId="$categoryId" :activePath="$activePath" :level="$level + 1" />
+                @include('frontend.pages.blog.components.category-item', ['category' => $child, 'categoryId' => $categoryId, 'activePath' => $activePath, 'level' => $level + 1])
             @endforeach
         </div>
     @endif

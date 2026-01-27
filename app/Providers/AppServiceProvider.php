@@ -63,9 +63,9 @@ class AppServiceProvider extends ServiceProvider
                 'site.title' => $settings->site_title,
                 'site.description' => $settings->site_description,
                 'site.keywords' => implode(', ', $settings->site_keywords ?? []),
-                'site.contact_email' => $settings->contact_email,
-                'services.google_maps.key' => $settings->google_maps_api_key,
-                'services.google_analytics.id' => $settings->google_analytics_id,
+                'site.contact_email' => $settings->getCustomSetting('contact_email'),
+                'services.google_maps.key' => $settings->getCustomSetting('google_maps_api_key'),
+                'services.google_analytics.id' => $settings->getCustomSetting('google_analytics_id'),
             ]);
 
             // Dynamic Attachments Configuration
@@ -79,8 +79,9 @@ class AppServiceProvider extends ServiceProvider
             ]);
 
             // Optional: Override mail from address if set
-            if ($settings->contact_email) {
-                config(['mail.from.address' => $settings->contact_email]);
+            $contactEmail = $settings->getCustomSetting('contact_email');
+            if ($contactEmail) {
+                config(['mail.from.address' => $contactEmail]);
             }
 
             // Livewire Force HTTPS / URL Fix

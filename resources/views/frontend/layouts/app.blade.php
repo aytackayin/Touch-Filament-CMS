@@ -30,7 +30,7 @@
     @php
         $siteTitle = config('site.title', config('app.name', 'Filament CMS'));
         $pageTitle = $siteTitle;
-        
+
         if (request()->routeIs('blog.index')) {
             $pageTitle = $siteTitle . ' - Blog';
         } elseif (request()->routeIs('blog.show')) {
@@ -165,7 +165,8 @@
                     <a href="{{ route('home') }}" class="group">
                         <div class="flex items-center">
                             <img src="{{ asset('logo.svg') }}"
-                                class="w-32 h-32 group-hover:scale-110 transition-transform duration-300" alt="Logo">
+                                class="w-32 h-32 group-hover:scale-110 transition-transform duration-300"
+                                alt="{{ $siteTitle }}">
                         </div>
                     </a>
                 </div>
@@ -260,7 +261,7 @@
         <div class="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-16">
 
             <div class="text-center text-slate-500 text-sm">
-                <p>&copy; {{ date('Y') }} BLOG. All rights reserved.</p>
+                <p>&copy; {{ date('Y') }} {{ $siteTitle }}. All rights reserved.</p>
                 <p class="mt-2 uppercase tracking-[0.2em] text-[10px] font-bold text-slate-600">Powered by ITouch</p>
             </div>
         </div>

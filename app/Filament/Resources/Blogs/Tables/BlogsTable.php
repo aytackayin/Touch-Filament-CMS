@@ -57,7 +57,7 @@ class BlogsTable
             ->columns($isGrid ? [
                 Stack::make([
                     ViewColumn::make('details')
-                        ->view('filament.tables.columns.blog-grid')->searchable(['title', 'content', 'tags']),
+                        ->view('filament.resources.blog.tables.columns.blog-grid')->searchable(['title', 'content', 'tags']),
                 ])->space(0),
             ] : [
                 ImageColumn::make('cover_thumbnail')
@@ -164,7 +164,7 @@ class BlogsTable
                     ->tooltip(__('filament-actions::view.single.label'))
                     ->color('gray')
                     ->modalHeading(fn($record) => $record->title)
-                    ->modalContent(fn($record) => view('filament.resources.blogs.modals.view-content', ['record' => $record]))
+                    ->modalContent(fn($record) => view('filament.resources.blog.modals.view-content', ['record' => $record]))
                     ->modalSubmitAction(false)
                     ->modalCancelActionLabel(__('filament-actions::view.single.modal.actions.close.label'))
                     ->modalWidth('5xl'),

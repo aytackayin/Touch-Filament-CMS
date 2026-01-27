@@ -153,7 +153,7 @@ class TouchFileManagerTable
             ->columns($isGrid ? [
                 Stack::make([
                     ViewColumn::make('details')
-                        ->view('filament.tables.columns.touchfilemanager-grid')
+                        ->view('filament.resources.touchfilemanager.tables.columns.touchfilemanager-grid')
                         ->searchable(['name', 'type', 'alt', 'tags', 'user_name', 'editor_name', 'created_at']),
                 ])->space(0),
             ] : [
@@ -305,7 +305,7 @@ class TouchFileManagerTable
 
                 Action::make('view')->icon('heroicon-o-eye')->label('')->color('gray')->tooltip(__('file_manager.action.view'))
                     ->hidden(fn($record) => !$record || !in_array($record->type, ['image', 'video']) || $record->id === 0)
-                    ->modalContent(fn($record) => $record ? view('filament.modals.touchfilemanager-preview', ['record' => $record, 'url' => Storage::disk('attachments')->url($record->path)]) : null)
+                    ->modalContent(fn($record) => $record ? view('filament.resources.touchfilemanager.modals.touchfilemanager-preview', ['record' => $record, 'url' => Storage::disk('attachments')->url($record->path)]) : null)
                     ->modalWidth('5xl')->modalSubmitAction(false)->modalCancelActionLabel(__('filament-actions::view.single.modal.actions.close.label')),
 
                 Action::make('edit')->url(fn($record) => TouchFileManagerResource::getUrl('edit', ['record' => $record, 'parent_id' => $record->parent_id, 'view_type' => $table->getLivewire()->view_type ?? 'grid']))

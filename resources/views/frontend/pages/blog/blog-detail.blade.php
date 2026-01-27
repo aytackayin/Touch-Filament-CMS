@@ -3,7 +3,7 @@
 use function Livewire\Volt\{state, computed, layout, mount};
 use App\Models\Blog;
 
-layout('layouts.blog');
+layout('frontend.layouts.app');
 
 state(['blog' => null]);
 

@@ -104,7 +104,7 @@ class BlogForm
                                     ->dehydrated(),
                                 Placeholder::make('video_thumbnail_handler')
                                     ->hiddenLabel()
-                                    ->view('filament.forms.components.video-thumbnail-handler'),
+                                    ->view('filament.resources.blog.forms.components.video-thumbnail-handler'),
                             ])->columns(2),
                     ])
                     ->columnSpan(['lg' => 2]),

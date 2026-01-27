@@ -177,7 +177,7 @@ class TouchFileForm
 
                                 Placeholder::make('video_thumbnail_handler')
                                     ->hiddenLabel()
-                                    ->view('filament.forms.components.video-thumbnail-handler'),
+                                    ->view('filament.resources.touchfilemanager.forms.components.video-thumbnail-handler'),
 
                                 Hidden::make('is_folder')
                                     ->default(false)
