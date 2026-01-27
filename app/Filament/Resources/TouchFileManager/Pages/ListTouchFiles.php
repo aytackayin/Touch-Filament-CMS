@@ -39,6 +39,9 @@ class ListTouchFiles extends ListRecords
     #[\Livewire\Attributes\Url]
     public ?string $iframe = null;
 
+    #[\Livewire\Attributes\Url]
+    public ?string $type = null;
+
     public function mount(): void
     {
         parent::mount();
@@ -69,7 +72,11 @@ class ListTouchFiles extends ListRecords
     public function getBreadcrumbs(): array
     {
         $breadcrumbs = [
-            static::getResource()::getUrl('index', ['view_type' => $this->view_type, 'iframe' => $this->iframe]) => static::getResource()::getBreadcrumb(),
+            static::getResource()::getUrl('index', [
+                'view_type' => $this->view_type,
+                'iframe' => $this->iframe,
+                'type' => $this->type
+            ]) => static::getResource()::getBreadcrumb(),
         ];
 
         if ($this->parent_id) {
@@ -81,6 +88,7 @@ class ListTouchFiles extends ListRecords
                         'parent_id' => $folder->id,
                         'view_type' => $this->view_type,
                         'iframe' => $this->iframe,
+                        'type' => $this->type,
                     ]),
                     'label' => $folder->name,
                 ]);
@@ -103,7 +111,11 @@ class ListTouchFiles extends ListRecords
         $upUrl = null;
 
         if ($currentFolder) {
-            $upParams = ['view_type' => $this->view_type, 'iframe' => $this->iframe];
+            $upParams = [
+                'view_type' => $this->view_type,
+                'iframe' => $this->iframe,
+                'type' => $this->type,
+            ];
             if ($currentFolder->parent_id) {
                 $upParams['parent_id'] = $currentFolder->parent_id;
             }
@@ -384,6 +396,7 @@ class ListTouchFiles extends ListRecords
                     'parent_id' => $this->parent_id,
                     'view_type' => $this->view_type,
                     'iframe' => $this->iframe,
+                    'type' => $this->type,
                 ])),
 
             $this->getTableSettingsAction(),
@@ -411,6 +424,7 @@ class ListTouchFiles extends ListRecords
                         'parent_id' => $this->parent_id,
                         'view_type' => $newView,
                         'iframe' => $this->iframe,
+                        'type' => $this->type,
                     ]));
                 }),
         ];

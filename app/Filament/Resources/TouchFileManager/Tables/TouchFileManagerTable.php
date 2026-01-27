@@ -46,6 +46,7 @@ class TouchFileManagerTable
             ->modifyQueryUsing(function (Builder $query) use ($table) {
                 $livewire = $table->getLivewire();
                 $parentId = ($livewire && property_exists($livewire, 'parent_id')) ? $livewire->parent_id : null;
+                $type = ($livewire && property_exists($livewire, 'type')) ? $livewire->type : request('type');
 
                 $columns = [
                     'touch_files.id',
@@ -65,12 +66,28 @@ class TouchFileManagerTable
                     'touch_files.updated_at'
                 ];
 
+                $dbTypes = [];
+                if ($type) {
+                    $dbTypes = match (strtolower($type)) {
+                        'images' => ['image'],
+                        'media', 'video' => ['video'],
+                        'document', 'documents' => ['document', 'spreadsheet', 'presentation'],
+                        default => [],
+                    };
+                }
+
                 if ($parentId) {
                     $mainQuery = TouchFile::query()->select($columns)
                         ->leftJoin('users as u', 'touch_files.user_id', '=', 'u.id')
                         ->leftJoin('users as e', 'touch_files.edit_user_id', '=', 'e.id')
                         ->addSelect('u.name as user_name', 'e.name as editor_name')
                         ->where('parent_id', $parentId);
+
+                    if (!empty($dbTypes)) {
+                        $mainQuery->where(function ($q) use ($dbTypes) {
+                            $q->whereIn('type', $dbTypes)->orWhere('is_folder', true);
+                        });
+                    }
 
                     $fakeRow = TouchFile::query()->selectRaw("0 as id, null as user_id, null as edit_user_id, 'Up' as name, null as alt, '' as path, 'folder' as type, null as mime_type, 0 as size, ? as parent_id, 1 as is_folder, null as metadata, null as tags, null as created_at, null as updated_at, null as user_name, null as editor_name", [$parentId]);
 
@@ -87,8 +104,15 @@ class TouchFileManagerTable
                     ->leftJoin('users as u', 'touch_files.user_id', '=', 'u.id')
                     ->leftJoin('users as e', 'touch_files.edit_user_id', '=', 'e.id')
                     ->addSelect('u.name as user_name', 'e.name as editor_name')
-                    ->whereNull('parent_id')
-                    ->orderBy('is_folder', 'desc')
+                    ->whereNull('parent_id');
+
+                if (!empty($dbTypes)) {
+                    $query->where(function ($q) use ($dbTypes) {
+                        $q->whereIn('type', $dbTypes)->orWhere('is_folder', true);
+                    });
+                }
+
+                $query->orderBy('is_folder', 'desc')
                     ->orderBy('name', 'asc');
             })
             ->defaultPaginationPageOption($table->getLivewire()->userPreferredPerPage ?? 10)
@@ -97,16 +121,30 @@ class TouchFileManagerTable
             ->recordUrl(function ($record) use ($table): ?string {
                 if (!$record)
                     return null;
+
+                $livewire = $table->getLivewire();
+                $params = [
+                    'view_type' => $livewire->view_type ?? 'grid',
+                    'iframe' => $livewire->iframe ?? null,
+                    'type' => $livewire->type ?? null,
+                ];
+
                 if ($record->id === 0) {
-                    $currentParentId = $table->getLivewire()->parent_id;
+                    $currentParentId = $livewire->parent_id ?? null;
                     if ($currentParentId) {
                         $currentFolder = TouchFile::find($currentParentId);
-                        $targetId = $currentFolder ? $currentFolder->parent_id : null;
-                        return TouchFileManagerResource::getUrl('index', ['parent_id' => $targetId, 'view_type' => $table->getLivewire()->view_type ?? 'grid']);
+                        $params['parent_id'] = $currentFolder ? $currentFolder->parent_id : null;
+                        return TouchFileManagerResource::getUrl('index', $params);
                     }
                     return null;
                 }
-                return $record->is_folder ? TouchFileManagerResource::getUrl('index', ['parent_id' => $record->id, 'view_type' => $table->getLivewire()->view_type ?? 'grid']) : null;
+
+                if ($record->is_folder) {
+                    $params['parent_id'] = $record->id;
+                    return TouchFileManagerResource::getUrl('index', $params);
+                }
+
+                return null;
             })
             ->columns($isGrid ? [
                 Stack::make([
