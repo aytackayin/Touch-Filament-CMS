@@ -48,9 +48,9 @@ class EditBlog extends EditRecord
             // Get all files recursively
             $allFiles = $disk->allFiles($baseDir);
 
-            // Filter: Exclude thumbs
             $validAttachments = array_filter($allFiles, function ($path) {
-                return !str_contains($path, '/thumbs/');
+                $path = str_replace('\\', '/', $path);
+                return !str_contains($path, '/thumbs/') && !str_contains($path, '/content-images/');
             });
 
             // Normalize paths

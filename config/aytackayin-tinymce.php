@@ -8,7 +8,7 @@ return [
       'upload_directory' => null,
       'custom_configs' => [
         //'content_css' => "/mycontent.css",
-        'relative_urls' => true,
+        'relative_urls' => false,
         'document_base_url' => config('app.url'),
         'toolbar_mode' => 'wrap',
         'paste_as_text' => true,

@@ -59,6 +59,9 @@ class BlogForm
                                                                     ->columnSpanFull(), */
                                 TinyEditor::make('content')
                                     ->label(__('blog.label.content'))
+                                    ->fileAttachmentsDisk('attachments')
+                                    ->fileAttachmentsDirectory(fn() => Blog::getStorageFolder() . '/temp/' . (auth()->id() ?? 'guest') . '/content-images')
+                                    ->fileAttachmentsVisibility('public')
                                     ->columnSpanFull()
                                     ->required(),
                                 TagsInput::make('tags')

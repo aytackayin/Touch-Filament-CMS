@@ -144,6 +144,10 @@ class TouchFileManagerTable
                     return TouchFileManagerResource::getUrl('index', $params);
                 }
 
+                if ($livewire->iframe) {
+                    return null;
+                }
+
                 return null;
             })
             ->columns($isGrid ? [
@@ -168,7 +172,18 @@ class TouchFileManagerTable
                         $ext = strtolower($record->extension);
                         return $ext ? url($base . "{$ext}.svg") : url($base . ($iconConfig['file'] ?? 'file.svg'));
                     })
-                    ->extraImgAttributes(['class' => 'object-cover object-center rounded-lg', 'style' => 'width: 60px; height: 60px; border-radius: 10px;']),
+                    ->extraImgAttributes(['class' => 'object-cover object-center rounded-lg', 'style' => 'width: 60px; height: 60px; border-radius: 10px;'])
+                    ->extraAttributes(function ($record) use ($livewire) {
+                        if ($livewire && property_exists($livewire, 'iframe') && $livewire->iframe && $record && !$record->is_folder && $record->id !== 0) {
+                            $url = parse_url(Storage::disk('attachments')->url($record->path), PHP_URL_PATH);
+                            $alt = str_replace(["\r", "\n", "'"], ["", "", "\\'"], $record->alt ?? '');
+                            return [
+                                'x-on:click.stop' => "window.parent.postMessage({ mceAction: 'insert', content: '{$url}', alt: '{$alt}' }, '*')",
+                                'style' => 'cursor: pointer;',
+                            ];
+                        }
+                        return [];
+                    }),
 
                 TextColumn::make('name')->label(__('file_manager.label.name'))->searchable(['name', 'alt'])->weight('bold')->wrap()
                     ->color(fn($record) => $record?->is_folder ? 'warning' : null)
@@ -178,6 +193,17 @@ class TouchFileManagerTable
                             return null;
 
                         return !empty($record->alt) ? $record->alt : null;
+                    })
+                    ->extraAttributes(function ($record) use ($livewire) {
+                        if ($livewire && property_exists($livewire, 'iframe') && $livewire->iframe && $record && !$record->is_folder && $record->id !== 0) {
+                            $url = parse_url(Storage::disk('attachments')->url($record->path), PHP_URL_PATH);
+                            $alt = str_replace(["\r", "\n", "'"], ["", "", "\\'"], $record->alt ?? '');
+                            return [
+                                'x-on:click.stop' => "window.parent.postMessage({ mceAction: 'insert', content: '{$url}', alt: '{$alt}' }, '*')",
+                                'style' => 'cursor: pointer; color: #4f46e5;',
+                            ];
+                        }
+                        return [];
                     }),
 
                 TextColumn::make('type_size')->label(__('file_manager.label.type_size'))

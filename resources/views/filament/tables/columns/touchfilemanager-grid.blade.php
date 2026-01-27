@@ -43,7 +43,13 @@
     }
 @endphp
 
-<div class="touch-file-card">
+<div class="touch-file-card" @if(request()->query('iframe') && !$isUp && !$isFolder) x-on:click.stop="
+    window.parent.postMessage({ 
+        mceAction: 'insert', 
+        content: '{{ parse_url(\Illuminate\Support\Facades\Storage::disk('attachments')->url($record->path), PHP_URL_PATH) }}', 
+        alt: '{{ str_replace(["\r", "\n", "'"], ["", "", "\\'"], $record->alt ?? '') }}' 
+    }, '*');
+" style="cursor: pointer;" @endif>
     <img src="{{ $imageUrl }}" alt="{{ $name }}" class="touch-file-bg {{ $isUp ? 'is-icon' : '' }}"
         onerror="this.src='{{ $fallbackUrl }}'; this.classList.add('is-icon')">
 
