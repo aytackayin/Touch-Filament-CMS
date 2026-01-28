@@ -89,13 +89,25 @@ $attachments = computed(fn() => collect($this->blog->attachments ?? [])->reverse
     @endphp
 
     @if($mediaUrl)
-        <div class="w-full h-[250px] lg:h-[400px] relative overflow-hidden bg-slate-900 border-b border-white/10 shadow-2xl">
+        <style>
+            @keyframes vertical-scroll {
+                0% { object-position: center 0%; }
+                50% { object-position: center 100%; }
+                100% { object-position: center 0%; }
+            }
+            .animate-vertical-scroll {
+                animation: vertical-scroll 45s ease-in-out infinite;
+                will-change: object-position;
+                opacity: 0.5;
+            }
+        </style>
+        <div class="w-full h-[75px] lg:h-[125px] relative overflow-hidden bg-slate-900 border-b border-white/10 shadow-2xl group">
             @if($isVideo && $headerMedia)
-                <video src="{{ $mediaUrl }}" class="w-full h-full object-cover" autoplay loop muted playsinline></video>
+                <video src="{{ $mediaUrl }}" class="w-full h-full object-cover blur-md animate-vertical-scroll" autoplay loop muted playsinline></video>
             @else
-                <img src="{{ $mediaUrl }}" class="w-full h-full object-cover" alt="{{ $blog->title }}">
+                <img src="{{ $mediaUrl }}" class="w-full h-full object-cover blur-md animate-vertical-scroll" alt="{{ $blog->title }}">
             @endif
-            <div class="absolute inset-0 bg-black/20 dark:bg-black/40"></div>
+            <div class="absolute inset-0 bg-black/40 dark:bg-black/60 backdrop-blur-sm"></div>
         </div>
     @endif
 

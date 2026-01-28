@@ -24,9 +24,24 @@ $blogs = computed(function () {
     }
 
     if ($this->categoryId) {
-        $query->whereHas('categories', function ($q) {
-            $q->where('blog_categories.id', $this->categoryId);
-        });
+        $category = BlogCategory::with('allChildren')->find($this->categoryId);
+
+        if ($category) {
+            $allCategoryIds = collect([$category->id]);
+
+            $collectIds = function ($cat) use (&$collectIds, &$allCategoryIds) {
+                foreach ($cat->allChildren as $child) {
+                    $allCategoryIds->push($child->id);
+                    $collectIds($child); // Recursive call
+                }
+            };
+
+            $collectIds($category);
+
+            $query->whereHas('categories', function ($q) use ($allCategoryIds) {
+                $q->whereIn('blog_categories.id', $allCategoryIds);
+            });
+        }
     }
 
     return $query->paginate(9);
@@ -174,6 +189,15 @@ $selectCategory = function ($id) {
                                             </svg>
                                         </div>
                                     @endif
+
+                                    <div class="absolute top-6 left-6 z-10">
+                                        @foreach($blog->categories->take(1) as $category)
+                                            <span
+                                                class="px-3 py-1 bg-white/90 dark:bg-[#2a2b3c]/90 backdrop-blur-md rounded-full text-[10px] font-bold uppercase tracking-widest text-slate-900 dark:text-white shadow-sm">
+                                                {{ $category->title }}
+                                            </span>
+                                        @endforeach
+                                    </div>
                                 </div>
                                 <div class="p-8">
                                     <h3

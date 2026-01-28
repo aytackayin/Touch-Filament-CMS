@@ -178,16 +178,16 @@
         },
         {
             "name": "aytackayin/youtube-to-blog",
-            "version": "v1.0.0",
+            "version": "v1.0.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aytackayin/youtube-to-blog.git",
-                "reference": "e3595fc34e091122bf8431f0af1fb04f9a9237db"
+                "reference": "e2d436540fdda7d58be173c52492001b05d085e0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aytackayin/youtube-to-blog/zipball/e3595fc34e091122bf8431f0af1fb04f9a9237db",
-                "reference": "e3595fc34e091122bf8431f0af1fb04f9a9237db",
+                "url": "https://api.github.com/repos/aytackayin/youtube-to-blog/zipball/e2d436540fdda7d58be173c52492001b05d085e0",
+                "reference": "e2d436540fdda7d58be173c52492001b05d085e0",
                 "shasum": ""
             },
             "require": {
@@ -231,9 +231,9 @@
             ],
             "support": {
                 "issues": "https://github.com/aytackayin/youtube-to-blog/issues",
-                "source": "https://github.com/aytackayin/youtube-to-blog/tree/v1.0.0"
+                "source": "https://github.com/aytackayin/youtube-to-blog/tree/v1.0.1"
             },
-            "time": "2026-01-28T22:23:01+00:00"
+            "time": "2026-01-28T23:03:53+00:00"
         },
         {
             "name": "bacon/bacon-qr-code",

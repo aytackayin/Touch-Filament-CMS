@@ -57,12 +57,12 @@ $sliderBlogs = computed(fn () =>
                     @if($isVideo)
                         <video x-ref="video{{ $index }}"
                                src="{{ $blog->getMediaUrl($slideMedia) }}" 
-                               class="w-full h-full object-cover" 
+                               class="w-full h-full object-cover opacity-50" 
                                autoplay loop muted playsinline>
                         </video>
                     @else
                         <img src="{{ $blog->getMediaUrl($slideMedia) ?? $blog->getDefaultMediaUrl() }}" 
-                             class="w-full h-full object-cover" alt="{{ $blog->title }}">
+                             class="w-full h-full object-cover opacity-50" alt="{{ $blog->title }}">
                     @endif
                     
                     <div class="absolute inset-0 z-20 flex flex-col items-center justify-center text-center px-4">
@@ -93,7 +93,7 @@ $sliderBlogs = computed(fn () =>
             <!-- Fallback Slider if no blogs yet -->
             <div class="absolute inset-0 bg-slate-950">
                 <div class="absolute inset-0 bg-black/50 z-10"></div>
-                <img src="{{ config('blog.default_media.path') ? url(config('blog.default_media.path')) : config('blog.default_media.url') }}" class="w-full h-full object-cover">
+                <img src="{{ config('blog.default_media.path') ? url(config('blog.default_media.path')) : config('blog.default_media.url') }}" class="w-full h-full object-cover opacity-50">
                 <div class="absolute inset-0 z-20 flex flex-col items-center justify-center text-center px-4">
                     <h1 class="text-5xl md:text-7xl font-black text-white mb-8 tracking-tight leading-tight">Welcome to Our Blog</h1>
                     <p class="text-xl text-slate-300 max-w-2xl mx-auto">Discover stories, insights, and inspirations from our writers.</p>
