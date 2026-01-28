@@ -32,15 +32,62 @@ async function processQueueItem(data) {
         const result = await response.json();
 
         if (response.ok) {
-            await updateQueueStatus(data.video_id, data.title, 'success', 'Tamamlandı');
-            // Başarılı olduktan 5 saniye sonra listeden kaldır
-            setTimeout(() => removeQueueItem(data.video_id), 5000);
+            // Başarılı kayıttan sonra durum (polling) takibi başlat
+            await updateQueueStatus(data.video_id, data.title, 'pending', 'Video işleniyor...');
+
+            // Eğer blog_id döndüyse polling başlat
+            if (result.blog_id) {
+                pollStatus(result.blog_id, data.video_id, data.title, siteUrl, apiKey);
+            } else {
+                await updateQueueStatus(data.video_id, data.title, 'success', 'Kaydedildi (Video yok)');
+                setTimeout(() => removeQueueItem(data.video_id), 5000);
+            }
         } else {
             await updateQueueStatus(data.video_id, data.title, 'error', result.message || 'Hata oluştu');
         }
     } catch (err) {
         await updateQueueStatus(data.video_id, data.title, 'error', 'Sunucu hatası');
     }
+}
+
+async function pollStatus(blogId, videoId, title, siteUrl, apiKey) {
+    const maxAttempts = 720; // 1 saat (5 saniyede 1 kontrol * 720 = 3600 sn)
+    let attempts = 0;
+
+    const intervalId = setInterval(async () => {
+        attempts++;
+        try {
+            const response = await fetch(`${siteUrl}/api/youtube/status/${blogId}`, {
+                method: 'GET',
+                headers: { 'X-API-KEY': apiKey, 'Accept': 'application/json' }
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                if (result.status === 'completed') {
+                    clearInterval(intervalId);
+                    await updateQueueStatus(videoId, title, 'success', 'Tamamlandı');
+                    setTimeout(() => removeQueueItem(videoId), 5000);
+                } else {
+                    // Hala işlemde, belki mesajı güncelleyebiliriz
+                    // await updateQueueStatus(videoId, title, 'pending', 'Video işleniyor... (' + attempts + ')');
+                }
+            } else {
+                if (response.status === 404) {
+                    // Blog silinmiş olabilir
+                    clearInterval(intervalId);
+                    await updateQueueStatus(videoId, title, 'error', 'Blog bulunamadı (404)');
+                }
+            }
+        } catch (e) {
+            // Bağlantı hatası vs. (geçici olabilir, devam et)
+        }
+
+        if (attempts >= maxAttempts) {
+            clearInterval(intervalId);
+            await updateQueueStatus(videoId, title, 'error', 'Zaman aşımı (İşlem çok uzun sürdü)');
+        }
+    }, 5000); // 5 saniyede bir kontrol
 }
 
 async function updateQueueStatus(videoId, title, status, message = '') {

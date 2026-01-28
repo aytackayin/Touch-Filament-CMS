@@ -8,17 +8,11 @@
         "framework"
     ],
     "license": "MIT",
-    "repositories": [
-        {
-            "type": "path",
-            "url": "./packages/aytackayin/youtube-to-blog"
-        }
-    ],
     "require": {
         "php": "^8.2",
         "aytackayin/filament-select-icon": "^1.0.7",
         "aytackayin/tinymce": "^1.0",
-        "aytackayin/youtube-to-blog": "@dev",
+        "aytackayin/youtube-to-blog": "^1.0.0",
         "bezhansalleh/filament-language-switch": "^4.0",
         "bezhansalleh/filament-shield": "^4.0",
         "codewithdennis/filament-select-tree": "^4.0",
