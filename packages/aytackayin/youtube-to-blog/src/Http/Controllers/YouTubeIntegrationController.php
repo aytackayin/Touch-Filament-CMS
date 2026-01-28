@@ -207,7 +207,7 @@ class YouTubeIntegrationController extends Controller
                     }
 
                     // Run yt-dlp
-                    $result = Process::run([
+                    $result = Process::timeout(3600)->run([
                         $exePath,
                         $videoUrl,
                         '-f',
