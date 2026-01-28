@@ -110,6 +110,10 @@ class YouTubeIntegrationController extends Controller
      */
     public function store(Request $request)
     {
+        // Prevent script termination if client disconnects
+        ignore_user_abort(true);
+        set_time_limit(0);
+
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'video_id' => 'required|string',
@@ -155,7 +159,7 @@ class YouTubeIntegrationController extends Controller
             '<a href="$1" target="_blank" style="color: #6366f1; text-decoration: underline;">$1</a>',
             $description
         );
-        $content .= '<h3>YouTube Açıklaması:</h3>' . nl2br($description);
+        $content .= '<br>' . nl2br($description);
 
         // Create Blog First
         $blog = $blogModel::create([
@@ -181,67 +185,13 @@ class YouTubeIntegrationController extends Controller
         }
 
         $attachments = [];
-        $videoDownloaded = false;
-        $localVideoPath = null;
 
         // Get storage folder method
         $storageFolder = method_exists($blogModel, 'getStorageFolder')
             ? $blogModel::getStorageFolder()
             : 'blog';
 
-        // 1. Handle Video Download if requested
-        if ($request->boolean('add_to_attachments') && config('youtube-to-blog.video_download_enabled', true)) {
-            try {
-                $exePath = config('youtube-to-blog.yt_dlp_path');
-
-                if (file_exists($exePath)) {
-                    $videoUrl = "https://www.youtube.com/watch?v=" . $validated['video_id'];
-
-                    $videoFolder = "{$storageFolder}/{$blog->id}/videos";
-                    $videoFilename = "{$slug}.mp4";
-                    $videoPath = "{$videoFolder}/{$videoFilename}";
-                    $absSavePath = $disk->path($videoPath);
-
-                    if (!$disk->exists($videoFolder)) {
-                        $disk->makeDirectory($videoFolder);
-                    }
-
-                    // Run yt-dlp
-                    $result = Process::timeout(3600)->run([
-                        $exePath,
-                        $videoUrl,
-                        '-f',
-                        'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
-                        '-o',
-                        $absSavePath,
-                        '--no-playlist',
-                        '--no-mtime'
-                    ]);
-
-                    if ($result->successful() && $disk->exists($videoPath)) {
-                        $attachments[] = $videoPath;
-                        $localVideoPath = $videoPath;
-                        $videoDownloaded = true;
-
-                        // Register video in TouchFile if available
-                        if ($touchFileModel && method_exists($touchFileModel, 'registerFile')) {
-                            $touchFileModel::registerFile($videoPath, auth()->id());
-                        }
-                    } else {
-                        // Fallback to youtube link if yt-dlp fails
-                        $attachments[] = "https://www.youtube.com/watch?v=" . $validated['video_id'];
-                    }
-                } else {
-                    // No yt-dlp, use youtube link
-                    $attachments[] = "https://www.youtube.com/watch?v=" . $validated['video_id'];
-                }
-            } catch (Exception $e) {
-                // Fallback to youtube link if download fails
-                $attachments[] = "https://www.youtube.com/watch?v=" . $validated['video_id'];
-            }
-        }
-
-        // 2. Handle Thumbnail / Cover Image
+        // 1. Handle Thumbnail / Cover Image (Synchronous)
         $imgPath = null;
         try {
             $videoId = $validated['video_id'];
@@ -255,7 +205,6 @@ class YouTubeIntegrationController extends Controller
 
             if ($imageResponse->successful()) {
                 $imgFolder = "{$storageFolder}/{$blog->id}/images";
-                $thumbsFolder = "{$storageFolder}/{$blog->id}/videos/thumbs";
                 $imgFilename = "youtube-cover.jpg";
                 $imgPath = "{$imgFolder}/{$imgFilename}";
 
@@ -264,7 +213,7 @@ class YouTubeIntegrationController extends Controller
                 }
                 $disk->put($imgPath, $imageResponse->body());
 
-                // Register and generate thumbnails for the cover image (always)
+                // Register and generate thumbnails for the cover image
                 if ($touchFileModel && method_exists($touchFileModel, 'registerFile')) {
                     $touchFileModel::registerFile($imgPath, auth()->id());
                     $touchFile = $touchFileModel::where('path', $imgPath)->first();
@@ -273,56 +222,69 @@ class YouTubeIntegrationController extends Controller
                     }
                 }
 
-                // Add to gallery (always)
+                // Add to gallery
                 $attachments[] = $imgPath;
-
-                if ($videoDownloaded) {
-                    // Video IS downloaded. Generate specific thumbs for video management
-                    if (!$disk->exists($thumbsFolder)) {
-                        $disk->makeDirectory($thumbsFolder);
-                    }
-
-                    // Generate sizes for video thumbnail if Intervention Image is available
-                    if (class_exists(\Intervention\Image\ImageManager::class) && class_exists(\Intervention\Image\Drivers\Gd\Driver::class)) {
-                        $sizes = $this->getThumbnailSizes($blog);
-                        $manager = new \Intervention\Image\ImageManager(new \Intervention\Image\Drivers\Gd\Driver());
-                        foreach ($sizes as $size) {
-                            try {
-                                $img = $manager->read($imageResponse->body());
-                                $img->scale(width: (int) $size);
-                                $disk->put("{$thumbsFolder}/{$slug}_{$size}.jpg", $img->toJpeg()->toString());
-                            } catch (Exception $e) {
-                                // Silent fail for thumbnail generation
-                            }
-                        }
-                    }
-                }
             }
         } catch (Exception $e) {
             // Silent fail for thumbnail fetching
         }
 
-        // Finalize attachments
+        // Finalize initial attachments (Cover Image)
         if (!empty($attachments)) {
             $blog->update(['attachments' => $attachments]);
         }
 
-        // 3. Update Content if video was downloaded
-        if ($videoDownloaded && $localVideoPath) {
-            $diskName = config('youtube-to-blog.disk', 'attachments');
-            $localUrl = Storage::disk($diskName)->url($localVideoPath);
-            $posterUrl = $imgPath ? Storage::disk($diskName)->url($imgPath) : null;
-
-            $localVideoHtml = '<div class="video-container"><video controls width="100%"' . ($posterUrl ? ' poster="' . $posterUrl . '"' : '') . '><source src="' . $localUrl . '" type="video/mp4">Tarayıcınız video etiketini desteklemiyor.</video></div>';
-            $newContent = str_replace($embedHtml, $localVideoHtml, $blog->content);
-            $blog->update(['content' => $newContent]);
+        // 2. Dispatch Job for Video Download (Asynchronous)
+        if ($request->boolean('add_to_attachments')) {
+            \Aytackayin\YoutubeToBlog\Jobs\ProcessYouTubeVideo::dispatch($blog, $validated);
         }
 
         return response()->json([
-            'message' => 'Blog başarıyla taslak olarak kaydedildi.',
+            'message' => 'Blog taslağı oluşturuldu. Video indirme işlemi arka planda başlatıldı.',
             'blog_id' => $blog->id,
             'url' => url("/admin/blogs/{$blog->id}/edit"),
         ], 201);
+    }
+
+
+
+    /**
+     * Check the status of blog video processing.
+     */
+    public function checkStatus($id)
+    {
+        $blogModel = $this->getBlogModel();
+        $blog = $blogModel::find($id);
+
+        if (!$blog) {
+            return response()->json(['status' => 'not_found'], 404);
+        }
+
+        // Check if content has local video player instead of iframe
+        $isLocalVideo = strpos($blog->content, '<video') !== false;
+
+        // Also check if attachments has mp4
+        $hasVideoAttachment = false;
+        if (!empty($blog->attachments)) {
+            foreach ($blog->attachments as $attachment) {
+                if (str_ends_with($attachment, '.mp4')) {
+                    $hasVideoAttachment = true;
+                    break;
+                }
+            }
+        }
+
+        if ($isLocalVideo || $hasVideoAttachment) {
+            return response()->json([
+                'status' => 'completed',
+                'message' => 'Video işleme tamamlandı.'
+            ]);
+        }
+
+        return response()->json([
+            'status' => 'processing',
+            'message' => 'Video indiriliyor...'
+        ]);
     }
 
     /**

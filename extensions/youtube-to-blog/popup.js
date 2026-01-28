@@ -276,6 +276,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // 7. Queue Management
+    // 7. Queue Management (Persistent)
     const progressList = document.createElement('div');
     progressList.id = 'progressList';
     progressList.style.marginTop = '15px';
@@ -283,58 +284,76 @@ document.addEventListener('DOMContentLoaded', async () => {
     progressList.style.paddingTop = '10px';
     document.getElementById('mainForm').appendChild(progressList);
 
-    function addToQueue(title, videoId) {
-        const item = document.createElement('div');
-        item.id = `queue-${videoId}`;
-        item.style.display = 'flex';
-        item.style.alignItems = 'center';
-        item.style.justifyContent = 'space-between';
-        item.style.padding = '8px';
-        item.style.marginBottom = '6px';
-        item.style.background = 'rgba(255, 255, 255, 0.05)';
-        item.style.borderRadius = '6px';
-        item.style.fontSize = '12px';
+    // Spinner Style
+    if (!document.getElementById('spinner-style')) {
+        const style = document.createElement('style');
+        style.id = 'spinner-style';
+        style.innerHTML = `
+            @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+            .spinner { display: inline-block; animation: spin 2s linear infinite; }
+            .status-pending { color: var(--primary); }
+            .status-success { color: #10b981; }
+            .status-error { color: #ef4444; }
+        `;
+        document.head.appendChild(style);
+    }
 
-        const titleSpan = document.createElement('span');
-        titleSpan.innerText = title;
-        titleSpan.style.flex = '1';
-        titleSpan.style.marginRight = '10px';
-        titleSpan.style.whiteSpace = 'nowrap';
-        titleSpan.style.overflow = 'hidden';
-        titleSpan.style.textOverflow = 'ellipsis';
+    function renderQueueItem(videoId, task) {
+        let item = document.getElementById(`queue-${videoId}`);
+        if (!item) {
+            item = document.createElement('div');
+            item.id = `queue-${videoId}`;
+            item.style.display = 'flex';
+            item.style.alignItems = 'center';
+            item.style.justifyContent = 'space-between';
+            item.style.padding = '8px';
+            item.style.marginBottom = '6px';
+            item.style.background = 'rgba(255, 255, 255, 0.05)';
+            item.style.borderRadius = '6px';
+            item.style.fontSize = '12px';
+            progressList.appendChild(item);
+        }
 
-        const statusLabel = document.createElement('span');
-        statusLabel.className = 'status-label';
-        statusLabel.innerHTML = '<span class="spinner">⏳</span> Kaydediliyor...';
-        statusLabel.style.color = 'var(--primary)';
-        statusLabel.style.fontWeight = 'bold';
+        const title = task.title;
+        let statusHtml = '';
 
-        item.appendChild(titleSpan);
-        item.appendChild(statusLabel);
-        progressList.appendChild(item);
+        if (task.status === 'pending') {
+            statusHtml = '<span class="status-pending"><span class="spinner">⏳</span> Kaydediliyor...</span>';
+        } else if (task.status === 'success') {
+            statusHtml = '<span class="status-success">✓ Tamamlandı</span>';
+        } else {
+            statusHtml = `<span class="status-error">✕ ${task.message || 'Hata'}</span>`;
+        }
 
-        // Add spinner animation style if not exists
-        if (!document.getElementById('spinner-style')) {
-            const style = document.createElement('style');
-            style.id = 'spinner-style';
-            style.innerHTML = `
-                @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-                .spinner { display: inline-block; animation: spin 2s linear infinite; }
-            `;
-            document.head.appendChild(style);
+        item.innerHTML = `
+            <span style="flex: 1; margin-right: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                ${title}
+            </span>
+            <span style="font-weight: bold;">${statusHtml}</span>
+        `;
+    }
+
+    async function updateQueueUI() {
+        const { taskQueue } = await chrome.storage.local.get(['taskQueue']);
+        progressList.innerHTML = '';
+        if (taskQueue) {
+            Object.keys(taskQueue).forEach(videoId => {
+                renderQueueItem(videoId, taskQueue[videoId]);
+            });
         }
     }
 
-    function removeFromQueue(videoId) {
-        const item = document.getElementById(`queue-${videoId}`);
-        if (item) {
-            item.style.opacity = '0.5';
-            setTimeout(() => item.remove(), 1000);
+    // Listen for storage changes to update UI automatically
+    chrome.storage.onChanged.addListener((changes, namespace) => {
+        if (namespace === 'local' && changes.taskQueue) {
+            updateQueueUI();
         }
-    }
+    });
+
+    // Initial load
+    updateQueueUI();
 
     btnSave.addEventListener('click', async () => {
-        const { siteUrl, apiKey } = await chrome.storage.local.get(['siteUrl', 'apiKey']);
         const selectedCheckboxes = document.querySelectorAll('.cat-checkbox:checked');
         const categoryIds = Array.from(selectedCheckboxes).map(cb => cb.value);
 
@@ -346,39 +365,21 @@ document.addEventListener('DOMContentLoaded', async () => {
         const note = noteInput.value;
         const attachments = addToAttachments.checked;
 
-        addToQueue(videoTitle, videoId);
-        showStatus("Kuyruğa eklendi. Arka planda işleniyor...", "success");
-
-        try {
-            const response = await fetch(`${siteUrl}/api/youtube/store`, {
-                method: 'POST',
-                headers: {
-                    'X-API-KEY': apiKey,
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
-                },
-                body: JSON.stringify({
-                    title: videoTitle,
-                    video_id: videoId,
-                    description: description,
-                    category_ids: categoryIds,
-                    note: note,
-                    add_to_attachments: attachments
-                })
-            });
-
-            const result = await response.json();
-            if (response.ok) {
-                removeFromQueue(videoId);
-                showStatus("İşlem tamamlandı!", "success");
-            } else {
-                removeFromQueue(videoId);
-                showStatus(result.message || "Bir hata oluştu.", "error");
+        // Send to background
+        chrome.runtime.sendMessage({
+            action: 'saveBlog',
+            data: {
+                title: videoTitle,
+                video_id: videoId,
+                description: description,
+                category_ids: categoryIds,
+                note: note,
+                add_to_attachments: attachments
             }
-        } catch (err) {
-            removeFromQueue(videoId);
-            showStatus("Sunucuya ulaşılamadı.", "error");
-        }
+        });
+
+        // Optimistic UI update (optional, usually storage listener handles it almost instantly)
+        showStatus("Kuyruğa eklendi. Arka planda işleniyor...", "success");
     });
 
     fetchCategories();

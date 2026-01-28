@@ -57,6 +57,7 @@ class YoutubeToBlogServiceProvider extends ServiceProvider
             Route::get('/categories', [\Aytackayin\YoutubeToBlog\Http\Controllers\YouTubeIntegrationController::class, 'getCategories']);
             Route::post('/categories', [\Aytackayin\YoutubeToBlog\Http\Controllers\YouTubeIntegrationController::class, 'storeCategory']);
             Route::post('/store', [\Aytackayin\YoutubeToBlog\Http\Controllers\YouTubeIntegrationController::class, 'store']);
+            Route::get('/status/{id}', [\Aytackayin\YoutubeToBlog\Http\Controllers\YouTubeIntegrationController::class, 'checkStatus']);
         });
     }
 }
