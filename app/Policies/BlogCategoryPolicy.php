@@ -12,15 +12,6 @@ class BlogCategoryPolicy
 {
     use HandlesAuthorization;
 
-    public function before(AuthUser $authUser, string $ability): ?bool
-    {
-        if ($authUser->hasAnyRole(['super_admin', 'admin'])) {
-            return true;
-        }
-
-        return null;
-    }
-
     public function viewAny(AuthUser $authUser): bool
     {
         return $authUser->can('ViewAny:BlogCategory');
@@ -38,42 +29,17 @@ class BlogCategoryPolicy
 
     public function update(AuthUser $authUser, BlogCategory $blogCategory): bool
     {
-        return $authUser->can('Update:BlogCategory') && $authUser->id === $blogCategory->user_id;
+        return $authUser->can('Update:BlogCategory');
     }
 
     public function delete(AuthUser $authUser, BlogCategory $blogCategory): bool
     {
-        return $authUser->can('Delete:BlogCategory') && $authUser->id === $blogCategory->user_id;
+        return $authUser->can('Delete:BlogCategory');
     }
 
     public function deleteAny(AuthUser $authUser): bool
     {
         return $authUser->can('DeleteAny:BlogCategory');
-    }
-
-    public function restore(AuthUser $authUser, BlogCategory $blogCategory): bool
-    {
-        return $authUser->can('Restore:BlogCategory') && $authUser->id === $blogCategory->user_id;
-    }
-
-    public function forceDelete(AuthUser $authUser, BlogCategory $blogCategory): bool
-    {
-        return $authUser->can('ForceDelete:BlogCategory') && $authUser->id === $blogCategory->user_id;
-    }
-
-    public function forceDeleteAny(AuthUser $authUser): bool
-    {
-        return $authUser->can('ForceDeleteAny:BlogCategory');
-    }
-
-    public function restoreAny(AuthUser $authUser): bool
-    {
-        return $authUser->can('RestoreAny:BlogCategory');
-    }
-
-    public function replicate(AuthUser $authUser, BlogCategory $blogCategory): bool
-    {
-        return $authUser->can('Replicate:BlogCategory') && $authUser->id === $blogCategory->user_id;
     }
 
     public function reorder(AuthUser $authUser): bool
@@ -90,4 +56,5 @@ class BlogCategoryPolicy
     {
         return $authUser->can('Export:BlogCategory');
     }
+
 }

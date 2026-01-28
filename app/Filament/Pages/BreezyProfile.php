@@ -19,6 +19,7 @@ use Filament\Actions\Action;
 use Filament\Pages\Page;
 use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\Storage;
+use Aytackayin\YoutubeToBlog\Filament\Components\YouTubeApiKeyComponent;
 use BackedEnum;
 
 class BreezyProfile extends Page implements HasForms
@@ -79,6 +80,17 @@ class BreezyProfile extends Page implements HasForms
                                         ->rows(3),
                                 ]),
                             ]),
+
+                        Tab::make('CromiumApiKey')
+                            ->label(__('Cromium API KEY'))
+                            ->icon('heroicon-o-puzzle-piece')
+                            ->visible(function () {
+                                $user = auth()->user();
+                                return $user && method_exists($user, 'can') && $user->can('AccessChromeExtension');
+                            })
+                            ->schema(
+                                YouTubeApiKeyComponent::getSchema('AccessChromeExtension')
+                            ),
 
                         Tab::make('SocialMedia')
                             ->label(__('user.label.social_media'))

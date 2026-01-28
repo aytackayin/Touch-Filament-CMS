@@ -11,7 +11,7 @@ use Illuminate\Auth\Access\HandlesAuthorization;
 class LanguagePolicy
 {
     use HandlesAuthorization;
-
+    
     public function viewAny(AuthUser $authUser): bool
     {
         return $authUser->can('ViewAny:Language');
@@ -40,31 +40,6 @@ class LanguagePolicy
     public function deleteAny(AuthUser $authUser): bool
     {
         return $authUser->can('DeleteAny:Language');
-    }
-
-    public function restore(AuthUser $authUser, Language $language): bool
-    {
-        return $authUser->can('Restore:Language');
-    }
-
-    public function forceDelete(AuthUser $authUser, Language $language): bool
-    {
-        return $authUser->can('ForceDelete:Language');
-    }
-
-    public function forceDeleteAny(AuthUser $authUser): bool
-    {
-        return $authUser->can('ForceDeleteAny:Language');
-    }
-
-    public function restoreAny(AuthUser $authUser): bool
-    {
-        return $authUser->can('RestoreAny:Language');
-    }
-
-    public function replicate(AuthUser $authUser, Language $language): bool
-    {
-        return $authUser->can('Replicate:Language');
     }
 
     public function reorder(AuthUser $authUser): bool

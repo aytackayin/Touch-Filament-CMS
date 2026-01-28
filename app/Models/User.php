@@ -31,6 +31,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
         'address',
         'social_links',
         'default_editor',
+        'chrome_token',
     ];
 
     protected $appends = [

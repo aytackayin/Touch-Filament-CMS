@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "165f2aec690722707aed7102ff96bc74",
+    "content-hash": "2a8c89d302a80daadf4e766f9a581322",
     "packages": [
         {
             "name": "anourvalar/eloquent-serialize",
@@ -175,6 +175,61 @@
                 "source": "https://github.com/aytackayin/tinymce/tree/v1.0.4"
             },
             "time": "2026-01-19T17:51:51+00:00"
+        },
+        {
+            "name": "aytackayin/youtube-to-blog",
+            "version": "dev-main",
+            "dist": {
+                "type": "path",
+                "url": "./packages/aytackayin/youtube-to-blog",
+                "reference": "85b4a99c79e03bf62f98dae4e718839ec09b92bc"
+            },
+            "require": {
+                "filament/filament": "^4.0",
+                "illuminate/support": "^11.0|^12.0",
+                "php": "^8.2"
+            },
+            "require-dev": {
+                "orchestra/testbench": "^9.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Aytackayin\\YoutubeToBlog\\YoutubeToBlogServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Aytackayin\\YoutubeToBlog\\": "src/"
+                }
+            },
+            "autoload-dev": {
+                "psr-4": {
+                    "Aytackayin\\YoutubeToBlog\\Tests\\": "tests/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Aytac Kayin"
+                }
+            ],
+            "description": "YouTube to Blog Laravel package with Chrome Extension API integration for Filament",
+            "keywords": [
+                "api",
+                "blog",
+                "chrome-extension",
+                "filament",
+                "laravel",
+                "youtube"
+            ],
+            "transport-options": {
+                "relative": true
+            }
         },
         {
             "name": "bacon/bacon-qr-code",
@@ -12879,7 +12934,9 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {},
+    "stability-flags": {
+        "aytackayin/youtube-to-blog": 20
+    },
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {

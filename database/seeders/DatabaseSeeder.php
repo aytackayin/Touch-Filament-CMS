@@ -86,6 +86,9 @@ class DatabaseSeeder extends Seeder
             Permission::firstOrCreate(['name' => "View:{$view}", 'guard_name' => 'web']);
         }
 
+        // YouTube-to-Blog: Chrome Extension Access Permission
+        Permission::firstOrCreate(['name' => 'AccessChromeExtension', 'guard_name' => 'web']);
+
         // 4. Assign Permissions to Roles
         $allPermissions = Permission::all();
         $superAdminRole->givePermissionTo($allPermissions);
