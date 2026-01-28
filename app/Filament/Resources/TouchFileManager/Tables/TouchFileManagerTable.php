@@ -35,7 +35,7 @@ class TouchFileManagerTable
                 $isGrid,
                 fn(Table $table) => $table
                     ->contentGrid([
-                        'md' => 2,
+                        'md' => 4,
                         'xl' => 4,
                         '2xl' => 5,
                     ])
