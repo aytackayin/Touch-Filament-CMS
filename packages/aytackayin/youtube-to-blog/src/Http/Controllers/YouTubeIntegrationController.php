@@ -237,10 +237,24 @@ class YouTubeIntegrationController extends Controller
         // 2. Dispatch Job for Video Download (Asynchronous)
         if ($request->boolean('add_to_attachments')) {
             \Aytackayin\YoutubeToBlog\Jobs\ProcessYouTubeVideo::dispatch($blog, $validated);
+
+            // Trigger Queue Worker (Windows) - "Fire and Forget"
+            // This starts the queue worker only for this job and stops when empty
+            try {
+                $artisanPath = base_path('artisan');
+                if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
+                    pclose(popen("start /B php {$artisanPath} queue:work --stop-when-empty", "r"));
+                } else {
+                    exec("php {$artisanPath} queue:work --stop-when-empty > /dev/null 2>&1 &");
+                }
+            } catch (Exception $e) {
+                // Log error but don't fail the request
+                \Illuminate\Support\Facades\Log::error("Failed to auto-start queue worker: " . $e->getMessage());
+            }
         }
 
         return response()->json([
-            'message' => 'Blog taslağı oluşturuldu. Video indirme işlemi arka planda başlatıldı.',
+            'message' => 'Blog taslağı oluşturuldu. Video indirme işlemi başlatıldı (Oto-Worker).',
             'blog_id' => $blog->id,
             'url' => url("/admin/blogs/{$blog->id}/edit"),
         ], 201);
