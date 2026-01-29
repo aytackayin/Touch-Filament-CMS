@@ -37,12 +37,9 @@ class TouchFileManagerTable
                     ->contentGrid([
                         'md' => 4,
                         'xl' => 4,
-                        '2xl' => 5,
-                    ])
-                    ->extraAttributes([
-                        'class' => 'touch-file-manager-grid',
                     ])
             )
+            ->defaultSort('name', 'asc')
             ->modifyQueryUsing(function (Builder $query) use ($table) {
                 $livewire = $table->getLivewire();
                 $parentId = ($livewire && property_exists($livewire, 'parent_id')) ? $livewire->parent_id : null;
@@ -93,13 +90,18 @@ class TouchFileManagerTable
 
                     $unionQuery = $mainQuery->union($fakeRow);
 
-                    return TouchFile::query()->fromSub($unionQuery, 'touch_files')->select('*')
+                    $q = TouchFile::query()->fromSub($unionQuery, 'touch_files')->select('*')
                         ->orderByRaw('CASE WHEN id = 0 THEN 1 ELSE 0 END DESC')
-                        ->orderBy('is_folder', 'desc')
-                        ->orderBy('name', 'asc');
+                        ->orderBy('is_folder', 'desc');
+
+                    if (!$table->getSortColumn()) {
+                        $q->orderByRaw("CASE WHEN name REGEXP '^[0-9]+$' THEN LENGTH(name) ELSE 0 END ASC")->orderBy('name', 'asc');
+                    }
+
+                    return $q;
                 }
 
-                return TouchFile::query()->from((new TouchFile)->getTable())
+                $query = TouchFile::query()->from((new TouchFile)->getTable())
                     ->select($columns)
                     ->leftJoin('users as u', 'touch_files.user_id', '=', 'u.id')
                     ->leftJoin('users as e', 'touch_files.edit_user_id', '=', 'e.id')
@@ -112,8 +114,11 @@ class TouchFileManagerTable
                     });
                 }
 
-                $query->orderBy('is_folder', 'desc')
-                    ->orderBy('name', 'asc');
+                $query->orderBy('touch_files.is_folder', 'desc');
+                if (!$table->getSortColumn()) {
+                    $query->orderByRaw("CASE WHEN touch_files.name REGEXP '^[0-9]+$' THEN LENGTH(touch_files.name) ELSE 0 END ASC")->orderBy('touch_files.name', 'asc');
+                }
+                return $query;
             })
             ->defaultPaginationPageOption($table->getLivewire()->userPreferredPerPage ?? 10)
             ->striped()
@@ -156,7 +161,9 @@ class TouchFileManagerTable
                         ->view('filament.resources.touchfilemanager.tables.columns.touchfilemanager-grid')
                         ->searchable(['name', 'type', 'alt', 'tags', 'user_name', 'editor_name', 'created_at']),
                 ])->space(0),
-                TextColumn::make('name')->sortable()->hidden(),
+                TextColumn::make('name')->sortable(query: function (Builder $query, string $direction) {
+                    $query->orderByRaw("CASE WHEN touch_files.name REGEXP '^[0-9]+$' THEN LENGTH(touch_files.name) ELSE 0 END {$direction}")->orderBy('touch_files.name', $direction);
+                })->hidden(),
                 TextColumn::make('type_size')->sortable(query: function (Builder $query, string $direction) {
                     $query->orderBy('type', $direction)->orderBy('size', 'desc');
                 })->hidden(),
@@ -189,7 +196,10 @@ class TouchFileManagerTable
                         return [];
                     }),
 
-                TextColumn::make('name')->label(__('file_manager.label.name'))->searchable(['name', 'alt'])->sortable()->weight('bold')->wrap()
+                TextColumn::make('name')->label(__('file_manager.label.name'))->searchable(['name', 'alt'])->weight('bold')->wrap()
+                    ->sortable(query: function (Builder $query, string $direction) {
+                        $query->orderByRaw("CASE WHEN touch_files.name REGEXP '^[0-9]+$' THEN LENGTH(touch_files.name) ELSE 0 END {$direction}")->orderBy('touch_files.name', $direction);
+                    })
                     ->color(fn($record) => $record?->is_folder ? 'warning' : null)
                     ->formatStateUsing(fn(string $state, $record) => $record?->id === 0 ? __('file_manager.label.up') : $state)
                     ->description(function ($record) {
