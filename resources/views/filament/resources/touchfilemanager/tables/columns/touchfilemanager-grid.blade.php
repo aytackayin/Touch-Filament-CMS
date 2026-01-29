@@ -10,7 +10,7 @@
 
     if ($isUp) {
         $imageUrl = url($basePath . 'grid-open-folder.svg');
-        $name = __('file_manager.label.up');
+        $name = __('touch_file_manager.label.up');
         $fallbackUrl = '';
     } else {
         // Determine Image URL
@@ -66,7 +66,7 @@
             };
         @endphp
         <div class="touch-file-type-badge" style="background-color: {{ $typeColor }};">
-            {{ __('file_manager.label.types.' . ($record->type ?? 'other')) }}
+            {{ __('touch_file_manager.label.types.' . ($record->type ?? 'other')) }}
         </div>
     @endif
 

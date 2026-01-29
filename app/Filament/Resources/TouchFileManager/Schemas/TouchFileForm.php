@@ -25,10 +25,10 @@ class TouchFileForm
             ->components([
                 Group::make()
                     ->schema([
-                        Section::make(__('file_manager.label.info_section'))
+                        Section::make(__('touch_file_manager.label.info_section'))
                             ->schema([
                                 TextInput::make('name')
-                                    ->label(__('file_manager.label.name'))
+                                    ->label(__('touch_file_manager.label.name'))
                                     ->required()
                                     ->maxLength(255)
                                     ->rules([
@@ -37,7 +37,7 @@ class TouchFileForm
                                                 if (!$get('parent_id')) {
                                                     $reservedNames = TouchFile::getReservedNames();
                                                     if (in_array(strtolower($value), $reservedNames)) {
-                                                        $fail(__('file_manager.errors.reserved_name'));
+                                                        $fail(__('touch_file_manager.errors.reserved_name'));
                                                     }
                                                 }
                                             };
@@ -67,7 +67,7 @@ class TouchFileForm
 
 
                                 FileUpload::make('files')
-                                    ->label(__('file_manager.label.upload_files'))
+                                    ->label(__('touch_file_manager.label.upload_files'))
                                     ->multiple()
                                     ->panelLayout('grid')
                                     ->disk('attachments')
@@ -110,16 +110,16 @@ class TouchFileForm
                                                 in_array($mime, ['text/xml', 'application/xml']) => 'xml',
                                                 default => null,
                                             };
-                                            return $key ? __('file_manager.label.types.' . $key) : null;
+                                            return $key ? __('touch_file_manager.label.types.' . $key) : null;
                                         })->filter()->unique()->values()->implode(', ');
 
-                                        return __('file_manager.label.supported_formats') . ': ' . $labels;
+                                        return __('touch_file_manager.label.supported_formats') . ': ' . $labels;
                                     })
                                     ->hidden(fn($operation) => $operation === 'edit')
                                     ->columnSpanFull(),
 
                                 FileUpload::make('path')
-                                    ->label(__('file_manager.label.file'))
+                                    ->label(__('touch_file_manager.label.file'))
                                     ->disk('attachments')
                                     ->imageEditor()
                                     ->imageEditorAspectRatios([
@@ -189,11 +189,11 @@ class TouchFileForm
                                     ->dehydrated(),
 
                                 TagsInput::make('tags')
-                                    ->label(__('file_manager.label.tags'))
+                                    ->label(__('touch_file_manager.label.tags'))
                                     ->columnSpanFull(),
 
                                 SelectTree::make('parent_id')
-                                    ->label(__('file_manager.label.parent_folder'))
+                                    ->label(__('touch_file_manager.label.parent_folder'))
                                     ->relationship('parent', 'name', 'parent_id', function ($query) {
                                         return $query->where('is_folder', true);
                                     }, function ($query) {
@@ -212,11 +212,11 @@ class TouchFileForm
                                         return !request()->filled('parent_id');
                                     })
                                     ->dehydrated()
-                                    ->placeholder(__('file_manager.label.root')),
+                                    ->placeholder(__('touch_file_manager.label.root')),
 
                                 Textarea::make('alt')
-                                    ->label(__('file_manager.label.description_alt'))
-                                    ->placeholder(__('file_manager.label.alt_placeholder'))
+                                    ->label(__('touch_file_manager.label.description_alt'))
+                                    ->placeholder(__('touch_file_manager.label.alt_placeholder'))
                                     ->maxLength(255),
                             ])
                             ->columns(2),
@@ -230,10 +230,10 @@ class TouchFileForm
     {
         return Schema::make()
             ->components([
-                Section::make(__('file_manager.label.create_folder_section'))
+                Section::make(__('touch_file_manager.label.create_folder_section'))
                     ->schema([
                         TextInput::make('name')
-                            ->label(__('file_manager.label.folder_name'))
+                            ->label(__('touch_file_manager.label.folder_name'))
                             ->required()
                             ->maxLength(255)
                             ->rules([
@@ -242,7 +242,7 @@ class TouchFileForm
                                         if (!$get('parent_id')) {
                                             $reservedNames = TouchFile::getReservedNames();
                                             if (in_array(strtolower($value), $reservedNames)) {
-                                                $fail(__('file_manager.errors.reserved_name'));
+                                                $fail(__('touch_file_manager.errors.reserved_name'));
                                             }
                                         }
                                     };
@@ -254,10 +254,10 @@ class TouchFileForm
                             ])
                             ->live(onBlur: true)
                             ->afterStateUpdated(fn($state, callable $set) => $set('name', Str::slug($state)))
-                            ->placeholder(__('file_manager.label.folder_name_placeholder')),
+                            ->placeholder(__('touch_file_manager.label.folder_name_placeholder')),
 
                         SelectTree::make('parent_id')
-                            ->label(__('file_manager.label.parent_folder'))
+                            ->label(__('touch_file_manager.label.parent_folder'))
                             ->relationship('parent', 'name', 'parent_id', function ($query) {
                                 return $query->where('is_folder', true);
                             }, function ($query) {
@@ -265,7 +265,7 @@ class TouchFileForm
                             })
                             ->enableBranchNode()
                             ->searchable()
-                            ->placeholder(__('file_manager.label.root')),
+                            ->placeholder(__('touch_file_manager.label.root')),
 
                         Hidden::make('is_folder')
                             ->default(true)

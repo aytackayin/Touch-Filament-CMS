@@ -142,8 +142,8 @@ trait HasTableSettings
                 Radio::make('view_type')
                     ->label(__('table_settings.view_type'))
                     ->options([
-                        'list' => __('file_manager.label.list_view'),
-                        'grid' => __('file_manager.label.grid_view'),
+                        'list' => __('touch_file_manager.label.list_view'),
+                        'grid' => __('touch_file_manager.label.grid_view'),
                     ])
                     ->default(property_exists($this, 'view_type') ? $this->view_type : 'list')
                     ->inline()

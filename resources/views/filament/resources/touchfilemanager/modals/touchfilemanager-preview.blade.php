@@ -27,7 +27,7 @@
             <video controls
                 style="display: block !important; margin: 0 auto !important; max-width: 100%; max-height: 70vh; border-radius: 12px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);">
                 <source src="{{ $url }}" type="{{ $record->mime_type }}">
-                {{ __('file_manager.label.video_support_error') }}
+                {{ __('touch_file_manager.label.video_support_error') }}
             </video>
         </div>
     @elseif(in_array(strtolower($record->extension), ['pdf', 'txt', 'json', 'xml', 'md', 'csv', 'mp3', 'wav']))
@@ -39,7 +39,7 @@
         <div class="w-full flex items-center justify-center p-12 bg-gray-50 dark:bg-gray-800 rounded-xl mb-6"
             style="padding: 3rem; background-color: rgba(156, 163, 175, 0.1); border-radius: 12px;">
             <span class="text-gray-500 font-medium" style="color: #6b7280;">
-                {{ __('file_manager.label.preview_not_available') ?? 'Önizleme mevcut değil' }}
+                {{ __('touch_file_manager.label.preview_not_available') ?? 'Önizleme mevcut değil' }}
             </span>
         </div>
     @endif
@@ -58,7 +58,7 @@
             <div class="flex flex-wrap items-center gap-2 pt-1"
                 style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px;">
                 <strong class="text-sm font-bold text-gray-900 dark:text-gray-100 italic"
-                    style="margin-right: 4px;">{{ __('file_manager.label.tags') }}
+                    style="margin-right: 4px;">{{ __('touch_file_manager.label.tags') }}
                     :</strong>
                 @foreach($record->tags as $tag)
                     <span
@@ -73,24 +73,24 @@
         <div class="space-y-1.5 pt-1">
             <p class="text-sm">
                 <strong
-                    class="font-bold text-gray-900 dark:text-gray-100 italic">{{ __('file_manager.label.file_name') }}
+                    class="font-bold text-gray-900 dark:text-gray-100 italic">{{ __('touch_file_manager.label.file_name') }}
                     :</strong>
                 <span style="opacity: 0.7 !important; display: inline-block;">{{ $record->name }}</span>
             </p>
 
             <p class="text-sm">
                 <strong
-                    class="font-bold text-gray-900 dark:text-gray-100 italic">{{ __('file_manager.label.type_size') }}
+                    class="font-bold text-gray-900 dark:text-gray-100 italic">{{ __('touch_file_manager.label.type_size') }}
                     :</strong>
                 <span
-                    style="opacity: 0.7 !important; display: inline-block;">{{ __('file_manager.label.types.' . ($record->type ?? 'other')) }}
+                    style="opacity: 0.7 !important; display: inline-block;">{{ __('touch_file_manager.label.types.' . ($record->type ?? 'other')) }}
                     |
                     {{ $record->human_size }} {{ $resolution }}</span>
             </p>
 
             <p class="text-sm">
                 <strong
-                    class="font-bold text-gray-900 dark:text-gray-100 italic">{{ __('file_manager.label.file_path') }}
+                    class="font-bold text-gray-900 dark:text-gray-100 italic">{{ __('touch_file_manager.label.file_path') }}
                     :</strong>
                 <span style="opacity: 0.7 !important; display: inline-block;">{{ $record->full_path }}</span>
             </p>

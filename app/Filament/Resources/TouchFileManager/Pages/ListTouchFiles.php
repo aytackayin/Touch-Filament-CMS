@@ -76,11 +76,11 @@ class ListTouchFiles extends ListRecords
     protected function getTableColumnOptions(): array
     {
         return [
-            'type_size' => __('file_manager.label.type_size'),
-            'tags' => __('file_manager.label.tags'),
-            'user' => __('file_manager.label.author'),
-            'editor' => __('file_manager.label.last_editor'),
-            'created_at' => __('file_manager.label.date'),
+            'type_size' => __('touch_file_manager.label.type_size'),
+            'tags' => __('touch_file_manager.label.tags'),
+            'user' => __('touch_file_manager.label.author'),
+            'editor' => __('touch_file_manager.label.last_editor'),
+            'created_at' => __('touch_file_manager.label.date'),
         ];
     }
 
@@ -139,8 +139,8 @@ class ListTouchFiles extends ListRecords
 
         return [
             Action::make('up')
-                ->label(__('file_manager.label.up'))
-                ->tooltip(__('file_manager.label.up'))
+                ->label(__('touch_file_manager.label.up'))
+                ->tooltip(__('touch_file_manager.label.up'))
                 ->hiddenLabel()
                 ->icon('heroicon-m-arrow-uturn-up')
                 ->color('gray')
@@ -149,8 +149,8 @@ class ListTouchFiles extends ListRecords
                 ->size('xs'),
 
             Action::make('sync')
-                ->label(__('file_manager.label.sync_files'))
-                ->tooltip(__('file_manager.label.sync_files'))
+                ->label(__('touch_file_manager.label.sync_files'))
+                ->tooltip(__('touch_file_manager.label.sync_files'))
                 ->hiddenLabel()
                 ->icon('heroicon-o-arrow-path')
                 ->color('info')
@@ -306,15 +306,15 @@ class ListTouchFiles extends ListRecords
                     }
 
                     Notification::make()
-                        ->title(__('file_manager.label.sync_notification.title'))
-                        ->body(__('file_manager.label.sync_notification.body', ['added' => $addedCount, 'removed' => $removedCount]))
+                        ->title(__('touch_file_manager.label.sync_notification.title'))
+                        ->body(__('touch_file_manager.label.sync_notification.body', ['added' => $addedCount, 'removed' => $removedCount]))
                         ->success()
                         ->send();
                 }),
 
             Action::make('createFolder')
-                ->label(__('file_manager.label.new_folder'))
-                ->tooltip(__('file_manager.label.new_folder'))
+                ->label(__('touch_file_manager.label.new_folder'))
+                ->tooltip(__('touch_file_manager.label.new_folder'))
                 ->hiddenLabel()
                 ->icon('heroicon-o-folder-plus')
                 ->color('warning')
@@ -325,10 +325,10 @@ class ListTouchFiles extends ListRecords
                     return [
                         Group::make()
                             ->schema([
-                                Section::make(__('file_manager.label.create_folder_section'))
+                                Section::make(__('touch_file_manager.label.create_folder_section'))
                                     ->schema([
                                         TextInput::make('name')
-                                            ->label(__('file_manager.label.folder_name'))
+                                            ->label(__('touch_file_manager.label.folder_name'))
                                             ->required()
                                             ->maxLength(255)
                                             ->rules([
@@ -338,7 +338,7 @@ class ListTouchFiles extends ListRecords
                                                         if (!$parentId) {
                                                             $reservedNames = TouchFile::getReservedNames();
                                                             if (in_array(strtolower($value), $reservedNames)) {
-                                                                $fail(__('file_manager.errors.reserved_name'));
+                                                                $fail(__('touch_file_manager.errors.reserved_name'));
                                                             }
                                                         }
                                                     };
@@ -350,14 +350,14 @@ class ListTouchFiles extends ListRecords
                                             ])
                                             ->live(onBlur: true)
                                             ->afterStateUpdated(fn($state, callable $set) => $set('name', Str::slug($state)))
-                                            ->placeholder(__('file_manager.label.folder_name_placeholder')),
+                                            ->placeholder(__('touch_file_manager.label.folder_name_placeholder')),
 
                                         Hidden::make('parent_id')
                                             ->default($parentId)
                                             ->visible((bool) $parentId),
 
                                         SelectTree::make('parent_id')
-                                            ->label(__('file_manager.label.parent_folder'))
+                                            ->label(__('touch_file_manager.label.parent_folder'))
                                             ->relationship('parent', 'name', 'parent_id', function ($query) {
                                                 return $query->where('is_folder', true);
                                             }, function ($query) {
@@ -365,7 +365,7 @@ class ListTouchFiles extends ListRecords
                                             })
                                             ->enableBranchNode()
                                             ->searchable()
-                                            ->placeholder(__('file_manager.label.root'))
+                                            ->placeholder(__('touch_file_manager.label.root'))
                                             ->visible(!$parentId),
 
                                         Hidden::make('is_folder')
@@ -401,11 +401,11 @@ class ListTouchFiles extends ListRecords
                     $data['user_id'] = auth()->id();
                     static::getResource()::getModel()::create($data);
                 })
-                ->successNotificationTitle(__('file_manager.label.folder_created')),
+                ->successNotificationTitle(__('touch_file_manager.label.folder_created')),
 
             CreateAction::make()
-                ->label(__('file_manager.label.upload_files'))
-                ->tooltip(__('file_manager.label.upload_files'))
+                ->label(__('touch_file_manager.label.upload_files'))
+                ->tooltip(__('touch_file_manager.label.upload_files'))
                 ->hiddenLabel()
                 ->color('success')
                 ->size('xs')
@@ -420,8 +420,8 @@ class ListTouchFiles extends ListRecords
             $this->getTableSettingsAction(),
 
             Action::make('toggleView')
-                ->label($this->view_type === 'grid' ? __('file_manager.label.list_view') : __('file_manager.label.grid_view'))
-                ->tooltip($this->view_type === 'grid' ? __('file_manager.label.list_view') : __('file_manager.label.grid_view'))
+                ->label($this->view_type === 'grid' ? __('touch_file_manager.label.list_view') : __('touch_file_manager.label.grid_view'))
+                ->tooltip($this->view_type === 'grid' ? __('touch_file_manager.label.list_view') : __('touch_file_manager.label.grid_view'))
                 ->hiddenLabel()
                 ->icon($this->view_type === 'grid' ? 'heroicon-o-list-bullet' : 'heroicon-o-squares-2x2')
                 ->extraAttributes(fn() => [

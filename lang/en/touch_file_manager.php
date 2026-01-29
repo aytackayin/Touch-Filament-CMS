@@ -27,7 +27,6 @@ return [
         'folder_name' => 'Folder Name',
         'file' => 'File',
         'type' => 'Type',
-        'tags' => 'Tags',
         'author' => 'Author',
         'last_editor' => 'Last Editor',
         'date' => 'Date',

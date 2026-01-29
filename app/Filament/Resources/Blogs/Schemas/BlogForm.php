@@ -92,10 +92,10 @@ class BlogForm
                                                 in_array($mime, ['text/xml', 'application/xml']) => 'xml',
                                                 default => null,
                                             };
-                                            return $key ? __('file_manager.label.types.' . $key) : null;
+                                            return $key ? __('blog.label.types.' . $key) : null;
                                         })->filter()->unique()->values()->implode(', ');
 
-                                        return __('file_manager.label.supported_formats') . ': ' . $labels;
+                                        return __('blog.label.supported_formats') . ': ' . $labels;
                                     })
                                     ->imageEditor()
                                     ->enableReordering()

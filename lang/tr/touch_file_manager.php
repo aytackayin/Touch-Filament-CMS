@@ -27,7 +27,6 @@ return [
         'folder_name' => 'Klasör Adı',
         'file' => 'Dosya',
         'type' => 'Tür',
-        'tags' => 'Etiketler',
         'author' => 'Yazar',
         'last_editor' => 'Son Düzenleyen',
         'date' => 'Tarih',

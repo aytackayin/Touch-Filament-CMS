@@ -88,8 +88,8 @@ class ListBlogs extends ListRecords
             $this->getTableSettingsAction(),
 
             Action::make('toggleView')
-                ->label($this->view_type === 'grid' ? __('file_manager.label.list_view') : __('file_manager.label.grid_view'))
-                ->tooltip($this->view_type === 'grid' ? __('file_manager.label.list_view') : __('file_manager.label.grid_view'))
+                ->label($this->view_type === 'grid' ? __('touch_file_manager.label.list_view') : __('touch_file_manager.label.grid_view'))
+                ->tooltip($this->view_type === 'grid' ? __('touch_file_manager.label.list_view') : __('touch_file_manager.label.grid_view'))
                 ->hiddenLabel()
                 ->icon($this->view_type === 'grid' ? 'heroicon-o-list-bullet' : 'heroicon-o-squares-2x2')
                 ->extraAttributes(fn() => [

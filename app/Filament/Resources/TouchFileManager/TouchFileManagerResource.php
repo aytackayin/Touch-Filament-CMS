@@ -25,12 +25,12 @@ class TouchFileManagerResource extends Resource implements HasShieldPermissions
 
     public static function getNavigationIcon(): string
     {
-        return __('file_manager.nav.icon');
+        return __('touch_file_manager.nav.icon');
     }
 
     public static function getNavigationGroup(): ?string
     {
-        return __('file_manager.nav.group');
+        return __('touch_file_manager.nav.group');
     }
 
     public static function getNavigationSort(): ?int
@@ -40,17 +40,17 @@ class TouchFileManagerResource extends Resource implements HasShieldPermissions
 
     public static function getNavigationLabel(): string
     {
-        return __('file_manager.nav.label');
+        return __('touch_file_manager.nav.label');
     }
 
     public static function getModelLabel(): string
     {
-        return __('file_manager.label.resource_label');
+        return __('touch_file_manager.label.resource_label');
     }
 
     public static function getPluralModelLabel(): string
     {
-        return __('file_manager.label.plural_resource_label');
+        return __('touch_file_manager.label.plural_resource_label');
     }
 
     public static function getGloballySearchableAttributes(): array
@@ -131,7 +131,7 @@ class TouchFileManagerResource extends Resource implements HasShieldPermissions
                 $details[] = new HtmlString('<span style="font-size: 12px; line-height: 1;">' . implode(', ', $record->tags) . '</span>');
             }
 
-            $details[] = new HtmlString('<span style="font-size: 12px; line-height: 1;">' . __('file_manager.label.types.' . ($record->type ?? 'other')) . ' (' . $record->human_size . ')</span>');
+            $details[] = new HtmlString('<span style="font-size: 12px; line-height: 1;">' . __('touch_file_manager.label.types.' . ($record->type ?? 'other')) . ' (' . $record->human_size . ')</span>');
         }
 
         if ($record->parent) {
