@@ -263,15 +263,15 @@ class TouchFileManagerTable
 
                 TextColumn::make('tags')->label(__('file_manager.label.tags'))->badge()->separator(',')->searchable()->wrap()
                     ->toggleable(isToggledHiddenByDefault: fn($livewire) => !in_array('tags', $livewire->visibleColumns ?? [])),
-                TextColumn::make('user.name')->label(__('file_manager.label.author'))
+                TextColumn::make('user.name')->label(__('file_manager.label.author'))->sortable()
                     ->searchable(query: fn(Builder $query, string $search) => $query->where('user_name', 'like', "%{$search}%"))
                     ->toggleable(isToggledHiddenByDefault: fn($livewire) => !in_array('user', $livewire->visibleColumns ?? []))
                     ->formatStateUsing(fn($state, $record) => $record?->id === 0 ? '' : $state),
-                TextColumn::make('editor.name')->label(__('file_manager.label.last_editor'))
+                TextColumn::make('editor.name')->label(__('file_manager.label.last_editor'))->sortable()
                     ->searchable(query: fn(Builder $query, string $search) => $query->where('editor_name', 'like', "%{$search}%"))
                     ->toggleable(isToggledHiddenByDefault: fn($livewire) => !in_array('editor', $livewire->visibleColumns ?? []))
                     ->formatStateUsing(fn($state, $record) => $record?->id === 0 ? '' : $state),
-                TextColumn::make('created_at')->label(__('file_manager.label.date'))->date()
+                TextColumn::make('created_at')->label(__('file_manager.label.date'))->date()->sortable()
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: fn($livewire) => !in_array('created_at', $livewire->visibleColumns ?? []))
                     ->placeholder(''),
