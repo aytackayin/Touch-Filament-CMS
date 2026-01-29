@@ -159,5 +159,40 @@ class BlogCategory extends Model
         return collect($this->attachments)->last();
     }
 
+    /**
+     * Scopes & Helpers for Published Status
+     */
+    public function scopeActive($query)
+    {
+        $now = now();
+        return $query->where('is_published', true)
+            ->where(function ($q) use ($now) {
+                $q->whereNull('publish_start')->orWhere('publish_start', '<=', $now);
+            })
+            ->where(function ($q) use ($now) {
+                $q->whereNull('publish_end')->orWhere('publish_end', '>=', $now);
+            });
+    }
 
+    public function isPublished(): bool
+    {
+        $now = now();
+        $base = $this->is_published &&
+            ($this->publish_start === null || $this->publish_start <= $now) &&
+            ($this->publish_end === null || $this->publish_end >= $now);
+
+        return $base;
+    }
+
+    public function isActivePath(): bool
+    {
+        $curr = $this;
+        while ($curr) {
+            if (!$curr->isPublished()) {
+                return false;
+            }
+            $curr = $curr->parent;
+        }
+        return true;
+    }
 }

@@ -14,7 +14,28 @@ mount(fn(?string $category = null) => $this->categorySlug = $category);
 $updatedSearch = fn() => $this->resetPage();
 
 $blogs = computed(function () {
-    $query = Blog::where('is_published', true)->latest();
+    // 1. Get all categories that are part of an active path from root
+    $activeRoots = BlogCategory::whereNull('parent_id')->active()->get();
+    $activeCategoryIds = collect();
+
+    $collectActive = function ($categories) use (&$collectActive, &$activeCategoryIds) {
+        foreach ($categories as $cat) {
+            $activeCategoryIds->push($cat->id);
+            $collectActive($cat->children()->active()->get());
+        }
+    };
+    $collectActive($activeRoots);
+
+    // 2. Query blogs that are active
+    $query = Blog::active()->latest();
+
+    // 3. Filter by category path (Blog must have at least one active path if it has categories)
+    $query->where(function ($q) use ($activeCategoryIds) {
+        $q->whereDoesntHave('categories')
+            ->orWhereHas('categories', function ($catQ) use ($activeCategoryIds) {
+                $catQ->whereIn('blog_categories.id', $activeCategoryIds);
+            });
+    });
 
     if ($this->search) {
         $query->where(function ($q) {
@@ -25,48 +46,51 @@ $blogs = computed(function () {
     }
 
     if ($this->categorySlug) {
-        $category = BlogCategory::where('slug', $this->categorySlug)->with('allChildren')->first();
+        $category = BlogCategory::where('slug', $this->categorySlug)->active()->first();
 
-        if ($category) {
+        if ($category && $category->isActivePath()) {
             $allCategoryIds = collect([$category->id]);
-
             $collectIds = function ($cat) use (&$collectIds, &$allCategoryIds) {
-                foreach ($cat->allChildren as $child) {
+                // Only collect active children
+                foreach ($cat->children()->active()->get() as $child) {
                     $allCategoryIds->push($child->id);
-                    $collectIds($child); // Recursive call
+                    $collectIds($child);
                 }
             };
-
             $collectIds($category);
 
             $query->whereHas('categories', function ($q) use ($allCategoryIds) {
                 $q->whereIn('blog_categories.id', $allCategoryIds);
             });
+        } else {
+            // Invalid or inactive category requested
+            $query->whereRaw('1 = 0');
         }
     }
 
-    return $query->paginate(9);
+    return $query->paginate(12);
 });
 
 $categories = computed(function () {
-    $categories = BlogCategory::whereNull('parent_id')
-        ->with(['allChildren'])
+    $roots = BlogCategory::whereNull('parent_id')
+        ->active()
+        ->with(['children'])
         ->get();
 
     $filterCategories = function ($categories) use (&$filterCategories) {
         return $categories->filter(function ($category) use (&$filterCategories) {
-            // Recursively filter children first
-            $filteredChildren = $filterCategories($category->children);
+            // Recursively filter children (only active ones)
+            $filteredChildren = $filterCategories($category->children()->active()->get());
 
-            // Update the relation so the view loop uses the filtered list
+            // Update the relation
             $category->setRelation('children', $filteredChildren);
 
-            // Keep if has own blogs OR has valid children
-            return $category->blogs()->exists() || $filteredChildren->isNotEmpty();
+            // Keep if has own ACTIVE blogs OR has valid children
+            return $category->blogs()->active()->exists() || $filteredChildren->isNotEmpty();
         });
     };
 
-    return $filterCategories($categories);
+    return $filterCategories($roots);
 });
 
 $activePath = computed(function () {

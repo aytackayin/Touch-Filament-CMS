@@ -9,9 +9,27 @@ layout('frontend.layouts.app');
 
 state(['blog' => null]);
 
-mount(fn (string $slug) => 
-    $this->blog = Blog::where('slug', $slug)->where('is_published', true)->firstOrFail()
-);
+mount(function (string $slug) {
+    $blog = Blog::where('slug', $slug)->active()->firstOrFail();
+
+    // Eğer blog kategorilere bağlıysa, en az bir kategorinin aktif bir yolu olmalı
+    $categories = $blog->categories;
+    if ($categories->isNotEmpty()) {
+        $hasActivePath = false;
+        foreach ($categories as $category) {
+            if ($category->isActivePath()) {
+                $hasActivePath = true;
+                break;
+            }
+        }
+        
+        if (!$hasActivePath) {
+            abort(404);
+        }
+    }
+
+    $this->blog = $blog;
+});
 
 $attachments = computed(function() {
     $paths = collect($this->blog->attachments ?? [])->reverse()->values();

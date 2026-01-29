@@ -122,7 +122,7 @@ class Blog extends Model
                     $thumbsDir = $model->getFileManagerFolderName() . "/{$model->id}/videos/thumbs";
 
                     if (!$disk->exists($thumbsDir)) {
-                        $disk->makeDirectory($thumbsDir, 0755, true);
+                        $disk->makeDirectory($thumbsDir);
                     }
 
                     $sizes = $model->getThumbnailSizes();
@@ -236,5 +236,28 @@ class Blog extends Model
         }
 
         return $slug;
+    }
+
+    /**
+     * Scopes & Helpers for Published Status
+     */
+    public function scopeActive($query)
+    {
+        $now = now();
+        return $query->where('is_published', true)
+            ->where(function ($q) use ($now) {
+                $q->whereNull('publish_start')->orWhere('publish_start', '<=', $now);
+            })
+            ->where(function ($q) use ($now) {
+                $q->whereNull('publish_end')->orWhere('publish_end', '>=', $now);
+            });
+    }
+
+    public function isPublished(): bool
+    {
+        $now = now();
+        return $this->is_published &&
+            ($this->publish_start === null || $this->publish_start <= $now) &&
+            ($this->publish_end === null || $this->publish_end >= $now);
     }
 }
