@@ -144,7 +144,7 @@ $attachments = computed(fn() => collect($this->blog->attachments ?? [])->reverse
                 {{ $blog->title }}
             </h1>
 
-            <div class="flex items-center gap-3 mb-10 text-[11px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">
+            <div class="flex items-center gap-3 mb-4 text-[11px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">
                 <div class="flex items-center gap-1.5">
                     <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                     <span>{{ $blog->created_at->format('M d, Y') }}</span>
@@ -155,6 +155,16 @@ $attachments = computed(fn() => collect($this->blog->attachments ?? [])->reverse
                     <span>{{ $blog->user->name }}</span>
                 </div>
             </div>
+
+            <div class="flex flex-wrap gap-2 mb-8">
+                @foreach($blog->categories as $category)
+                    <a href="{{ route('blog.category', $category->slug) }}" 
+                       class="px-4 py-1.5 bg-slate-100 dark:bg-[#2a2b3c] hover:bg-indigo-600 hover:text-white dark:hover:bg-indigo-600 dark:hover:text-white text-slate-600 dark:text-slate-400 rounded-full text-xs font-bold transition-all duration-300">
+                        {{ $category->title }}
+                    </a>
+                @endforeach
+            </div>
+
         </div>
 
         <!-- Content -->
