@@ -186,13 +186,39 @@ trait HasFileManagerSync
     protected function cleanupEmptyFolder(string $resourceType, $id): void
     {
         $disk = Storage::disk('attachments');
-        $path = "{$resourceType}/{$id}";
-        if ($disk->exists($path) && empty($disk->allFiles($path))) {
-            $folder = TouchFile::where('path', $path)->where('is_folder', true)->first();
+        $rootPath = "{$resourceType}/{$id}";
+
+        if (!$disk->exists($rootPath))
+            return;
+
+        // Alt klasörleri (files, images, content-images vb.) ve onların thumbslarını temizle
+        foreach ($disk->directories($rootPath) as $dir) {
+            foreach ($disk->directories($dir) as $subDir) {
+                if (empty($disk->allFiles($subDir))) {
+                    $folder = TouchFile::where('path', $subDir)->where('is_folder', true)->first();
+                    if ($folder)
+                        $folder->delete();
+                    else
+                        $disk->deleteDirectory($subDir);
+                }
+            }
+
+            if (empty($disk->allFiles($dir))) {
+                $folder = TouchFile::where('path', $dir)->where('is_folder', true)->first();
+                if ($folder)
+                    $folder->delete();
+                else
+                    $disk->deleteDirectory($dir);
+            }
+        }
+
+        // Ana klasör
+        if (empty($disk->allFiles($rootPath))) {
+            $folder = TouchFile::where('path', $rootPath)->where('is_folder', true)->first();
             if ($folder)
                 $folder->delete();
             else
-                $disk->deleteDirectory($path);
+                $disk->deleteDirectory($rootPath);
         }
     }
     public function getThumbnailSizes(): array
