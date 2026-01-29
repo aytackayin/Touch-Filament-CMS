@@ -45,7 +45,10 @@ $attachments = computed(function() {
 <div x-data="{ 
     lightbox: false, 
     activeThumb: 0, 
-    allMedia: {{ $mediaFiles->map(fn($file) => $file->url ?? Storage::disk('attachments')->url($file->path))->toJson() }}
+    allMedia: {{ $mediaFiles->map(fn($file) => $file->url ?? Storage::disk('attachments')->url($file->path))->toJson() }},
+    filePreview: false,
+    filePreviewUrl: '',
+    filePreviewName: ''
 }" class="pb-24 bg-white dark:bg-[#222330] min-h-screen">
     
     <!-- Lightbox Overlay -->
@@ -108,6 +111,41 @@ $attachments = computed(function() {
                             :class="activeThumb === index ? 'bg-white w-8' : 'bg-white/30 w-2 hover:bg-white/50'"
                             class="h-2 rounded-full transition-all duration-300"></button>
                 </template>
+            </div>
+        </div>
+    </template>
+
+    <!-- File Preview Lightbox -->
+    <template x-teleport="body">
+        <div x-show="filePreview" 
+             style="display: none;"
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"
+             class="fixed inset-0 z-[100] bg-black/95 flex flex-col items-center justify-center p-4 lg:p-8"
+             @keydown.escape.window="filePreview = false">
+            
+            <div class="relative w-full h-full max-w-6xl flex flex-col bg-white dark:bg-slate-900 rounded-lg shadow-2xl overflow-hidden" @click.away="filePreview = false">
+                <!-- Header -->
+                <div class="flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
+                    <h3 class="text-lg font-bold text-slate-700 dark:text-slate-200 truncate" x-text="filePreviewName"></h3>
+                    <div class="flex items-center gap-2">
+                        <a :href="filePreviewUrl" download class="p-2 text-slate-500 hover:text-emerald-500 transition-colors" title="Download">
+                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                        </a>
+                        <button @click="filePreview = false" class="p-2 text-slate-500 hover:text-red-500 transition-colors">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Iframe -->
+                <div class="flex-1 w-full h-full bg-slate-100 dark:bg-black/50 relative">
+                    <iframe :src="filePreviewUrl" class="w-full h-full absolute inset-0" frameborder="0"></iframe>
+                </div>
             </div>
         </div>
     </template>
@@ -315,7 +353,8 @@ $attachments = computed(function() {
                                     
                                     $fileUrl = $file->url ?? Storage::disk('attachments')->url($file->path);
                                 @endphp
-                                <a href="{{ $fileUrl }}" target="_blank" download class="group flex items-center gap-4 p-4 rounded-xl bg-slate-50 dark:bg-[#2a2b3c] border border-slate-100 dark:border-slate-700 hover:border-emerald-500/30 hover:shadow-lg hover:shadow-emerald-500/5 transition-all duration-300">
+                                <!-- Container Link (Removed href from main container to prevent conflict) -->
+                                <div class="group flex items-center gap-4 p-4 rounded-xl bg-slate-50 dark:bg-[#2a2b3c] border border-slate-100 dark:border-slate-700 hover:border-emerald-500/30 hover:shadow-lg hover:shadow-emerald-500/5 transition-all duration-300">
                                     <div class="w-12 h-12 flex-shrink-0 flex items-center justify-center bg-white dark:bg-slate-800 rounded-lg p-2 shadow-sm group-hover:scale-110 transition-transform">
                                         <img src="{{ $iconUrl }}" 
                                              class="w-full h-full object-contain" 
@@ -336,10 +375,23 @@ $attachments = computed(function() {
                                         </div>
                                     </div>
 
-                                    <div class="w-8 h-8 flex items-center justify-center rounded-full bg-slate-200 dark:bg-slate-700 text-slate-400 group-hover:bg-emerald-500 group-hover:text-white transition-all">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                    <!-- Actions -->
+                                    <div class="flex items-center gap-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                                        @if(in_array($ext, ['pdf', 'txt', 'json', 'xml', 'md', 'csv', 'mp3', 'wav']))
+                                            <button @click="filePreview = true; filePreviewUrl = '{{ $fileUrl }}'; filePreviewName = {{ \Illuminate\Support\Js::from($displayText) }}" 
+                                               class="w-8 h-8 flex items-center justify-center rounded-full bg-slate-200 dark:bg-slate-700 text-slate-500 hover:bg-indigo-500 hover:text-white transition-all transform hover:scale-110" 
+                                               title="Preview">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                            </button>
+                                        @endif
+                                        
+                                        <a href="{{ $fileUrl }}" download 
+                                           class="w-8 h-8 flex items-center justify-center rounded-full bg-slate-200 dark:bg-slate-700 text-slate-500 hover:bg-emerald-500 hover:text-white transition-all transform hover:scale-110"
+                                           title="Download">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                        </a>
                                     </div>
-                                </a>
+                                </div>
                             @endforeach
                         </div>
                     </div>
