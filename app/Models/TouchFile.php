@@ -402,6 +402,14 @@ class TouchFile extends Model
 
     protected static function booted()
     {
+        static::deleted(function ($file) {
+            $path = str_replace('\\', '/', $file->path);
+            $directory = dirname($path);
+            $disk = Storage::disk('attachments');
+            // Dosyanın bulunduğu klasörü temizlemeyi dene
+            static::cleanupDirectoryIfEmpty($disk, $directory);
+        });
+
         static::saved(function ($model) {
             if (!$model->is_folder && $model->type === 'image') {
                 $model->generateThumbnails();
@@ -438,5 +446,66 @@ class TouchFile extends Model
                 }
             }
         });
+    }
+
+    public static function cleanupDirectoryIfEmpty(\Illuminate\Contracts\Filesystem\Filesystem $disk, string $path, bool $checkParent = true): void
+    {
+        $path = str_replace('\\', '/', $path);
+
+        if (function_exists('clearstatcache')) {
+            clearstatcache(true, $disk->path($path));
+        }
+
+        if (!$disk->exists($path)) {
+            return;
+        }
+
+        // Recursively clean subdirectories first (don't check parent from child to avoid infinite loop)
+        foreach ($disk->directories($path) as $directory) {
+            static::cleanupDirectoryIfEmpty($disk, $directory, false);
+        }
+
+        if (function_exists('clearstatcache')) {
+            clearstatcache(true, $disk->path($path));
+        }
+
+        // Check content ignoring junk files
+        $allFiles = $disk->files($path);
+
+        $junkFiles = ['Thumbs.db', 'thumbs.db', 'ehthumbs.db', 'Desktop.ini', '.DS_Store'];
+        $realFiles = array_filter($allFiles, function ($f) use ($junkFiles) {
+            return !in_array(basename($f), $junkFiles);
+        });
+
+        $allDirs = $disk->directories($path);
+
+        if (empty($realFiles) && empty($allDirs)) {
+            // Delete folder record from DB if exists
+            $folder = static::where('path', $path)->where('is_folder', true)->first();
+
+            $triggeredDbDelete = false;
+            if ($folder) {
+                // This triggers 'deleting' (removes dir via deleteDirectory) and 'deleted' (checks parent)
+                $folder->delete();
+                $triggeredDbDelete = true;
+            }
+
+            // Cleanup physical leftovers (junk files or non-DB folders like thumbs)
+            // Even if folder->delete() was called, verify it's gone
+            if ($disk->exists($path)) {
+                foreach ($allFiles as $f) {
+                    $disk->delete($f);
+                }
+                $disk->deleteDirectory($path);
+            }
+
+            // If no DB record existed to trigger event chain, manually escalate to parent
+            if (!$triggeredDbDelete && $checkParent) {
+                $parent = dirname($path);
+                if ($parent && $parent !== '.' && $parent !== '') {
+                    static::cleanupDirectoryIfEmpty($disk, $parent);
+                }
+            }
+        }
     }
 }

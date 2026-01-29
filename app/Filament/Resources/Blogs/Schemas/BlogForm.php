@@ -47,16 +47,6 @@ class BlogForm
                                         $set('slug', Blog::generateUniqueSlug($state, $record?->id));
                                     })
                                     ->unique(Blog::class, 'slug', ignoreRecord: true),
-                                /*                                 RichEditor::make('content')
-                                                                    ->required()
-                                                                    ->fileAttachmentsDisk('attachments')
-                                                                    ->fileAttachmentsDirectory(function ($record) {
-                                                                        if ($record) {
-                                                                            return 'blogs/' . $record->id . '/content-images';
-                                                                        }
-                                                                        return 'blogs/temp';
-                                                                    })
-                                                                    ->columnSpanFull(), */
                                 TinyEditor::make('content')
                                     ->label(__('blog.label.content'))
                                     ->fileAttachmentsDisk('attachments')

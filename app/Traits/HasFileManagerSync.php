@@ -188,37 +188,51 @@ trait HasFileManagerSync
         $disk = Storage::disk('attachments');
         $rootPath = "{$resourceType}/{$id}";
 
-        if (!$disk->exists($rootPath))
+        if (!$disk->exists($rootPath)) {
             return;
-
-        // Alt klasörleri (files, images, content-images vb.) ve onların thumbslarını temizle
-        foreach ($disk->directories($rootPath) as $dir) {
-            foreach ($disk->directories($dir) as $subDir) {
-                if (empty($disk->allFiles($subDir))) {
-                    $folder = TouchFile::where('path', $subDir)->where('is_folder', true)->first();
-                    if ($folder)
-                        $folder->delete();
-                    else
-                        $disk->deleteDirectory($subDir);
-                }
-            }
-
-            if (empty($disk->allFiles($dir))) {
-                $folder = TouchFile::where('path', $dir)->where('is_folder', true)->first();
-                if ($folder)
-                    $folder->delete();
-                else
-                    $disk->deleteDirectory($dir);
-            }
         }
 
-        // Ana klasör
-        if (empty($disk->allFiles($rootPath))) {
-            $folder = TouchFile::where('path', $rootPath)->where('is_folder', true)->first();
-            if ($folder)
+        $this->recursiveDeleteEmptyFolders($disk, $rootPath);
+    }
+
+    protected function recursiveDeleteEmptyFolders(\Illuminate\Contracts\Filesystem\Filesystem $disk, string $path): void
+    {
+        // Önce alt klasörleri özyinelemeli olarak temizle
+        foreach ($disk->directories($path) as $directory) {
+            $this->recursiveDeleteEmptyFolders($disk, $directory);
+        }
+
+        if (function_exists('clearstatcache')) {
+            clearstatcache(true, $disk->path($path));
+        }
+
+        // Mevcut klasörün boş olup olmadığını kontrol et
+        if (empty($disk->files($path)) && empty($disk->directories($path))) {
+            $folder = TouchFile::where('path', $path)->where('is_folder', true)->first();
+
+            if ($folder) {
                 $folder->delete();
-            else
-                $disk->deleteDirectory($rootPath);
+            }
+
+            // Klasör veritabanından silindiyse ama diskte duruyorsa veya veritabanında yoksa sil
+            if ($disk->exists($path)) {
+                $disk->deleteDirectory($path);
+
+                // Eğer hala duruyorsa, Windows sistem dosyalarını silmeyi dene
+                if (function_exists('clearstatcache')) {
+                    clearstatcache(true, $disk->path($path));
+                }
+
+                if ($disk->exists($path)) {
+                    $junkFiles = ['Thumbs.db', 'thumbs.db', 'ehthumbs.db', 'Desktop.ini', '.DS_Store'];
+                    foreach ($junkFiles as $junk) {
+                        if ($disk->exists("{$path}/{$junk}")) {
+                            $disk->delete("{$path}/{$junk}");
+                        }
+                    }
+                    $disk->deleteDirectory($path);
+                }
+            }
         }
     }
     public function getThumbnailSizes(): array
