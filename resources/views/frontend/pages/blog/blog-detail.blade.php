@@ -35,35 +35,49 @@ $attachments = computed(function() {
 });
 ?>
 
+<!-- Attachments Logic -->
+@php
+    $allAttachments = $this->attachments;
+    $mediaFiles = $allAttachments->filter(fn($file) => in_array($file->type, ['image', 'video']))->values();
+    $otherFiles = $allAttachments->reject(fn($file) => in_array($file->type, ['image', 'video']))->values();
+@endphp
+
 <div x-data="{ 
     lightbox: false, 
     activeThumb: 0, 
-    allMedia: {{ $this->attachments->map(fn($file) => $file->url ?? Storage::disk('attachments')->url($file->path))->toJson() }}
+    allMedia: {{ $mediaFiles->map(fn($file) => $file->url ?? Storage::disk('attachments')->url($file->path))->toJson() }}
 }" class="pb-24 bg-white dark:bg-[#222330] min-h-screen">
     
     <!-- Lightbox Overlay -->
     <template x-teleport="body">
         <div x-show="lightbox" 
+             style="display: none;"
              x-transition:enter="transition ease-out duration-300"
              x-transition:enter-start="opacity-0"
              x-transition:enter-end="opacity-100"
              x-transition:leave="transition ease-in duration-200"
              x-transition:leave-start="opacity-100"
              x-transition:leave-end="opacity-0"
-             class="fixed inset-0 z-[100] bg-black/95 flex flex-col items-center justify-center p-4 lg:p-12"
-             x-cloak>
+             class="fixed inset-0 z-[100] bg-black/95 flex flex-col items-center justify-center p-4 lg:p-12">
             
             <div class="relative w-full h-full flex items-center justify-center">
-                <!-- Close Button (Moved and Z-Indexed) -->
+                <!-- Close Button -->
                 <button @click="lightbox = false" 
                         class="absolute -top-4 -right-4 lg:top-0 lg:right-0 z-[110] text-white/50 hover:text-white transition-all p-4 bg-white/5 hover:bg-white/10 rounded-full">
                     <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
 
                 <!-- Nav -->
-                <button @click="activeThumb = (activeThumb - 1 + allMedia.length) % allMedia.length" class="absolute left-4 lg:left-8 text-white/50 hover:text-white p-4">
-                    <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
-                </button>
+                <template x-if="allMedia.length > 1">
+                    <div>
+                        <button @click="activeThumb = (activeThumb - 1 + allMedia.length) % allMedia.length" class="absolute left-4 lg:left-8 z-[105] text-white/50 hover:text-white p-4">
+                            <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                        </button>
+                        <button @click="activeThumb = (activeThumb + 1) % allMedia.length" class="absolute right-4 lg:right-8 z-[105] text-white/50 hover:text-white p-4">
+                            <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                        </button>
+                    </div>
+                </template>
                 
                 <div class="max-w-7xl max-h-full overflow-hidden flex items-center justify-center">
                     <template x-for="(url, index) in allMedia" :key="index">
@@ -71,28 +85,24 @@ $attachments = computed(function() {
                              x-transition:enter="transition ease-out duration-500"
                              x-transition:enter-start="opacity-0 scale-95"
                              x-transition:enter-end="opacity-100 scale-100"
-                             class="flex items-center justify-center">
+                             class="flex items-center justify-center w-full h-full">
                             
-                            <!-- Video Check -->
+                            <!-- Video -->
                             <template x-if="url.endsWith('.mp4') || url.endsWith('.webm')">
                                 <video :src="url" controls class="max-w-full max-h-[80vh] rounded-2xl shadow-2xl"></video>
                             </template>
                             
-                            <!-- Image Check -->
+                            <!-- Image -->
                             <template x-if="!(url.endsWith('.mp4') || url.endsWith('.webm'))">
                                 <img :src="url" class="max-w-full max-h-[80vh] rounded-2xl shadow-2xl object-contain">
                             </template>
                         </div>
                     </template>
                 </div>
-
-                <button @click="activeThumb = (activeThumb + 1) % allMedia.length" class="absolute right-4 lg:right-8 text-white/50 hover:text-white p-4">
-                    <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
-                </button>
             </div>
 
             <!-- Thumbnails index -->
-            <div class="mt-8 flex space-x-2">
+            <div class="mt-8 flex space-x-2" x-show="allMedia.length > 1">
                 <template x-for="(url, index) in allMedia" :key="'thumb' + index">
                     <button @click="activeThumb = index" 
                             :class="activeThumb === index ? 'bg-white w-8' : 'bg-white/30 w-2 hover:bg-white/50'"
@@ -132,7 +142,7 @@ $attachments = computed(function() {
     @endif
 
     <article class="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-16 {{ $headerMedia ? 'pt-12' : 'pt-32' }}">
-        <!-- Meta -->
+        <!-- Meta Header -->
         <div class="mb-12">
             <div class="flex flex-wrap items-center gap-2 mb-6 text-xs font-bold uppercase tracking-widest text-slate-500">
                 <a href="{{ route('blog.index') }}" class="hover:text-indigo-600 transition-colors">Blogs</a>
@@ -187,7 +197,7 @@ $attachments = computed(function() {
 
         </div>
 
-        <!-- Content -->
+        <!-- Main Content -->
         <div class="prose prose-lg dark:prose-invert max-w-none mb-20 text-slate-600 dark:text-slate-300 leading-relaxed font-medium"
             x-init="
                 $el.querySelectorAll('pre').forEach(pre => {
@@ -223,82 +233,117 @@ $attachments = computed(function() {
             {!! $blog->content !!}
         </div>
 
-        <!-- Attachments Grid -->
-        @if($this->attachments->count() > 0)
+        <!-- Attachments Section -->
+        @if($allAttachments->count() > 0)
             <div class="mt-24 pt-16 border-t border-slate-100 dark:border-slate-800">
-                <h3 class="text-2xl font-black mb-10 tracking-tight">Gallery & Attachments</h3>
-                <div class="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-6 gap-6">
-                    @foreach($this->attachments as $index => $file)
-                        @php
-                            $thumbUrl = $file->thumbnail_url ?? $this->blog->getThumbnailUrl($file->path);
-                            $isVideo = $file->type === 'video' || $this->blog->isVideo($file->path);
-                            // Determine Extension/Type Label
-                            $ext = $file->extension ? strtoupper($file->extension) : 'FILE';
-                            $size = $file->human_size !== '0 B' ? $file->human_size : '';
-                            
-                            // Alt text or Name
-                            $hasAlt = !empty($file->alt);
-                            $displayText = $hasAlt ? $file->alt : $file->name;
-                            $tooltipText = $hasAlt ? $file->alt : $file->name;
-                        @endphp
-                        
-                        <div class="relative group aspect-square rounded-xl overflow-hidden bg-slate-100 dark:bg-[#2a2b3c] border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-all duration-300">
-                            <!-- Clickable Area -->
-                            <button @click="lightbox = true; activeThumb = {{ $index }}" class="w-full h-full focus:outline-none">
-                                @if($thumbUrl)
-                                    <img src="{{ $thumbUrl }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" alt="{{ $displayText }}">
-                                    @if($isVideo)
-                                        <div class="absolute inset-0 flex items-center justify-center bg-black/10 group-hover:bg-black/20 transition-colors">
-                                            <div class="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                                                <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"></path></svg>
+                
+                <!-- Media Gallery -->
+                @if($mediaFiles->count() > 0)
+                    <div class="mb-16">
+                        <h3 class="text-2xl font-black mb-8 tracking-tight flex items-center gap-3">
+                            <span class="bg-indigo-600 w-1.5 h-8 rounded-full"></span>
+                            Media Gallery
+                        </h3>
+                        <div class="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-6 gap-6">
+                            @foreach($mediaFiles as $index => $file)
+                                @php
+                                    $thumbUrl = $file->thumbnail_url ?? $this->blog->getThumbnailUrl($file->path);
+                                    $isVideo = $file->type === 'video' || $this->blog->isVideo($file->path);
+                                    $ext = $file->extension ? strtoupper($file->extension) : 'FILE';
+                                    $size = $file->human_size !== '0 B' ? $file->human_size : '';
+                                    
+                                    $hasAlt = !empty($file->alt);
+                                    $displayText = $hasAlt ? $file->alt : $file->name;
+                                @endphp
+                                
+                                <div class="relative group aspect-square rounded-2xl overflow-hidden bg-slate-100 dark:bg-[#2a2b3c] border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-xl hover:shadow-indigo-500/10 transition-all duration-300 cursor-zoom-in"
+                                     @click="lightbox = true; activeThumb = {{ $index }}">
+                                    @if($thumbUrl)
+                                        <img src="{{ $thumbUrl }}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="{{ $displayText }}">
+                                        @if($isVideo)
+                                            <div class="absolute inset-0 flex items-center justify-center bg-black/10 group-hover:bg-black/30 transition-colors">
+                                                <div class="w-12 h-12 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/30 group-hover:scale-110 transition-transform">
+                                                    <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"></path></svg>
+                                                </div>
                                             </div>
+                                        @endif
+                                    @elseif($isVideo)
+                                        <div class="w-full h-full flex items-center justify-center bg-slate-800 text-slate-500">
+                                            <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"></path></svg>
+                                        </div>
+                                    @else
+                                        <div class="w-full h-full flex items-center justify-center bg-slate-50 dark:bg-slate-800 p-8">
+                                            <svg class="w-12 h-12 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                                         </div>
                                     @endif
-                                @elseif($isVideo)
-                                    <div class="w-full h-full flex items-center justify-center bg-slate-800 text-slate-500">
-                                        <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"></path></svg>
+
+                                    <!-- Bottom Info -->
+                                    <div class="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/90 via-black/60 to-transparent translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+                                        <p class="text-white text-xs font-semibold truncate">{{ \Illuminate\Support\Str::limit($displayText, 20) }}</p>
+                                        <p class="text-white/70 text-[10px]">{{ $size }}</p>
                                     </div>
-                                @else
-                                    @php
-                                        $iconExt = strtolower($file->extension);
-                                        $baseIconPath = '/assets/icons/colorful-icons/';
-                                        $iconUrl = url($baseIconPath . 'grid-' . $iconExt . '.svg');
-                                        $fallbackIcon = url($baseIconPath . 'grid-file.svg');
-                                    @endphp
-                                    <div class="w-full h-full flex items-center justify-center bg-slate-50 dark:bg-slate-800 p-8">
+                                    
+                                    <!-- Ext Badge -->
+                                    <div class="absolute top-2 left-2 px-1.5 py-0.5 rounded text-[9px] font-bold bg-black/50 text-white backdrop-blur-sm border border-white/10 group-hover:bg-indigo-600 group-hover:border-indigo-500 transition-colors">
+                                        {{ $ext }}
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
+
+                <!-- Other Files -->
+                @if($otherFiles->count() > 0)
+                    <div>
+                        <h3 class="text-2xl font-black mb-8 tracking-tight flex items-center gap-3">
+                            <span class="bg-emerald-500 w-1.5 h-8 rounded-full"></span>
+                            Other Files
+                        </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            @foreach($otherFiles as $file)
+                                @php
+                                    $hasAlt = !empty($file->alt);
+                                    $displayText = $hasAlt ? $file->alt : $file->name;
+                                    $ext = strtolower($file->extension);
+                                    $baseIconPath = '/assets/icons/colorful-icons/';
+                                    
+                                    // Direct extension match (e.g. pdf.svg, doc.svg)
+                                    $iconUrl = url($baseIconPath . $ext . '.svg');
+                                    // Fallback icon
+                                    $fallbackIcon = url($baseIconPath . 'file.svg');
+                                    
+                                    $fileUrl = $file->url ?? Storage::disk('attachments')->url($file->path);
+                                @endphp
+                                <a href="{{ $fileUrl }}" target="_blank" download class="group flex items-center gap-4 p-4 rounded-xl bg-slate-50 dark:bg-[#2a2b3c] border border-slate-100 dark:border-slate-700 hover:border-emerald-500/30 hover:shadow-lg hover:shadow-emerald-500/5 transition-all duration-300">
+                                    <div class="w-12 h-12 flex-shrink-0 flex items-center justify-center bg-white dark:bg-slate-800 rounded-lg p-2 shadow-sm group-hover:scale-110 transition-transform">
                                         <img src="{{ $iconUrl }}" 
-                                             class="w-full h-full object-contain drop-shadow-sm transition-transform duration-500 group-hover:scale-110"
-                                             alt="{{ $displayText }}"
+                                             class="w-full h-full object-contain" 
+                                             alt="{{ $ext }}"
                                              onerror="this.onerror=null; this.src='{{ $fallbackIcon }}';">
                                     </div>
-                                @endif
-                            </button>
+                                    
+                                    <div class="flex-1 min-w-0">
+                                        <h4 class="font-bold text-slate-700 dark:text-slate-200 text-sm truncate group-hover:text-emerald-500 transition-colors">
+                                            {{ $displayText }}
+                                        </h4>
+                                        <div class="flex items-center gap-2 text-xs text-slate-400 mt-1">
+                                            <span class="uppercase font-semibold bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-400 px-1 py-0.5 rounded-[4px]">
+                                                {{ strtoupper($ext) }}
+                                            </span>
+                                            <span>&bull;</span>
+                                            <span>{{ $file->human_size }}</span>
+                                        </div>
+                                    </div>
 
-                            <!-- Badges -->
-                            <div class="absolute top-2 left-2 z-10 pointer-events-none">
-                                <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-indigo-600/90 text-white shadow-sm backdrop-blur-sm tracking-wider">
-                                    {{ $ext }}
-                                </span>
-                            </div>
-
-                            @if($size)
-                                <div class="absolute top-2 right-2 z-10 pointer-events-none">
-                                    <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-black/60 text-white shadow-sm backdrop-blur-sm">
-                                        {{ $size }}
-                                    </span>
-                                </div>
-                            @endif
-
-                            <!-- Bottom Overlay -->
-                            <div class="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/80 via-black/50 to-transparent translate-y-full group-hover:translate-y-0 transition-transform duration-300"
-                                 title="{{ $tooltipText }}">
-                                <p class="text-white text-xs font-medium truncate drop-shadow-md">
-                                    {{ \Illuminate\Support\Str::limit($displayText, 25) }}
-                                </p>
-                            </div>
+                                    <div class="w-8 h-8 flex items-center justify-center rounded-full bg-slate-200 dark:bg-slate-700 text-slate-400 group-hover:bg-emerald-500 group-hover:text-white transition-all">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                    </div>
+                                </a>
+                            @endforeach
                         </div>
-                    @endforeach
-                </div>
+                    </div>
+                @endif
             </div>
         @endif
     </article>
