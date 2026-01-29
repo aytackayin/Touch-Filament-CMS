@@ -1,0 +1,32 @@
+{
+    "name": "aytackayin/tinymce",
+    "description": "Filament 4/3 Tinymce Plugin with Code Editor",
+    "version": "1.0.6",
+    "require": {
+        "filament/filament": "^3.0|^4.0"
+    },
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Aytackayin\\Tinymce\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Aytackayin\\Tinymce\\TinymceServiceProvider"
+            ]
+        }
+    },
+    "authors": [
+        {
+            "name": "Itouch",
+            "email": "info@aytackayin.com"
+        }
+    ],
+    "config": {
+        "sort-packages": true
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
