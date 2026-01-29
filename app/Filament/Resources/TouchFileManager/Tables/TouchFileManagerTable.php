@@ -35,11 +35,12 @@ class TouchFileManagerTable
                 $isGrid,
                 fn(Table $table) => $table
                     ->contentGrid([
-                        'md' => 4,
                         'xl' => 4,
                     ])
+                    ->extraAttributes([
+                        'class' => 'touch-file-manager-grid',
+                    ])
             )
-            ->defaultSort('name', 'asc')
             ->modifyQueryUsing(function (Builder $query) use ($table) {
                 $livewire = $table->getLivewire();
                 $parentId = ($livewire && property_exists($livewire, 'parent_id')) ? $livewire->parent_id : null;
@@ -94,9 +95,9 @@ class TouchFileManagerTable
                         ->orderByRaw('CASE WHEN id = 0 THEN 1 ELSE 0 END DESC')
                         ->orderBy('is_folder', 'desc');
 
-                    if (!$table->getSortColumn()) {
-                        $q->orderByRaw("CASE WHEN name REGEXP '^[0-9]+$' THEN LENGTH(name) ELSE 0 END ASC")->orderBy('name', 'asc');
-                    }
+
+
+
 
                     return $q;
                 }
@@ -115,9 +116,6 @@ class TouchFileManagerTable
                 }
 
                 $query->orderBy('touch_files.is_folder', 'desc');
-                if (!$table->getSortColumn()) {
-                    $query->orderByRaw("CASE WHEN touch_files.name REGEXP '^[0-9]+$' THEN LENGTH(touch_files.name) ELSE 0 END ASC")->orderBy('touch_files.name', 'asc');
-                }
                 return $query;
             })
             ->defaultPaginationPageOption($table->getLivewire()->userPreferredPerPage ?? 10)

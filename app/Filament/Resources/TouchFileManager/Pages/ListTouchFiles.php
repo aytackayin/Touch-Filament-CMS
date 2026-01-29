@@ -46,6 +46,21 @@ class ListTouchFiles extends ListRecords
     {
         parent::mount();
         $this->mountHasTableSettings();
+
+        // Set default sort if no sort is currently active
+        if (!request()->has('tableSort') && !request()->has('tableSortDirection')) {
+            $this->tableSort = 'name';
+            $this->tableSortDirection = 'asc';
+        }
+    }
+
+    public function updatedTableSort(): void
+    {
+        // If tableSort becomes null (user clicked to remove sort), revert to name asc
+        if ($this->tableSort === null) {
+            $this->tableSort = 'name';
+            $this->tableSortDirection = 'asc';
+        }
     }
 
     protected function getTableSettingsKey(): string
