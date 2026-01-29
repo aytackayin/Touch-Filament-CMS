@@ -60,7 +60,30 @@ class BlogCategoryForm
                                     ->panelLayout('grid')
                                     ->disk('attachments')
                                     ->directory(BlogCategory::getStorageFolder() . '/temp')
-                                    ->image()
+                                    ->acceptedFileTypes(config('blog.accepted_category_file_types'))
+                                    ->helperText(function () {
+                                        $types = config('blog.accepted_category_file_types', []);
+                                        $labels = collect($types)->map(function ($mime) {
+                                            $key = match (true) {
+                                                str_starts_with($mime, 'image/') => 'image',
+                                                str_starts_with($mime, 'video/') => 'video',
+                                                str_starts_with($mime, 'audio/') => 'audio',
+                                                $mime === 'application/pdf' => 'pdf',
+                                                in_array($mime, ['application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']) => 'word',
+                                                in_array($mime, ['application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet']) => 'excel',
+                                                in_array($mime, ['application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.presentationml.presentation']) => 'powerpoint',
+                                                in_array($mime, ['application/zip', 'application/x-zip-compressed', 'multipart/x-zip', 'application/x-rar-compressed', 'application/vnd.rar', 'application/x-7z-compressed']) => 'archive',
+                                                $mime === 'text/plain' => 'text',
+                                                $mime === 'application/json' => 'json',
+                                                $mime === 'text/csv' => 'csv',
+                                                in_array($mime, ['text/xml', 'application/xml']) => 'xml',
+                                                default => null,
+                                            };
+                                            return $key ? __('file_manager.label.types.' . $key) : null;
+                                        })->filter()->unique()->values()->implode(', ');
+
+                                        return __('file_manager.label.supported_formats') . ': ' . $labels;
+                                    })
                                     ->imageEditor()
                                     ->enableReordering()
                                     ->preserveFilenames()

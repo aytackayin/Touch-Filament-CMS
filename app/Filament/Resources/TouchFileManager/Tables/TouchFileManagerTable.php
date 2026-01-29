@@ -318,7 +318,7 @@ class TouchFileManagerTable
                     ->url(fn($record) => $record ? Storage::disk('attachments')->url($record->path) : null)->openUrlInNewTab(),
 
                 Action::make('view')->icon('heroicon-o-eye')->label('')->color('gray')->tooltip(__('file_manager.action.view'))
-                    ->hidden(fn($record) => !$record || !in_array($record->type, ['image', 'video']) || $record->id === 0)
+                    ->hidden(fn($record) => !$record || $record->is_folder || $record->id === 0)
                     ->modalContent(fn($record) => $record ? view('filament.resources.touchfilemanager.modals.touchfilemanager-preview', ['record' => $record, 'url' => Storage::disk('attachments')->url($record->path)]) : null)
                     ->modalWidth('5xl')->modalSubmitAction(false)->modalCancelActionLabel(__('filament-actions::view.single.modal.actions.close.label')),
 

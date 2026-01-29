@@ -30,6 +30,18 @@
                 {{ __('file_manager.label.video_support_error') }}
             </video>
         </div>
+    @elseif(in_array(strtolower($record->extension), ['pdf', 'txt', 'json', 'xml', 'md', 'csv', 'mp3', 'wav']))
+        <div class="w-full" style="margin-bottom: 20px;">
+            <iframe src="{{ $url }}" class="w-full rounded-xl border border-gray-200 dark:border-gray-700"
+                style="width: 100%; height: 600px; border-radius: 12px;"></iframe>
+        </div>
+    @else
+        <div class="w-full flex items-center justify-center p-12 bg-gray-50 dark:bg-gray-800 rounded-xl mb-6"
+            style="padding: 3rem; background-color: rgba(156, 163, 175, 0.1); border-radius: 12px;">
+            <span class="text-gray-500 font-medium" style="color: #6b7280;">
+                {{ __('file_manager.label.preview_not_available') ?? 'Önizleme mevcut değil' }}
+            </span>
+        </div>
     @endif
 
     <div class="w-full text-gray-700 dark:text-gray-300 leading-relaxed space-y-3">
