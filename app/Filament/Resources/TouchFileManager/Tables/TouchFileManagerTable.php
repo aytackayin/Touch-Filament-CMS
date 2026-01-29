@@ -35,7 +35,12 @@ class TouchFileManagerTable
                 $isGrid,
                 fn(Table $table) => $table
                     ->contentGrid([
-                        'xl' => 4,
+                        'xs' => 2,
+                        'sm' => 3,
+                        'md' => 4,
+                        'lg' => 4,
+                        'xl' => 5,
+                        '2xl' => 5,
                     ])
                     ->extraAttributes([
                         'class' => 'touch-file-manager-grid',
@@ -184,7 +189,7 @@ class TouchFileManagerTable
                     ->extraImgAttributes(['class' => 'object-cover object-center rounded-lg', 'style' => 'width: 60px; height: 60px; border-radius: 10px;'])
                     ->extraAttributes(function ($record) use ($livewire) {
                         if ($livewire && property_exists($livewire, 'iframe') && $livewire->iframe && $record && !$record->is_folder && $record->id !== 0) {
-                            $url = parse_url(Storage::disk('attachments')->url($record->path), PHP_URL_PATH);
+                            $url = Storage::disk('attachments')->url($record->path);
                             $alt = str_replace(["\r", "\n", "'"], ["", "", "\\'"], $record->alt ?? '');
                             return [
                                 'x-on:click.stop' => "window.parent.postMessage({ mceAction: 'insert', content: '{$url}', alt: '{$alt}' }, '*')",
@@ -208,7 +213,7 @@ class TouchFileManagerTable
                     })
                     ->extraAttributes(function ($record) use ($livewire) {
                         if ($livewire && property_exists($livewire, 'iframe') && $livewire->iframe && $record && !$record->is_folder && $record->id !== 0) {
-                            $url = parse_url(Storage::disk('attachments')->url($record->path), PHP_URL_PATH);
+                            $url = Storage::disk('attachments')->url($record->path);
                             $alt = str_replace(["\r", "\n", "'"], ["", "", "\\'"], $record->alt ?? '');
                             return [
                                 'x-on:click.stop' => "window.parent.postMessage({ mceAction: 'insert', content: '{$url}', alt: '{$alt}' }, '*')",
