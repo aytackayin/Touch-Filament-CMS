@@ -156,6 +156,10 @@ class TouchFileManagerTable
                         ->view('filament.resources.touchfilemanager.tables.columns.touchfilemanager-grid')
                         ->searchable(['name', 'type', 'alt', 'tags', 'user_name', 'editor_name', 'created_at']),
                 ])->space(0),
+                TextColumn::make('name')->sortable()->hidden(),
+                TextColumn::make('type_size')->sortable(query: function (Builder $query, string $direction) {
+                    $query->orderBy('type', $direction)->orderBy('size', 'desc');
+                })->hidden(),
             ] : [
                 ImageColumn::make('thumbnail_preview')->label('')->disk('attachments')->state(fn(TouchFile $record) => $record->thumbnail_path)->width(60)->height(60)
                     ->defaultImageUrl(function ($record) {
@@ -185,7 +189,7 @@ class TouchFileManagerTable
                         return [];
                     }),
 
-                TextColumn::make('name')->label(__('file_manager.label.name'))->searchable(['name', 'alt'])->weight('bold')->wrap()
+                TextColumn::make('name')->label(__('file_manager.label.name'))->searchable(['name', 'alt'])->sortable()->weight('bold')->wrap()
                     ->color(fn($record) => $record?->is_folder ? 'warning' : null)
                     ->formatStateUsing(fn(string $state, $record) => $record?->id === 0 ? __('file_manager.label.up') : $state)
                     ->description(function ($record) {
@@ -206,7 +210,9 @@ class TouchFileManagerTable
                         return [];
                     }),
 
-                TextColumn::make('type_size')->label(__('file_manager.label.type_size'))
+                TextColumn::make('type_size')->label(__('file_manager.label.type_size'))->sortable(query: function (Builder $query, string $direction) {
+                    $query->orderBy('type', $direction)->orderBy('size', 'desc');
+                })
                     ->state(fn($record) => $record?->id === 0 ? '' : $record->type)
                     ->badge()
                     ->color(fn(string $state): string => match ($state) {

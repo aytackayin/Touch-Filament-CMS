@@ -157,6 +157,7 @@ class ListTouchFiles extends ListRecords
                     $allDirectories = $disk->allDirectories($basePath);
 
                     $isExcluded = function ($path) {
+                        $path = str_replace('\\', '/', $path);
                         $parts = explode('/', $path);
                         foreach ($parts as $part) {
                             if (in_array($part, ['thumbs', 'temp'])) {
@@ -175,6 +176,7 @@ class ListTouchFiles extends ListRecords
                     });
 
                     foreach ($allDirectories as $dirPath) {
+                        $dirPath = str_replace('\\', '/', $dirPath);
                         if ($isExcluded($dirPath))
                             continue;
 
@@ -215,6 +217,7 @@ class ListTouchFiles extends ListRecords
 
                     // 2. Sync Files & Validate Model Storage
                     foreach ($allFiles as $filePath) {
+                        $filePath = str_replace('\\', '/', $filePath);
                         if ($isExcluded($filePath))
                             continue;
 
@@ -243,7 +246,7 @@ class ListTouchFiles extends ListRecords
 
                             $mimeType = $disk->mimeType($filePath);
                             $size = $disk->size($filePath);
-                            $type = TouchFile::determineFileType($mimeType ?? '');
+                            $type = TouchFile::determineFileType($mimeType ?? '', $filePath);
 
                             TouchFile::create([
                                 'user_id' => auth()->id(),
@@ -447,18 +450,10 @@ class ListTouchFiles extends ListRecords
             $recordId = $parts[1] ?? null;
 
             if ($recordId !== null) {
-                // If the folder is 'temp', 'content-images', 'thumbs' etc, we skip model validation 
-                // but usually those are inside the ID folder.
-                // If the second part is NOT numeric (like 'temp' directly in root of model), it's unauthorized
                 if (!is_numeric($recordId)) {
-                    // Allow certain reserved names directly under model folder if needed, 
-                    // but according to user request, everything under model folder must relate to a record.
-                    // We already exclude 'temp' and 'thumbs' in the loop before calling this, 
-                    // so if we are here, it's likely a record folder or unauthorized file.
                     return false;
                 }
 
-                // Check if record exists
                 return $modelClass::where('id', $recordId)->exists();
             }
         }

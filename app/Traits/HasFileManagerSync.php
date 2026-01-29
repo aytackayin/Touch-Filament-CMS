@@ -72,7 +72,7 @@ trait HasFileManagerSync
 
                 try {
                     $mime = $disk->mimeType($attachment) ?? '';
-                } catch (Exception $e) {
+                } catch (\Exception $e) {
                     $mime = '';
                 }
 
@@ -92,7 +92,7 @@ trait HasFileManagerSync
                     if (function_exists('clearstatcache'))
                         clearstatcache(true, $disk->path($targetPath));
 
-                    usleep(50000);
+                    usleep(100000); // 100ms for disk settling
 
                     $record = TouchFile::where('path', $targetPath)->first() ?? TouchFile::where('path', $attachment)->first();
 
@@ -106,9 +106,6 @@ trait HasFileManagerSync
                             $record->generateThumbnails();
                     } else {
                         TouchFile::registerFile($targetPath, auth()->id() ?? $this->user_id, auth()->id() ?? $this->edit_user_id);
-                        $record = TouchFile::where('path', $targetPath)->first();
-                        if ($record && $record->type === 'image')
-                            $record->generateThumbnails();
                     }
 
                     $finalPaths[] = $targetPath;
@@ -118,50 +115,39 @@ trait HasFileManagerSync
                     if (function_exists('clearstatcache'))
                         clearstatcache(true, $disk->path($attachment));
 
-                    // IF IT IS A TEMP PATH (from Filament upload) BUT FILE EXISTS, WE MUST MOVE IT
-                    // Filament usually puts uploads in a 'temp' or base directory before validation
-                    // We detect this if the path doesn't start with our expected folder
                     if ($disk->exists($attachment)) {
                         if (!$disk->exists(dirname($targetPath))) {
-                            $disk->makeDirectory(dirname($targetPath), 0755, true);
+                            $disk->makeDirectory(dirname($targetPath));
                         }
 
                         $disk->move($attachment, $targetPath);
                         if (function_exists('clearstatcache'))
                             clearstatcache(true, $disk->path($targetPath));
 
-                        usleep(50000);
+                        usleep(100000);
 
                         TouchFile::registerFile($targetPath, auth()->id() ?? $this->user_id, auth()->id() ?? $this->edit_user_id);
-                        $record = TouchFile::where('path', $targetPath)->first();
-                        if ($record && $record->type === 'image')
-                            $record->generateThumbnails();
 
-                        $finalPaths[] = $targetPath; // USE NEW PERMANENT PATH
+                        $finalPaths[] = $targetPath;
                         $changed = true;
                     } else {
-                        // If file not found at $attachment, maybe it's already at $targetPath?
                         if ($disk->exists($targetPath)) {
                             $finalPaths[] = $targetPath;
                             $changed = ($attachment !== $targetPath);
+                            // Also ensure registered if it exists on disk
+                            TouchFile::registerFile($targetPath, auth()->id() ?? $this->user_id, auth()->id() ?? $this->edit_user_id);
                         } else {
-                            // File truly missing, keep original ref to avoid unintended data loss
-                            $finalPaths[] = $attachment;
+                            // Truly missing
+                            // $finalPaths[] = $attachment;
                         }
                     }
                 }
             } else {
-                // Already in correct place and correct name
-                if (function_exists('clearstatcache'))
-                    clearstatcache(true, $disk->path($attachment));
+                // Correct place, just ensure it is registered
                 if ($disk->exists($attachment)) {
                     TouchFile::registerFile($attachment, $this->user_id, auth()->id() ?? $this->edit_user_id);
-                    // Ensure fresh thumbnails even if already in correct place
-                    $record = TouchFile::where('path', $attachment)->first();
-                    if ($record && $record->type === 'image')
-                        $record->generateThumbnails();
+                    $finalPaths[] = $attachment;
                 }
-                $finalPaths[] = $attachment;
             }
         }
 
@@ -337,7 +323,7 @@ trait HasFileManagerSync
         $thumbPath = $this->getThumbnailPath($path);
 
         if ($thumbPath) {
-            return \Illuminate\Support\Facades\Storage::disk('attachments')->url($thumbPath);
+            return Storage::disk('attachments')->url($thumbPath);
         }
 
         return null;

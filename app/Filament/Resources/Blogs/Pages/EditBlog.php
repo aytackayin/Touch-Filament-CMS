@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Blogs\Pages;
 
 use App\Filament\Resources\Blogs\BlogResource;
 use App\Models\Blog;
+use App\Models\TouchFile;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Support\Facades\Storage;
@@ -61,17 +62,26 @@ class EditBlog extends EditRecord
             // Compare
             $currentAttachments = $record->attachments ?? [];
 
-            // Ensure it's an array (could be string from old data)
+            // Ensure it's an array
             if (!is_array($currentAttachments)) {
                 $currentAttachments = [];
             }
 
-            // Sort for comparison
-            sort($validAttachments);
-            sort($currentAttachments);
+            // Keep temp uploads that are currently in DB but not yet moved to permanent
+            $tempFiles = array_filter($currentAttachments, fn($p) => str_contains($p, '/temp/'));
+            $mergedSet = array_unique(array_merge($validAttachments, $tempFiles));
 
-            if ($validAttachments !== $currentAttachments) {
-                $record->attachments = $validAttachments;
+            // Register missing files in TouchFile
+            foreach ($validAttachments as $p) {
+                TouchFile::registerFile($p, $record->user_id, auth()->id() ?? $record->edit_user_id);
+            }
+
+            sort($mergedSet);
+            $comparableCurrent = $currentAttachments;
+            sort($comparableCurrent);
+
+            if ($mergedSet !== $comparableCurrent) {
+                $record->attachments = array_values($mergedSet);
                 $record->saveQuietly();
             }
         }

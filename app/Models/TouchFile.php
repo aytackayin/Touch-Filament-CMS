@@ -237,7 +237,7 @@ class TouchFile extends Model
         $thumbPath = $this->getThumbnailPathAttribute(); // Call the accessor
 
         if ($thumbPath) {
-            return \Illuminate\Support\Facades\Storage::disk('attachments')->url($thumbPath);
+            return Storage::disk('attachments')->url($thumbPath);
         }
 
         return null;
@@ -377,7 +377,7 @@ class TouchFile extends Model
             $thumbsDir = ($dir === '.' || $dir === '') ? 'thumbs' : "{$dir}/thumbs";
 
             if (!$disk->exists($thumbsDir)) {
-                $disk->makeDirectory($thumbsDir, 0755, true);
+                $disk->makeDirectory($thumbsDir);
             }
 
             // CLEANUP
@@ -396,7 +396,7 @@ class TouchFile extends Model
                 $image->save($disk->path($target));
             }
         } catch (Exception $e) {
-            \Illuminate\Support\Facades\Log::warning("Thumbnail generation failed for {$this->path}: " . $e->getMessage());
+            // Silently fail or log sparingly
         }
     }
 
