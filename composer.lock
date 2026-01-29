@@ -131,16 +131,16 @@
         },
         {
             "name": "aytackayin/tinymce",
-            "version": "1.0.4",
+            "version": "1.0.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aytackayin/tinymce.git",
-                "reference": "33695173118f2f99bc18e05eef3fb07ce768f3b5"
+                "reference": "f37ba4dea698da3ef6b78cab2ae001c2f8005114"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aytackayin/tinymce/zipball/33695173118f2f99bc18e05eef3fb07ce768f3b5",
-                "reference": "33695173118f2f99bc18e05eef3fb07ce768f3b5",
+                "url": "https://api.github.com/repos/aytackayin/tinymce/zipball/f37ba4dea698da3ef6b78cab2ae001c2f8005114",
+                "reference": "f37ba4dea698da3ef6b78cab2ae001c2f8005114",
                 "shasum": ""
             },
             "require": {
@@ -172,9 +172,9 @@
             "description": "Filament 4/3 Tinymce Plugin with Code Editor",
             "support": {
                 "issues": "https://github.com/aytackayin/tinymce/issues",
-                "source": "https://github.com/aytackayin/tinymce/tree/v1.0.4"
+                "source": "https://github.com/aytackayin/tinymce/tree/v1.0.6"
             },
-            "time": "2026-01-19T17:51:51+00:00"
+            "time": "2026-01-29T21:17:38+00:00"
         },
         {
             "name": "aytackayin/youtube-to-blog",
@@ -4648,16 +4648,16 @@
         },
         {
             "name": "nesbot/carbon",
-            "version": "3.11.0",
+            "version": "3.11.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/CarbonPHP/carbon.git",
-                "reference": "bdb375400dcd162624531666db4799b36b64e4a1"
+                "reference": "f438fcc98f92babee98381d399c65336f3a3827f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/CarbonPHP/carbon/zipball/bdb375400dcd162624531666db4799b36b64e4a1",
-                "reference": "bdb375400dcd162624531666db4799b36b64e4a1",
+                "url": "https://api.github.com/repos/CarbonPHP/carbon/zipball/f438fcc98f92babee98381d399c65336f3a3827f",
+                "reference": "f438fcc98f92babee98381d399c65336f3a3827f",
                 "shasum": ""
             },
             "require": {
@@ -4681,7 +4681,7 @@
                 "phpstan/extension-installer": "^1.4.3",
                 "phpstan/phpstan": "^2.1.22",
                 "phpunit/phpunit": "^10.5.53",
-                "squizlabs/php_codesniffer": "^3.13.4"
+                "squizlabs/php_codesniffer": "^3.13.4 || ^4.0.0"
             },
             "bin": [
                 "bin/carbon"
@@ -4724,14 +4724,14 @@
                 }
             ],
             "description": "An API extension for DateTime that supports 281 different languages.",
-            "homepage": "https://carbon.nesbot.com",
+            "homepage": "https://carbonphp.github.io/carbon/",
             "keywords": [
                 "date",
                 "datetime",
                 "time"
             ],
             "support": {
-                "docs": "https://carbon.nesbot.com/docs",
+                "docs": "https://carbonphp.github.io/carbon/guide/getting-started/introduction.html",
                 "issues": "https://github.com/CarbonPHP/carbon/issues",
                 "source": "https://github.com/CarbonPHP/carbon"
             },
@@ -4749,7 +4749,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2025-12-02T21:04:28+00:00"
+            "time": "2026-01-29T09:26:29+00:00"
         },
         {
             "name": "nette/php-generator",
