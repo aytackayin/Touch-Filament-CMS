@@ -1,16 +1,17 @@
 <?php
 
-use function Livewire\Volt\{state, computed, with, layout, usesPagination};
+use function Livewire\Volt\{state, computed, with, layout, usesPagination, mount};
 use App\Models\Blog;
 use App\Models\BlogCategory;
 
 layout('frontend.layouts.app');
 usesPagination();
 
-state(['search' => '', 'categoryId' => null]);
+state(['search' => '', 'categorySlug' => null]);
+
+mount(fn(?string $category = null) => $this->categorySlug = $category);
 
 $updatedSearch = fn() => $this->resetPage();
-$updatedCategoryId = fn() => $this->resetPage();
 
 $blogs = computed(function () {
     $query = Blog::where('is_published', true)->latest();
@@ -23,8 +24,8 @@ $blogs = computed(function () {
         });
     }
 
-    if ($this->categoryId) {
-        $category = BlogCategory::with('allChildren')->find($this->categoryId);
+    if ($this->categorySlug) {
+        $category = BlogCategory::where('slug', $this->categorySlug)->with('allChildren')->first();
 
         if ($category) {
             $allCategoryIds = collect([$category->id]);
@@ -48,45 +49,46 @@ $blogs = computed(function () {
 });
 
 $categories = computed(function () {
-    // Top-level categories that have blogs or have descendants with blogs
-    return BlogCategory::whereNull('parent_id')
+    $categories = BlogCategory::whereNull('parent_id')
         ->with(['allChildren'])
-        ->get()
-        ->filter(function ($category) {
-            // Recursive check if this category or any descendant has blogs
-            $hasBlogs = function ($cat) use (&$hasBlogs) {
-                if ($cat->blogs()->exists())
-                    return true;
-                foreach ($cat->children as $child) {
-                    if ($hasBlogs($child))
-                        return true;
-                }
-                return false;
-            };
-            return $hasBlogs($category);
+        ->get();
+
+    $filterCategories = function ($categories) use (&$filterCategories) {
+        return $categories->filter(function ($category) use (&$filterCategories) {
+            // Recursively filter children first
+            $filteredChildren = $filterCategories($category->children);
+
+            // Update the relation so the view loop uses the filtered list
+            $category->setRelation('children', $filteredChildren);
+
+            // Keep if has own blogs OR has valid children
+            return $category->blogs()->exists() || $filteredChildren->isNotEmpty();
         });
+    };
+
+    return $filterCategories($categories);
 });
 
 $activePath = computed(function () {
-    if (!$this->categoryId)
+    if (!$this->categorySlug)
         return [];
 
     $path = [];
-    $current = BlogCategory::find($this->categoryId);
+    $current = BlogCategory::where('slug', $this->categorySlug)->first();
 
     while ($current) {
-        $path[] = $current->id;
+        $path[] = $current->id; // We keep tracking IDs for UI logic
         $current = $current->parent;
     }
 
     return $path;
 });
 
-$selectCategory = function ($id) {
-    if ($this->categoryId === $id) {
-        $this->categoryId = null;
+$selectCategory = function ($slug) {
+    if ($this->categorySlug === $slug) {
+        $this->categorySlug = null;
     } else {
-        $this->categoryId = $id;
+        $this->categorySlug = $slug;
     }
     $this->resetPage();
 };
@@ -118,21 +120,22 @@ $selectCategory = function ($id) {
                         </h3>
 
                         <div class="space-y-4">
-                            <button wire:click="$set('categoryId', null)"
-                                class="w-full flex items-center justify-between px-4 py-2.5 rounded-xl text-sm font-bold transition-all border-l-4 {{ is_null($this->categoryId) ? 'bg-indigo-600/10 border-indigo-600 text-indigo-600 dark:bg-indigo-600/20 shadow-sm' : 'border-transparent text-slate-500 hover:bg-slate-100 dark:hover:bg-[#222330]' }}">
-                                <span>All Categories</span>
-                                <span
-                                    class="px-2 py-0.5 rounded-full text-[10px] font-black {{ is_null($this->categoryId) ? 'bg-indigo-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-400' }}">
-                                    {{ \App\Models\Blog::where('is_published', true)->count() }}
-                                </span>
-                            </button>
+                            <div class="space-y-4">
+                                <a href="{{ route('blog.index') }}" wire:navigate
+                                    class="w-full flex items-center justify-between px-4 py-2.5 rounded-xl text-sm font-bold transition-all border-l-4 {{ is_null($this->categorySlug) ? 'bg-indigo-600/10 border-indigo-600 text-indigo-600 dark:bg-indigo-600/20 shadow-sm' : 'border-transparent text-slate-500 hover:bg-slate-100 dark:hover:bg-[#222330]' }}">
+                                    <span>All Categories</span>
+                                    <span
+                                        class="px-2 py-0.5 rounded-full text-[10px] font-black {{ is_null($this->categorySlug) ? 'bg-indigo-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-400' }}">
+                                        {{ \App\Models\Blog::where('is_published', true)->count() }}
+                                    </span>
+                                </a>
 
-                            @foreach($this->categories as $category)
-                                @include('frontend.pages.blog.components.category-item', ['category' => $category, 'categoryId' => $this->categoryId, 'activePath' => $this->activePath])
-                            @endforeach
+                                @foreach($this->categories as $category)
+                                    @include('frontend.pages.blog.components.category-item', ['category' => $category, 'categorySlug' => $this->categorySlug, 'activePath' => $this->activePath])
+                                @endforeach
+                            </div>
                         </div>
                     </div>
-                </div>
             </aside>
 
             <!-- Main Content (Blog List) -->

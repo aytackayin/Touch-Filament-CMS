@@ -5,7 +5,8 @@ use Livewire\Volt\Volt;
 use Illuminate\Http\Request;
 
 Volt::route('/', 'home')->name('home');
-Volt::route('/blog', 'blog.blog-list')->name('blog.index');
+Volt::route('/blogs', 'blog.blog-list')->name('blog.index');
+Volt::route('/blogs/{category}', 'blog.blog-list')->name('blog.category');
 Volt::route('/blog/{slug}', 'blog.blog-detail')->name('blog.show');
 
 Route::view('dashboard', 'frontend.pages.dashboard')

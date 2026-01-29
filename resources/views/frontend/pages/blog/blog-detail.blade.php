@@ -114,10 +114,30 @@ $attachments = computed(fn() => collect($this->blog->attachments ?? [])->reverse
     <article class="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-16 {{ $headerMedia ? 'pt-12' : 'pt-32' }}">
         <!-- Meta -->
         <div class="mb-12">
-            <div class="flex items-center space-x-4 mb-6">
-                @foreach($blog->categories as $category)
-                    <span class="px-4 py-1.5 bg-indigo-50 dark:bg-[#2a2b3c] text-indigo-600 dark:text-indigo-400 rounded-full text-xs font-bold uppercase tracking-widest">{{ $category->title }}</span>
-                @endforeach
+            <div class="flex flex-wrap items-center gap-2 mb-6 text-xs font-bold uppercase tracking-widest text-slate-500">
+                <a href="{{ route('blog.index') }}" class="hover:text-indigo-600 transition-colors">Blogs</a>
+                
+                @if($blog->categories->count() > 0)
+                    @php
+                        $category = $blog->categories->first();
+                        $breadcrumbs = [];
+                        $curr = $category;
+                        while($curr) {
+                            array_unshift($breadcrumbs, $curr);
+                            $curr = $curr->parent;
+                        }
+                    @endphp
+                    
+                    @foreach($breadcrumbs as $crumb)
+                        <svg class="w-3 h-3 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                        <a href="{{ route('blog.category', $crumb->slug) }}" class="hover:text-indigo-600 transition-colors {{ $loop->last ? 'text-indigo-600' : '' }}">
+                            {{ $crumb->title }}
+                        </a>
+                    @endforeach
+                @else
+                    <svg class="w-3 h-3 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                    <span>Blog</span>
+                @endif
             </div>
             
             <h1 class="text-4xl md:text-6xl font-black mb-4 tracking-tight leading-tight text-slate-900 dark:text-white">
