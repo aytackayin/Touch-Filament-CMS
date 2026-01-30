@@ -23,6 +23,7 @@ use App\Http\Middleware\FilamentIframeMiddleware;
 use App\Filament\Resources\Shield\RoleResource;
 use App\Filament\Pages\BreezyProfile;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
+use App\Filament\Resources\Blogs\Widgets\LatestBlogsWidget;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -58,6 +59,7 @@ class AdminPanelProvider extends PanelProvider
             ->widgets([
                 AccountWidget::class,
                 FilamentInfoWidget::class,
+                LatestBlogsWidget::class,
             ])
             ->plugins([
 

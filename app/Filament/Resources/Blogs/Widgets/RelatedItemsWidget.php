@@ -34,7 +34,7 @@ class RelatedItemsWidget extends BaseWidget
                 static::$heading = __('blog.label.articles');
             }
         } else {
-            static::$heading = __('blog.label.articles');
+            static::$heading = __('blog.label.uncategorized_articles');
         }
     }
 
@@ -43,13 +43,18 @@ class RelatedItemsWidget extends BaseWidget
         $query = Blog::query();
 
         if ($this->parent_id) {
-            // Robust filtering using whereHas
-            $query->whereHas('categories', function ($q) {
-                $q->where('blog_categories.id', $this->parent_id);
-            });
+            $category = BlogCategory::find($this->parent_id);
+            if ($category) {
+                $categoryIds = $category->getAllDescendantIds();
+                $query->whereHas('categories', function ($q) use ($categoryIds) {
+                    $q->whereIn('blog_categories.id', $categoryIds);
+                });
+            } else {
+                $query->whereRaw('1 = 0');
+            }
         } else {
-            // If no parent_id, show nothing
-            $query->whereRaw('1 = 0');
+            // Show blogs with no categories at root level
+            $query->whereDoesntHave('categories');
         }
 
         $table->query($query)
@@ -57,8 +62,8 @@ class RelatedItemsWidget extends BaseWidget
                 ActionGroup::make([
                     CreateAction::make()
                         ->label('')
-                        ->tooltip(__('filament-actions::create.single.modal.actions.create.label'))
-                        ->color('success')
+                        ->tooltip(__('blog.label.create_blog'))
+                        ->color('warning')
                         ->size('xs')
                         ->icon('heroicon-m-document-plus')
                         ->url(fn(): string => BlogResource::getUrl('create', ['category_id' => $this->parent_id])),

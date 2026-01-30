@@ -29,6 +29,11 @@ return [
         'latest_blogs' => 'Son Blog Yazıları',
         'articles' => 'Yazılar',
         'articles_in' => '":name" Kategorisindeki Yazılar',
+        'uncategorized_articles' => 'Kategorisiz Yazılar',
+        'create_category' => 'Kategori Oluştur',
+        'create_blog' => 'Blog Oluştur',
+        'import_categories' => 'Kategorileri İçe Aktar',
+        'export_categories' => 'Kategorileri Dışa Aktar',
         'supported_formats' => 'Desteklenen Formatlar',
         'types' => [
             'image' => 'Resim',

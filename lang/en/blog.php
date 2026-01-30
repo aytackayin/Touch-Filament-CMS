@@ -29,6 +29,11 @@ return [
         'latest_blogs' => 'Latest Blog Posts',
         'articles' => 'Articles',
         'articles_in' => 'Articles in ":name"',
+        'uncategorized_articles' => 'Uncategorized Articles',
+        'create_category' => 'Create Category',
+        'create_blog' => 'Create Blog',
+        'import_categories' => 'Import Categories',
+        'export_categories' => 'Export Categories',
         'supported_formats' => 'Supported Formats',
         'types' => [
             'image' => 'Image',

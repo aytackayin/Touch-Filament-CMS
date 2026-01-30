@@ -117,6 +117,26 @@ $selectCategory = function ($slug) {
     $this->resetPage();
 };
 
+$totalActiveCount = computed(function () {
+    $activeRoots = BlogCategory::whereNull('parent_id')->active()->get();
+    $activeCategoryIds = collect();
+    $collectActive = function ($categories) use (&$collectActive, &$activeCategoryIds) {
+        foreach ($categories as $cat) {
+            $activeCategoryIds->push($cat->id);
+            $collectActive($cat->children()->active()->get());
+        }
+    };
+    $collectActive($activeRoots);
+
+    return Blog::active()
+        ->where(function ($q) use ($activeCategoryIds) {
+            $q->whereDoesntHave('categories')
+                ->orWhereHas('categories', function ($catQ) use ($activeCategoryIds) {
+                    $catQ->whereIn('blog_categories.id', $activeCategoryIds);
+                });
+        })->count();
+});
+
 ?>
 
 <div class="pt-32 pb-24 bg-slate-50 dark:bg-[#222330] min-h-screen">
@@ -150,7 +170,7 @@ $selectCategory = function ($slug) {
                                     <span>All Categories</span>
                                     <span
                                         class="px-2 py-0.5 rounded-full text-[10px] font-black {{ is_null($this->categorySlug) ? 'bg-indigo-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-400' }}">
-                                        {{ \App\Models\Blog::where('is_published', true)->count() }}
+                                        {{ $this->totalActiveCount }}
                                     </span>
                                 </a>
 
@@ -217,12 +237,30 @@ $selectCategory = function ($slug) {
                                         </div>
                                     @endif
 
-                                    <div class="absolute top-6 left-6 z-10">
-                                        @foreach($blog->categories->take(1) as $category)
-                                            <span
-                                                class="px-3 py-1 bg-white/90 dark:bg-[#2a2b3c]/90 backdrop-blur-md rounded-full text-[10px] font-bold uppercase tracking-widest text-slate-900 dark:text-white shadow-sm">
-                                                {{ $category->title }}
-                                            </span>
+                                    <div class="absolute top-6 left-6 z-10 flex flex-wrap gap-2 pr-6">
+                                        @foreach($blog->categories as $category)
+                                            @php
+                                                $fullTitle = trim($category->title);
+                                                $words = preg_split('/\s+/', $fullTitle, -1, PREG_SPLIT_NO_EMPTY);
+                                                $isLong = count($words) > 1;
+                                                $shortTitle = $isLong ? $words[0] . '...' : $fullTitle;
+                                            @endphp
+
+                                            @if($isLong)
+                                                <div x-data="{ hovered: false }" @mouseenter="hovered = true"
+                                                    @mouseleave="hovered = false" class="relative">
+                                                    <span
+                                                        class="inline-block px-3 py-1 bg-white/90 dark:bg-[#2a2b3c]/90 backdrop-blur-md rounded-full text-[10px] font-bold uppercase tracking-widest text-slate-900 dark:text-white shadow-sm transition-all duration-500 ease-in-out overflow-hidden whitespace-nowrap cursor-default"
+                                                        :class="hovered ? 'max-w-[400px]' : 'max-w-[150px]'">
+                                                        <span x-show="!hovered" x-transition:enter.duration.200ms>{{ $shortTitle }}</span>
+                                                        <span x-show="hovered" x-transition:enter.duration.300ms>{{ $fullTitle }}</span>
+                                                    </span>
+                                                </div>
+                                            @else
+                                                <span class="inline-block px-3 py-1 bg-white/90 dark:bg-[#2a2b3c]/90 backdrop-blur-md rounded-full text-[10px] font-bold uppercase tracking-widest text-slate-900 dark:text-white shadow-sm">
+                                                    {{ $fullTitle }}
+                                                </span>
+                                            @endif
                                         @endforeach
                                     </div>
                                 </div>

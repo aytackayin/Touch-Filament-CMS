@@ -121,13 +121,29 @@ class BlogCategory extends Model
 
     public function getTotalBlogsCountAttribute(): int
     {
-        $count = $this->blogs()->count();
+        $categoryIds = $this->getAllDescendantIds();
 
-        foreach ($this->allChildren as $child) {
-            $count += $child->total_blogs_count;
+        return Blog::active()
+            ->whereHas('categories', function ($query) use ($categoryIds) {
+                $query->whereIn('blog_categories.id', $categoryIds);
+            })
+            ->count();
+    }
+
+    /**
+     * Get all descendant category IDs including current category ID
+     * 
+     * @return array
+     */
+    public function getAllDescendantIds(): array
+    {
+        $ids = [$this->id];
+
+        foreach ($this->children()->active()->get() as $child) {
+            $ids = array_merge($ids, $child->getAllDescendantIds());
         }
 
-        return $count;
+        return $ids;
     }
 
     /**

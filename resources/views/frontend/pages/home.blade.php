@@ -154,9 +154,30 @@ $sliderBlogs = computed(fn () =>
                                     </div>
                                 @endif
                                 
-                                <div class="absolute top-6 left-6">
-                                    @foreach($blog->categories->take(1) as $category)
-                                        <span class="px-3 py-1 bg-white/90 dark:bg-[#2a2b3c]/90 backdrop-blur-md rounded-full text-[10px] font-bold uppercase tracking-widest text-slate-900 dark:text-white">{{ $category->title }}</span>
+                                <div class="absolute top-6 left-6 z-10 flex flex-wrap gap-2 pr-6">
+                                    @foreach($blog->categories as $category)
+                                        @php
+                                            $fullTitle = trim($category->title);
+                                            $words = preg_split('/\s+/', $fullTitle, -1, PREG_SPLIT_NO_EMPTY);
+                                            $isLong = count($words) > 1;
+                                            $shortTitle = $isLong ? $words[0] . '...' : $fullTitle;
+                                        @endphp
+
+                                        @if($isLong)
+                                            <div x-data="{ hovered: false }" @mouseenter="hovered = true"
+                                                @mouseleave="hovered = false" class="relative">
+                                                <span
+                                                    class="inline-block px-3 py-1 bg-white/90 dark:bg-[#2a2b3c]/90 backdrop-blur-md rounded-full text-[10px] font-bold uppercase tracking-widest text-slate-900 dark:text-white shadow-sm transition-all duration-500 ease-in-out overflow-hidden whitespace-nowrap cursor-default"
+                                                    :class="hovered ? 'max-w-[400px]' : 'max-w-[150px]'">
+                                                    <span x-show="!hovered" x-transition:enter.duration.200ms>{{ $shortTitle }}</span>
+                                                    <span x-show="hovered" x-transition:enter.duration.300ms>{{ $fullTitle }}</span>
+                                                </span>
+                                            </div>
+                                        @else
+                                            <span class="inline-block px-3 py-1 bg-white/90 dark:bg-[#2a2b3c]/90 backdrop-blur-md rounded-full text-[10px] font-bold uppercase tracking-widest text-slate-900 dark:text-white shadow-sm">
+                                                {{ $fullTitle }}
+                                            </span>
+                                        @endif
                                     @endforeach
                                 </div>
                             </div>

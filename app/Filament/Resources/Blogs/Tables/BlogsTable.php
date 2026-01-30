@@ -22,6 +22,7 @@ use App\Filament\Exports\BlogExporter;
 use Filament\Actions\ExportBulkAction;
 use Filament\Support\Icons\Heroicon;
 use App\Filament\Resources\Blogs\BlogResource;
+use App\Filament\Resources\BlogCategories\BlogCategoryResource;
 use CodeWithDennis\FilamentSelectTree\SelectTree;
 use Filament\Tables\Filters\Filter;
 use Illuminate\Database\Eloquent\Builder;
@@ -54,6 +55,7 @@ class BlogsTable
             ->striped()
             ->paginatedWhileReordering()
             ->recordUrl(null)
+            ->recordAction(null)
             ->columns($isGrid ? [
                 Stack::make([
                     ViewColumn::make('details')
@@ -79,6 +81,10 @@ class BlogsTable
                     ->label(__('blog.label.categories'))
                     ->badge()
                     ->icon('heroicon-s-folder')
+                    ->url(function ($state, Blog $record) {
+                        $category = $record->categories->firstWhere('title', $state);
+                        return $category ? BlogCategoryResource::getUrl('index', ['parent_id' => $category->id]) : null;
+                    })
                     ->searchable()
                     ->sortable()
                     ->wrap()

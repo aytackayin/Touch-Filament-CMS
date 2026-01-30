@@ -8,6 +8,7 @@ use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
 use App\Models\BlogCategory;
 use Illuminate\Database\Eloquent\Builder;
+use App\Filament\Resources\Blogs\BlogResource;
 use App\Filament\Resources\Blogs\Widgets\RelatedItemsWidget;
 use Filament\Actions\ExportAction;
 use Filament\Actions\ImportAction;
@@ -15,6 +16,8 @@ use App\Filament\Exports\BlogCategoryExporter;
 use App\Filament\Imports\BlogCategoryImporter;
 use Filament\Support\Icons\Heroicon;
 use App\Traits\HasTableSettings;
+use Illuminate\Support\Str;
+use Illuminate\Support\HtmlString;
 
 class ListBlogCategories extends ListRecords
 {
@@ -79,13 +82,22 @@ class ListBlogCategories extends ListRecords
             while ($category) {
                 array_unshift($trail, [
                     'url' => static::getUrl(['parent_id' => $category->id]),
-                    'label' => $category->title,
+                    'title' => $category->title,
                 ]);
                 $category = $category->parent;
             }
 
+            // Total count = Base + Trail + Current Page
+            $shouldTruncate = (count($trail) + 2) > 5;
+
             foreach ($trail as $crumb) {
-                $breadcrumbs[$crumb['url']] = $crumb['label'];
+                $label = $shouldTruncate ? Str::limit($crumb['title'], 15) : $crumb['title'];
+
+                if ($shouldTruncate && strlen($crumb['title']) > 15) {
+                    $breadcrumbs[$crumb['url']] = new HtmlString('<span title="' . e($crumb['title']) . '">' . e($label) . '</span>');
+                } else {
+                    $breadcrumbs[$crumb['url']] = $label;
+                }
             }
         }
 
@@ -117,7 +129,7 @@ class ListBlogCategories extends ListRecords
         $actions[] = ExportAction::make()
             ->label('')
             ->icon(Heroicon::OutlinedArrowUpOnSquareStack)
-            ->tooltip(__('filament-actions::export.modal.actions.export.label'))
+            ->tooltip(__('blog.label.export_categories'))
             ->color('gray')
             ->size('xs')
             ->exporter(BlogCategoryExporter::class)
@@ -126,7 +138,7 @@ class ListBlogCategories extends ListRecords
         $actions[] = ImportAction::make()
             ->label('')
             ->icon(Heroicon::OutlinedArrowDownOnSquareStack)
-            ->tooltip(__('filament-actions::import.modal.actions.import.label'))
+            ->tooltip(__('blog.label.import_categories'))
             ->color('gray')
             ->size('xs')
             ->importer(BlogCategoryImporter::class)
@@ -135,11 +147,19 @@ class ListBlogCategories extends ListRecords
         $actions[] =
             CreateAction::make()
                 ->label('')
-                ->tooltip(__('filament-actions::create.single.modal.actions.create.label'))
+                ->tooltip(__('blog.label.create_category'))
                 ->color('success')
                 ->size('xs')
                 ->icon('heroicon-m-squares-plus')
                 ->url(static::getResource()::getUrl('create', $createParams));
+
+        $actions[] = Action::make('create_blog')
+            ->label('')
+            ->tooltip(__('blog.label.create_blog'))
+            ->color('warning')
+            ->size('xs')
+            ->icon('heroicon-m-document-plus')
+            ->url(fn(): string => BlogResource::getUrl('create', ['category_id' => $this->parent_id]));
 
         $actions[] = $this->getTableSettingsAction();
 
@@ -148,10 +168,6 @@ class ListBlogCategories extends ListRecords
 
     public function getFooterWidgets(): array
     {
-        if (!$this->parent_id) {
-            return [];
-        }
-
         return [
             RelatedItemsWidget::make([
                 'parent_id' => $this->parent_id,
